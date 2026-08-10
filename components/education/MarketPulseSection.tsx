@@ -504,14 +504,84 @@ export default function MarketPulseSection() {
                 </div>
             )}
 
-            <a
-                href="/api/education/share-image"
-                download="market-pulse.png"
-                className="inline-flex items-center gap-2 rounded-lg border border-zinc-700 bg-zinc-900 px-4 py-2.5 text-sm font-medium text-zinc-200 hover:border-emerald-600 hover:text-white transition"
-            >
-                <Download size={14} />
-                Download for Twitter / X
-            </a>
+            <ShareImageDownload />
+        </div>
+    );
+}
+
+/**
+ * Same "generate, preview, then download" pattern as ShareCardButton
+ * and EarningsPreviewShareCardButton -- this used to be a plain
+ * <a href download> that triggered an immediate download with no
+ * chance to see the image first, inconsistent with the other two
+ * share cards in this app.
+ */
+function ShareImageDownload() {
+    const [status, setStatus] = useState<"idle" | "loading" | "error">("idle");
+    const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+    const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+    async function handleGenerate() {
+        setStatus("loading");
+        setErrorMessage(null);
+        try {
+            const res = await fetch("/api/education/share-image");
+            if (!res.ok) throw new Error(`Request failed: ${res.status}`);
+            const blob = await res.blob();
+            setPreviewUrl(URL.createObjectURL(blob));
+            setStatus("idle");
+        } catch (err) {
+            setStatus("error");
+            setErrorMessage(err instanceof Error ? err.message : "Could not generate image.");
+        }
+    }
+
+    function handleDownload() {
+        if (!previewUrl) return;
+        const link = document.createElement("a");
+        link.download = "market-pulse.png";
+        link.href = previewUrl;
+        link.click();
+    }
+
+    if (!previewUrl) {
+        return (
+            <div>
+                <button
+                    type="button"
+                    onClick={handleGenerate}
+                    disabled={status === "loading"}
+                    className="inline-flex items-center gap-2 rounded-lg border border-zinc-700 bg-zinc-900 px-4 py-2.5 text-sm font-medium text-zinc-200 hover:border-emerald-600 hover:text-white transition disabled:opacity-50"
+                >
+                    <Download size={14} />
+                    {status === "loading" ? "Generating…" : "Preview for Twitter / X"}
+                </button>
+                {status === "error" && <p className="mt-2 text-sm text-red-400">{errorMessage}</p>}
+            </div>
+        );
+    }
+
+    return (
+        <div className="space-y-2">
+            {/* eslint-disable-next-line @next/next/no-img-element -- object URL preview, not a static asset */}
+            <img src={previewUrl} alt="Market Pulse share card" className="max-w-md rounded-lg border border-zinc-800" />
+            <div className="flex gap-2">
+                <button
+                    type="button"
+                    onClick={handleDownload}
+                    className="inline-flex items-center gap-2 rounded-lg bg-emerald-700 px-4 py-2.5 text-sm font-medium text-white hover:bg-emerald-600 transition"
+                >
+                    <Download size={14} />
+                    Download PNG
+                </button>
+                <button
+                    type="button"
+                    onClick={() => { URL.revokeObjectURL(previewUrl); setPreviewUrl(null); }}
+                    className="rounded-lg border border-zinc-700 px-4 py-2.5 text-sm font-medium text-zinc-300 hover:text-white transition"
+                >
+                    Regenerate
+                </button>
+            </div>
         </div>
     );
 }
