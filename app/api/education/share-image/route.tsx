@@ -13,7 +13,7 @@ const INSTRUMENTS = [
 
 /**
  * Deterministic (no AI call, no extra latency in an image-generation
- * route) plain-language read on the day's pattern — same logic as
+ * route) plain-language read on the day's pattern -- same logic as
  * MarketPulseSection's describePattern, kept in sync manually since
  * this route runs on the edge runtime and can't share a client
  * component import. The shareable image should teach something
@@ -30,15 +30,54 @@ function describePattern(rows: Array<{ symbol: string; quote: Quote | null }>): 
     const goldUp = gold ? gold.changePercent > 0.5 : false;
 
     if (equitiesDown && goldUp) {
-        return "Stocks down, gold up — a classic \"risk-off\" day: money rotating out of equities into safe havens.";
+        return "Stocks down, gold up -- a classic \"risk-off\" day: money rotating out of equities into safe havens.";
     }
     if (equitiesUp && !goldUp) {
-        return "Stocks broadly higher with gold flat/down — a \"risk-on\" day: investors more willing to hold riskier assets.";
+        return "Stocks broadly higher with gold flat/down -- a \"risk-on\" day: investors more willing to hold riskier assets.";
     }
     if (equitiesDown) {
         return "Equities down today, without a clear offsetting move into safe havens like gold.";
     }
-    return "A mixed day — no clear risk-on or risk-off pattern across equities and safe havens.";
+    return "A mixed day -- no clear risk-on or risk-off pattern across equities and safe havens.";
+}
+
+/**
+ * Short sentiment label for the gauge row. Deliberately tied to the
+ * EXACT same branching logic as describePattern() above rather than
+ * a separately-invented editorial label -- "Cautious" vs "Risk-off
+ * tilt" would be two different claims about the same data if they
+ * weren't derived from the same computation.
+ */
+function sentimentLabel(rows: Array<{ symbol: string; quote: Quote | null }>): { text: string; color: string } {
+    const equities = rows.filter(r => r.symbol !== "^VIX" && r.symbol !== "GLD").map(r => r.quote).filter(Boolean) as Quote[];
+    const gold = rows.find(r => r.symbol === "GLD")?.quote ?? null;
+    if (equities.length === 0) return { text: "No data", color: "#8A8FA3" };
+
+    const avgEquity = equities.reduce((sum, q) => sum + q.changePercent, 0) / equities.length;
+    const equitiesDown = avgEquity < -0.05;
+    const equitiesUp = avgEquity > 0.05;
+    const goldUp = gold ? gold.changePercent > 0.5 : false;
+
+    if (equitiesDown && goldUp) return { text: "Risk-off", color: "#F04452" };
+    if (equitiesUp && !goldUp) return { text: "Risk-on", color: "#16D47B" };
+    if (equitiesDown) return { text: "Cautious", color: "#F5A524" };
+    return { text: "Mixed", color: "#F5A524" };
+}
+
+/**
+ * Best/worst performer among the real instruments already fetched --
+ * a genuine, derivable fact ("which of these five actually moved the
+ * most today"), not an invented sector or news narrative. The
+ * mockup's "root cause" / "winners today" boxes implied AI-written
+ * commentary this route deliberately doesn't generate (no AI call
+ * here -- see describePattern's docstring) -- this is the honest
+ * substitute: real numbers, not a guessed cause.
+ */
+function bestAndWorst(rows: Array<{ symbol: string; label: string; quote: Quote | null }>) {
+    const withData = rows.filter(r => r.quote !== null) as Array<{ symbol: string; label: string; quote: Quote }>;
+    if (withData.length === 0) return { best: null, worst: null };
+    const sorted = [...withData].sort((a, b) => b.quote.changePercent - a.quote.changePercent);
+    return { best: sorted[0], worst: sorted[sorted.length - 1] };
 }
 
 export async function GET() {
@@ -52,8 +91,11 @@ export async function GET() {
     });
 
     const whyLine = describePattern(rows);
+    const sentiment = sentimentLabel(rows);
+    const { best, worst } = bestAndWorst(rows);
 
-    const dateStr = new Date().toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric", year: "numeric" });
+    const dateStr = new Date().toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric", year: "numeric" });
+    const timeStr = new Date().toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", timeZone: "America/New_York" });
 
     return new ImageResponse(
         (
@@ -63,18 +105,51 @@ export async function GET() {
                     width: "100%",
                     display: "flex",
                     flexDirection: "column",
-                    backgroundColor: "#09090b",
-                    padding: "60px",
+                    backgroundColor: "#060A12",
+                    padding: "56px",
                     fontFamily: "sans-serif",
                 }}
             >
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                    <span style={{ fontSize: 40, fontWeight: 700, color: "#fff" }}>Market Pulse</span>
-                    <span style={{ fontSize: 22, color: "#71717a" }}>IPO Sniper AI</span>
+                    <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                        <div
+                            style={{
+                                display: "flex",
+                                width: 34,
+                                height: 34,
+                                borderRadius: 9,
+                                backgroundColor: "#160B3D",
+                                border: "1px solid rgba(91,45,209,0.5)",
+                                alignItems: "center",
+                                justifyContent: "center",
+                            }}
+                        >
+                            <div style={{ display: "flex", width: 13, height: 13, borderRadius: 999, backgroundColor: "#C3AEFF" }} />
+                        </div>
+                        <span style={{ fontSize: 22, fontWeight: 700, color: "#E7E9F0" }}>IPO Sniper AI</span>
+                    </div>
+                    <span style={{ fontSize: 18, color: "#8A8FA3" }}>{dateStr}</span>
                 </div>
-                <span style={{ fontSize: 20, color: "#a1a1aa", marginTop: 4 }}>{dateStr}</span>
 
-                <div style={{ display: "flex", marginTop: 50, gap: 24 }}>
+                <span style={{ fontSize: 40, fontWeight: 700, color: "#fff", marginTop: 28 }}>Market Pulse</span>
+                <span style={{ fontSize: 18, color: "#8A8FA3", marginTop: 4 }}>Today&apos;s move, with real data</span>
+
+                <div
+                    style={{
+                        display: "flex",
+                        flexDirection: "column",
+                        marginTop: 28,
+                        padding: "20px 24px",
+                        backgroundColor: "#131A26",
+                        borderLeft: "4px solid #5B2DD1",
+                        borderRadius: "0 12px 12px 0",
+                    }}
+                >
+                    <span style={{ fontSize: 18, fontWeight: 700, color: "#E7E9F0" }}>What&apos;s driving markets today?</span>
+                    <span style={{ fontSize: 16, color: "#B9BECC", marginTop: 8, lineHeight: 1.5 }}>{whyLine}</span>
+                </div>
+
+                <div style={{ display: "flex", marginTop: 24, gap: 16 }}>
                     {rows.map(row => {
                         const up = (row.quote?.changePercent ?? 0) >= 0;
                         return (
@@ -84,22 +159,22 @@ export async function GET() {
                                     display: "flex",
                                     flexDirection: "column",
                                     flex: 1,
-                                    backgroundColor: "#18181b",
-                                    borderRadius: 16,
-                                    padding: "24px",
-                                    border: "1px solid #27272a",
+                                    backgroundColor: "#0D111B",
+                                    borderRadius: 12,
+                                    padding: "16px",
+                                    border: "1px solid rgba(255,255,255,0.06)",
                                 }}
                             >
-                                <span style={{ fontSize: 18, color: "#71717a" }}>{row.label}</span>
-                                <span style={{ fontSize: 32, fontWeight: 700, color: "#fff", marginTop: 8 }}>
+                                <span style={{ fontSize: 14, color: "#8A8FA3" }}>{row.label}</span>
+                                <span style={{ fontSize: 22, fontWeight: 700, color: "#fff", marginTop: 6 }}>
                                     {row.quote ? row.quote.price.toFixed(2) : "—"}
                                 </span>
                                 <span
                                     style={{
-                                        fontSize: 20,
+                                        fontSize: 15,
                                         fontWeight: 600,
                                         marginTop: 4,
-                                        color: !row.quote ? "#52525b" : up ? "#34d399" : "#f87171",
+                                        color: !row.quote ? "#52525b" : up ? "#16D47B" : "#F04452",
                                     }}
                                 >
                                     {row.quote ? `${up ? "+" : ""}${row.quote.changePercent.toFixed(2)}%` : "N/A"}
@@ -109,26 +184,62 @@ export async function GET() {
                     })}
                 </div>
 
+                <div style={{ display: "flex", marginTop: 20, gap: 16 }}>
+                    <div style={{ display: "flex", flexDirection: "column", flex: 1, backgroundColor: "#0D111B", border: "1px solid rgba(255,255,255,0.06)", borderRadius: 12, padding: "14px 16px" }}>
+                        <span style={{ fontSize: 12, fontWeight: 700, color: "#5B85E0", textTransform: "uppercase", letterSpacing: 1 }}>Best today</span>
+                        <span style={{ fontSize: 16, color: "#D3D6E0", marginTop: 6 }}>
+                            {best ? `${best.label} ${best.quote.changePercent >= 0 ? "+" : ""}${best.quote.changePercent.toFixed(2)}%` : "No data"}
+                        </span>
+                    </div>
+                    <div style={{ display: "flex", flexDirection: "column", flex: 1, backgroundColor: "#0D111B", border: "1px solid rgba(255,255,255,0.06)", borderRadius: 12, padding: "14px 16px" }}>
+                        <span style={{ fontSize: 12, fontWeight: 700, color: "#5B85E0", textTransform: "uppercase", letterSpacing: 1 }}>Worst today</span>
+                        <span style={{ fontSize: 16, color: "#D3D6E0", marginTop: 6 }}>
+                            {worst ? `${worst.label} ${worst.quote.changePercent >= 0 ? "+" : ""}${worst.quote.changePercent.toFixed(2)}%` : "No data"}
+                        </span>
+                    </div>
+                    <div style={{ display: "flex", flexDirection: "column", flex: 1, backgroundColor: "#0D111B", border: "1px solid rgba(255,255,255,0.06)", borderRadius: 12, padding: "14px 16px" }}>
+                        <span style={{ fontSize: 12, fontWeight: 700, color: "#5B85E0", textTransform: "uppercase", letterSpacing: 1 }}>Data as of</span>
+                        <span style={{ fontSize: 16, color: "#D3D6E0", marginTop: 6 }}>{timeStr} ET</span>
+                    </div>
+                </div>
+
                 <div
                     style={{
                         display: "flex",
-                        marginTop: 36,
-                        padding: "20px 24px",
-                        backgroundColor: "#1e1b3a",
-                        border: "1px solid #4c1d95",
+                        alignItems: "center",
+                        justifyContent: "space-between",
+                        marginTop: 20,
+                        backgroundColor: "#0D111B",
+                        border: "1px solid rgba(255,255,255,0.06)",
                         borderRadius: 12,
-                        fontSize: 20,
-                        color: "#e4e4e7",
+                        padding: "16px 20px",
                     }}
                 >
-                    {whyLine}
+                    <span style={{ fontSize: 16, color: "#8A8FA3" }}>Market sentiment</span>
+                    <span style={{ fontSize: 20, fontWeight: 700, color: sentiment.color }}>{sentiment.text}</span>
                 </div>
 
-                <div style={{ display: "flex", marginTop: 24, color: "#52525b", fontSize: 16 }}>
-                    Educational content only — not financial advice.
+                <div
+                    style={{
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "space-between",
+                        marginTop: 20,
+                        backgroundColor: "#160B3D",
+                        border: "1px solid rgba(91,45,209,0.5)",
+                        borderRadius: 12,
+                        padding: "16px 20px",
+                    }}
+                >
+                    <span style={{ fontSize: 16, fontWeight: 700, color: "#E7E9F0" }}>See the full AI committee inside IPO Sniper AI</span>
+                    <span style={{ fontSize: 20, color: "#C3AEFF" }}>&rarr;</span>
+                </div>
+
+                <div style={{ display: "flex", marginTop: 20, color: "#5A5E70", fontSize: 14 }}>
+                    Educational content only -- not financial advice. IPO Sniper AI is not a registered investment adviser.
                 </div>
             </div>
         ),
-        { width: 1200, height: 630 }
+        { width: 1200, height: 900 }
     );
 }
