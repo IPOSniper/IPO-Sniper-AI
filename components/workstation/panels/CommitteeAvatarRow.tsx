@@ -4,6 +4,7 @@ import { useState } from "react";
 import Image from "next/image";
 import { Bot } from "lucide-react";
 import type { CommitteeReport } from "@/engine/committee/contracts/CommitteeReport";
+import { buildCommitteePhotoAssignments } from "./committeeAvatars";
 import AnalystWorkspace from "./AnalystWorkspace";
 import type { AnalystReport } from "@/engine/committee/contracts/AnalystReport";
 
@@ -32,33 +33,6 @@ import type { AnalystReport } from "@/engine/committee/contracts/AnalystReport";
  * through the available 12 if there are more analysts than photos.
  */
 
-const PHOTOS = [
-    "lina", "sarah", "jasmine", "priya", "marcus_j", "donald",
-    "arjun", "chris", "kenji", "declan", "olivia", "ethan", "mei",
-];
-
-/**
- * Guaranteed-unique photo assignment, not hash-based -- a hash-mod
- * assignment can (and did) collide once analyst count exceeded the
- * 13-photo pool, showing the same face for two different analysts.
- * This sorts analysts into a stable order (alphabetical by name, so
- * it's deterministic across reloads without depending on
- * committee.reports' array order) and assigns each a DIFFERENT photo
- * by index. Once the 13-photo pool is exhausted, remaining analysts
- * get a generic AI-bot icon instead of a reused or fabricated face --
- * two different analysts must never appear to be the same person,
- * and a generic bot icon is unambiguous in a way a "unique-looking"
- * gradient could still be mistaken for an attempted persona.
- */
-function buildPhotoAssignments(analystNames: string[]): Map<string, string | null> {
-    const sorted = [...analystNames].sort();
-    const map = new Map<string, string | null>();
-    sorted.forEach((name, i) => {
-        map.set(name, i < PHOTOS.length ? `/committee/${PHOTOS[i]}.png` : null);
-    });
-    return map;
-}
-
 const RECOMMENDATION_COLOR: Record<string, string> = {
     STRONG_BUY: "#16D47B",
     BUY: "#16D47B",
@@ -77,7 +51,7 @@ const RECOMMENDATION_LABEL: Record<string, string> = {
 
 export default function CommitteeAvatarRow({ committee }: { committee: CommitteeReport }) {
     const votingAnalysts = committee.reports.filter(r => r.confidence > 0);
-    const photoAssignments = buildPhotoAssignments(committee.reports.map(r => r.analyst));
+    const photoAssignments = buildCommitteePhotoAssignments(committee.reports.map(r => r.analyst));
     const [selectedReport, setSelectedReport] = useState<AnalystReport | null>(null);
 
     const buyCount = votingAnalysts.filter(r => r.recommendation === "STRONG_BUY" || r.recommendation === "BUY").length;

@@ -26,6 +26,12 @@ export class NewsAnalyst implements Analyst<EvidencePackage> {
 
     const sentiment = input.news.sentimentScore.value;
     const articleCount = input.news.articleCount.value;
+    const recentArticles = input.news.recentArticles.value ?? [];
+    // Most recent first, capped at 2 -- enough to make the thesis
+    // concrete without turning it into a headline dump.
+    const citedArticles = [...recentArticles]
+      .sort((a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime())
+      .slice(0, 2);
 
     const recommendation =
       sentiment >= 40
@@ -39,6 +45,12 @@ export class NewsAnalyst implements Analyst<EvidencePackage> {
         : "SELL";
 
     const score = Math.max(0, Math.min(100, Math.round(50 + sentiment / 2)));
+
+    const headlineClause = citedArticles.length > 0
+      ? ` Most recent: "${citedArticles[0].title}" (${citedArticles[0].source})${
+          citedArticles.length > 1 ? `, and "${citedArticles[1].title}" (${citedArticles[1].source})` : ""
+        }.`
+      : "";
 
     return {
 
@@ -55,7 +67,7 @@ export class NewsAnalyst implements Analyst<EvidencePackage> {
       thesis:
         `Coverage over the last 30 days (${articleCount} articles) reads ${
           sentiment > 15 ? "net positive" : sentiment < -15 ? "net negative" : "mixed/neutral"
-        } on a keyword basis (score ${sentiment}).`,
+        } on a keyword basis (score ${sentiment}).${headlineClause}`,
 
       evidence: [
         {
@@ -75,7 +87,19 @@ export class NewsAnalyst implements Analyst<EvidencePackage> {
           confidence: input.news.articleCount.confidence,
           verified: input.news.articleCount.verified,
           collectedAt: input.news.articleCount.collectedAt
-        }
+        },
+        // Real cited headlines, not just the aggregate count -- lets
+        // anyone reading this analyst's report see exactly which
+        // real articles the sentiment number is actually summarizing.
+        ...citedArticles.map(article => ({
+          category: "News",
+          metric: "Cited Headline",
+          value: `${article.title} — ${article.source}`,
+          source: input.news.recentArticles.source,
+          confidence: input.news.recentArticles.confidence,
+          verified: input.news.recentArticles.verified,
+          collectedAt: input.news.recentArticles.collectedAt
+        }))
       ],
 
       assumptions: [
