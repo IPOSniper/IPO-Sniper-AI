@@ -189,7 +189,8 @@ const ShareCard = forwardRef<HTMLDivElement, WorkstationPanelProps>(
                 <div className="rounded-lg border border-violet-900/40 bg-[#160B3D] p-3.5">
                     <p className="mb-1.5 text-[10px] font-semibold uppercase tracking-wide text-violet-300">Committee reasoning</p>
                     <p className="text-xs leading-relaxed text-zinc-200">{committee.summary}</p>
-                    {investmentDecision?.executiveDecision.summary && (
+                    {investmentDecision?.executiveDecision.summary &&
+                        investmentDecision.executiveDecision.summary.trim() !== committee.summary.trim() && (
                         <p className="mt-2 text-xs leading-relaxed text-zinc-300">{investmentDecision.executiveDecision.summary}</p>
                     )}
                 </div>
