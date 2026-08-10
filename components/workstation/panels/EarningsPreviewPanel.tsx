@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { CalendarClock, Sparkles } from "lucide-react";
 
-interface CalendarData {
+export interface CalendarData {
     available: boolean;
     reason?: string;
     reportDate?: string;
@@ -14,7 +14,7 @@ interface CalendarData {
     fiscalYear?: number | null;
 }
 
-interface PreviewData {
+export interface PreviewData {
     available: boolean;
     reason?: string;
     topicsToWatch?: Array<{ topic: string; importance: 1 | 2 | 3 | 4 | 5 }>;
@@ -25,7 +25,7 @@ interface PreviewData {
     narrative?: string;
 }
 
-interface Response {
+export interface EarningsPreviewResponse {
     calendar: CalendarData;
     preview: PreviewData;
 }
@@ -50,6 +50,17 @@ function formatMoney(n: number | null | undefined): string {
     return `$${n.toFixed(2)}`;
 }
 
+/** Real day count from today to the report date -- no invented "coming soon" language. */
+function daysUntil(dateStr: string | undefined): number | null {
+    if (!dateStr) return null;
+    const target = new Date(dateStr);
+    if (Number.isNaN(target.getTime())) return null;
+    const now = new Date();
+    const msPerDay = 24 * 60 * 60 * 1000;
+    const diff = Math.ceil((target.setHours(0, 0, 0, 0) - now.setHours(0, 0, 0, 0)) / msPerDay);
+    return diff;
+}
+
 function Stars({ importance }: { importance: number }) {
     return (
         <span className="text-amber-400 tracking-tight">
@@ -60,7 +71,7 @@ function Stars({ importance }: { importance: number }) {
 }
 
 export default function EarningsPreviewPanel({ ticker, companyName, sector, industry }: Props) {
-    const [data, setData] = useState<Response | null>(null);
+    const [data, setData] = useState<EarningsPreviewResponse | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(false);
 
@@ -110,6 +121,7 @@ export default function EarningsPreviewPanel({ ticker, companyName, sector, indu
     }
 
     const { calendar, preview } = data;
+    const daysAway = daysUntil(calendar.reportDate);
 
     if (!calendar.available) {
         return (
@@ -136,6 +148,11 @@ export default function EarningsPreviewPanel({ ticker, companyName, sector, indu
                         {calendar.reportDate}
                         {" · "}
                         {SESSION_LABEL[calendar.session ?? "unknown"]}
+                        {daysAway !== null && (
+                            <span className="ml-1 text-violet-400">
+                                {daysAway === 0 ? "· Today" : daysAway === 1 ? "· Tomorrow" : daysAway > 0 ? `· in ${daysAway} days` : `· ${Math.abs(daysAway)} days ago`}
+                            </span>
+                        )}
                     </p>
                 </div>
                 <span className="shrink-0 rounded-full border border-emerald-800 bg-emerald-950/40 px-2 py-0.5 text-[10px] font-medium text-emerald-400">

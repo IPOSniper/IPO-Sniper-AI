@@ -1,6 +1,7 @@
 import { WorkstationPanelProps } from "../contracts/WorkstationPanelProps";
 import EarningsRecapPanel from "./EarningsRecapPanel";
 import EarningsPreviewPanel from "./EarningsPreviewPanel";
+import EarningsPreviewShareCardButton from "./EarningsPreviewShareCard/EarningsPreviewShareCardButton";
 
 /**
  * The full before/after pair: EarningsRecapPanel shows the most
@@ -18,6 +19,12 @@ export default function EarningsPanel({ research }: WorkstationPanelProps) {
         <div className="space-y-4">
             <EarningsRecapPanel ticker={company.ticker} companyName={company.name} />
             <EarningsPreviewPanel
+                ticker={company.ticker}
+                companyName={company.name}
+                sector={company.sector}
+                industry={company.industry}
+            />
+            <EarningsPreviewShareCardButton
                 ticker={company.ticker}
                 companyName={company.name}
                 sector={company.sector}
