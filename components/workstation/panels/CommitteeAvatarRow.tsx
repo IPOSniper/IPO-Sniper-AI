@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { Bot } from "lucide-react";
 import { WorkstationPanelProps } from "../contracts/WorkstationPanelProps";
 
 /**
@@ -31,26 +32,18 @@ const PHOTOS = [
     "arjun", "chris", "kenji", "declan", "olivia", "ethan", "mei",
 ];
 
-const GRADIENTS = [
-    "from-violet-600 to-indigo-700",
-    "from-blue-600 to-cyan-700",
-    "from-emerald-600 to-teal-700",
-    "from-amber-600 to-orange-700",
-    "from-rose-600 to-pink-700",
-    "from-fuchsia-600 to-purple-700",
-    "from-sky-600 to-blue-700",
-];
-
 /**
  * Guaranteed-unique photo assignment, not hash-based -- a hash-mod
  * assignment can (and did) collide once analyst count exceeded the
- * 12-photo pool, showing the same face for two different analysts.
+ * 13-photo pool, showing the same face for two different analysts.
  * This sorts analysts into a stable order (alphabetical by name, so
  * it's deterministic across reloads without depending on
  * committee.reports' array order) and assigns each a DIFFERENT photo
  * by index. Once the 13-photo pool is exhausted, remaining analysts
- * fall back to a gradient-initials avatar instead of reusing a face
- * -- two different analysts must never show the same person.
+ * get a generic AI-bot icon instead of a reused or fabricated face --
+ * two different analysts must never appear to be the same person,
+ * and a generic bot icon is unambiguous in a way a "unique-looking"
+ * gradient could still be mistaken for an attempted persona.
  */
 function buildPhotoAssignments(analystNames: string[]): Map<string, string | null> {
     const sorted = [...analystNames].sort();
@@ -59,12 +52,6 @@ function buildPhotoAssignments(analystNames: string[]): Map<string, string | nul
         map.set(name, i < PHOTOS.length ? `/committee/${PHOTOS[i]}.png` : null);
     });
     return map;
-}
-
-function gradientFor(name: string): string {
-    let hash = 0;
-    for (let i = 0; i < name.length; i++) hash = (hash * 31 + name.charCodeAt(i)) >>> 0;
-    return GRADIENTS[hash % GRADIENTS.length];
 }
 
 const RECOMMENDATION_COLOR: Record<string, string> = {
@@ -124,10 +111,8 @@ export default function CommitteeAvatarRow({ research }: WorkstationPanelProps) 
                                         className="object-cover"
                                     />
                                 ) : (
-                                    <div className={`flex h-full w-full items-center justify-center bg-gradient-to-br ${gradientFor(report.analyst)}`}>
-                                        <span className="text-xs font-bold text-white">
-                                            {report.analyst.split(" ")[0].slice(0, 2).toUpperCase()}
-                                        </span>
+                                    <div className="flex h-full w-full items-center justify-center bg-zinc-800">
+                                        <Bot size={22} className="text-zinc-400" />
                                     </div>
                                 )}
                             </div>
