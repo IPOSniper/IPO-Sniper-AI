@@ -1,0 +1,402 @@
+"use client";
+
+import { useEffect, useRef, useState } from "react";
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, ResponsiveContainer, Cell, Tooltip, ReferenceLine } from "recharts";
+import { TrendingUp, TrendingDown, Sparkles, Download, AlertTriangle, ExternalLink, HelpCircle, ShieldQuestion } from "lucide-react";
+
+interface Quote {
+    price: number;
+    change: number;
+    changePercent: number;
+    previousClose: number;
+}
+
+interface Pulse {
+    available: boolean;
+    reason?: string;
+    headline?: string;
+    whatsHappening?: string;
+    whyItsHappening?: string;
+    sectorsAffected?: string[];
+    rippleEffects?: string;
+    rootCauses?: string[];
+    likelyWinners?: string[];
+    likelyLosers?: string[];
+    riskRewardNote?: string;
+    safeHavenNote?: string;
+    macroPoliticalNote?: string;
+    riskMitigationConsiderations?: string[];
+    evidenceForThisRead?: string[];
+    uncertainty?: string;
+    whatWouldChangeThisView?: string;
+}
+
+interface Headline {
+    headline: string;
+    source: string;
+    url?: string;
+}
+
+interface Response {
+    quotes: Record<string, Quote>;
+    headlines: Headline[];
+    pulse: Pulse;
+}
+
+const INSTRUMENT_LABELS: Record<string, string> = {
+    DIA: "Dow Jones (DIA)",
+    SPY: "S&P 500 (SPY)",
+    QQQ: "Nasdaq 100 (QQQ)",
+    IWM: "Russell 2000 (IWM)",
+    VIX: "Volatility (VIX)",
+    GLD: "Gold (GLD)",
+    TLT: "Long Bonds (TLT)",
+};
+
+// What each instrument actually represents, and why its move matters
+// today — shown when a card is expanded, so clicking an index teaches
+// something instead of just restating the number already on the card.
+const INSTRUMENT_BLURBS: Record<string, string> = {
+    DIA: "Tracks the Dow Jones Industrial Average, 30 large industrial-era blue-chip stocks. Price-weighted (not market-cap weighted), so it can move differently than SPY/QQQ on the same day.",
+    SPY: "Tracks the S&P 500 — the 500 largest U.S. companies, the most common single \"the market\" proxy professionals quote.",
+    QQQ: "Tracks the Nasdaq 100 — heavily weighted toward large tech companies, so it tends to swing harder than SPY on rate and growth-outlook news.",
+    IWM: "Tracks the Russell 2000 — small-cap U.S. stocks. Smaller companies are more sensitive to domestic economic conditions and borrowing costs, so IWM is often read as a gauge of risk appetite.",
+    VIX: "The \"fear gauge\" — the market's expectation of S&P 500 volatility over the next 30 days, derived from options prices. Rises when investors pay up for downside protection.",
+    GLD: "Tracks the price of gold — a traditional safe-haven asset investors rotate into during uncertainty, inflation concern, or when they distrust currencies/bonds.",
+    TLT: "Tracks long-term (20+ year) U.S. Treasury bonds. Prices move opposite to interest-rate expectations — TLT tends to rise when investors expect rates to fall or when they want a safe, government-backed asset.",
+};
+
+function QASection({ title, children }: { title: string; children: React.ReactNode }) {
+    return (
+        <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-4 hover:border-zinc-700 transition-colors">
+            <h3 className="text-sm font-semibold text-zinc-200 mb-2">{title}</h3>
+            {children}
+        </div>
+    );
+}
+
+function BulletList({ items }: { items?: string[] }) {
+    if (!items || items.length === 0) return null;
+    return (
+        <ul className="space-y-1 text-sm text-zinc-300 list-disc list-inside">
+            {items.map((item, i) => <li key={i}>{item}</li>)}
+        </ul>
+    );
+}
+
+/**
+ * Deterministic, no-AI-required read on the day's cross-asset pattern.
+ * Renders even when ANTHROPIC_API_KEY isn't configured, so the page
+ * isn't blank/unexplained just because the AI layer is off — it's a
+ * plain-language description of the shape of the data itself, not an
+ * interpretation of *why*.
+ */
+function describePattern(quotes: Record<string, Quote>): string | null {
+    const equities = ["DIA", "SPY", "QQQ", "IWM"].map(s => quotes[s]).filter(Boolean) as Quote[];
+    const gold = quotes.GLD;
+    const bonds = quotes.TLT;
+    if (equities.length === 0) return null;
+
+    const avgEquity = equities.reduce((sum, q) => sum + q.changePercent, 0) / equities.length;
+    const equitiesDown = avgEquity < -0.05;
+    const equitiesUp = avgEquity > 0.05;
+    const goldUp = gold ? gold.changePercent > 0.5 : false;
+    const bondsUp = bonds ? bonds.changePercent > 0.1 : false;
+
+    if (equitiesDown && (goldUp || bondsUp)) {
+        return "Stocks are down today while gold and/or long bonds are up — a pattern often described as \"risk-off,\" where money rotates out of equities and into assets seen as safer.";
+    }
+    if (equitiesUp && !goldUp) {
+        return "Stocks are broadly higher today with safe-haven assets like gold flat or lower — a \"risk-on\" pattern, where investors are more willing to hold riskier assets.";
+    }
+    if (equitiesDown) {
+        return "Equity indexes are down today. Safe-haven assets (gold, long bonds) aren't showing a clear offsetting move, so this doesn't read as a strong flight-to-safety day.";
+    }
+    return "Markets are mixed today, without a clear risk-on or risk-off pattern across equities and safe-haven assets.";
+}
+
+export default function MarketPulseSection() {
+    const [data, setData] = useState<Response | null>(null);
+    const [loading, setLoading] = useState(true);
+    const [expanded, setExpanded] = useState<string | null>(null);
+    const containerRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        fetch("/api/education/market-pulse")
+            .then(res => res.json())
+            .then(setData)
+            .catch(() => setData(null))
+            .finally(() => setLoading(false));
+    }, []);
+
+    // Click-to-expand an index card, click-anywhere-outside to close.
+    useEffect(() => {
+        function handleClickOutside(e: MouseEvent) {
+            if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+                setExpanded(null);
+            }
+        }
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => document.removeEventListener("mousedown", handleClickOutside);
+    }, []);
+
+    const chartData = data
+        ? Object.entries(data.quotes).map(([symbol, q]) => ({
+            symbol,
+            changePercent: Number(q.changePercent.toFixed(2)),
+        }))
+        : [];
+
+    return (
+        <div className="space-y-5">
+
+            {/* Purpose banner — states plainly what this page is and isn't for */}
+            <div className="rounded-xl border border-zinc-800 bg-zinc-900/60 p-4">
+                <p className="text-sm text-zinc-300">
+                    <span className="font-semibold text-white">What this page is for: </span>
+                    understanding what moved markets today, why, and how confident that explanation actually is —
+                    not a signal to act on. Click any index below to learn what it tracks and why its move matters.
+                </p>
+            </div>
+
+            {/* Static disclaimer — always shown regardless of AI output */}
+            <div className="flex items-start gap-2 rounded-lg border border-amber-900/50 bg-amber-950/20 p-3 text-xs text-amber-400">
+                <AlertTriangle size={14} className="mt-0.5 shrink-0" />
+                <span>
+                    Educational content only — not financial or investment advice. IPO Sniper AI is not a
+                    registered investment adviser. Nothing here is a recommendation to buy, sell, or hold any
+                    security.
+                </span>
+            </div>
+
+            {loading && (
+                <div className="rounded-xl border border-zinc-800 bg-zinc-900 p-8 text-center text-sm text-zinc-500">
+                    Loading market pulse…
+                </div>
+            )}
+
+            {!loading && data && Object.keys(data.quotes).length > 0 && (
+                <>
+                    {/* Instrument row — click a card to expand what it means and why it moved */}
+                    <div ref={containerRef} className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3">
+                        {Object.entries(data.quotes).map(([symbol, q]) => {
+                            const up = q.changePercent >= 0;
+                            const isExpanded = expanded === symbol;
+                            return (
+                                <button
+                                    key={symbol}
+                                    type="button"
+                                    onClick={() => setExpanded(isExpanded ? null : symbol)}
+                                    className={`group relative overflow-hidden rounded-xl border bg-zinc-950 p-3 text-left transition-all ${
+                                        up ? "border-emerald-900/60 hover:border-emerald-700" : "border-red-900/60 hover:border-red-700"
+                                    } ${isExpanded ? "col-span-2 md:col-span-4 lg:col-span-7 ring-1 ring-cyan-600" : ""}`}
+                                >
+                                    <div className={`absolute inset-x-0 top-0 h-0.5 ${up ? "bg-emerald-500" : "bg-red-500"}`} />
+                                    <p className="text-xs text-zinc-500">{INSTRUMENT_LABELS[symbol] ?? symbol}</p>
+                                    <p className="mt-1 text-lg font-semibold text-white">{q.price.toFixed(2)}</p>
+                                    <p className={`flex items-center gap-1 text-xs mt-0.5 font-medium ${up ? "text-emerald-400" : "text-red-400"}`}>
+                                        {up ? <TrendingUp size={12} /> : <TrendingDown size={12} />}
+                                        {up ? "+" : ""}{q.changePercent.toFixed(2)}%
+                                    </p>
+
+                                    {isExpanded && (
+                                        <div className="mt-3 border-t border-zinc-800 pt-3 text-sm text-zinc-300">
+                                            <p>{INSTRUMENT_BLURBS[symbol] ?? "No description available."}</p>
+                                            <p className="mt-2 text-xs text-zinc-500">
+                                                Previous close: {q.previousClose.toFixed(2)} · Change: {q.change >= 0 ? "+" : ""}{q.change.toFixed(2)}
+                                            </p>
+                                        </div>
+                                    )}
+                                </button>
+                            );
+                        })}
+                    </div>
+
+                    {/* Plain-language read on the chart — always renders, doesn't need AI */}
+                    {describePattern(data.quotes) && (
+                        <div className="rounded-xl border border-violet-900/40 bg-violet-950/10 p-4">
+                            <p className="text-sm text-zinc-200">{describePattern(data.quotes)}</p>
+                        </div>
+                    )}
+
+                    {/* Real-data chart */}
+                    <div className="rounded-xl border border-zinc-800 bg-zinc-950 p-4">
+                        <div className="flex items-center justify-between mb-2">
+                            <p className="text-xs uppercase tracking-wide text-zinc-500">Today&apos;s % Change</p>
+                            <div className="flex items-center gap-3 text-[11px] text-zinc-500">
+                                <span className="flex items-center gap-1"><span className="h-2 w-2 rounded-sm bg-emerald-400 inline-block" /> Up</span>
+                                <span className="flex items-center gap-1"><span className="h-2 w-2 rounded-sm bg-red-400 inline-block" /> Down</span>
+                            </div>
+                        </div>
+                        <ResponsiveContainer width="100%" height={220}>
+                            <BarChart data={chartData}>
+                                <CartesianGrid strokeDasharray="3 3" stroke="#27272a" vertical={false} />
+                                <XAxis dataKey="symbol" stroke="#a1a1aa" fontSize={12} />
+                                <YAxis stroke="#a1a1aa" fontSize={12} unit="%" />
+                                <ReferenceLine y={0} stroke="#52525b" />
+                                <Tooltip
+                                    contentStyle={{ background: "#18181b", border: "1px solid #3f3f46", borderRadius: 8, fontSize: 12 }}
+                                    labelStyle={{ color: "#e4e4e7" }}
+                                    formatter={(value: number) => [`${value > 0 ? "+" : ""}${value}%`, "Change"]}
+                                />
+                                <Bar dataKey="changePercent" radius={[4, 4, 0, 0]}>
+                                    {chartData.map((entry, i) => (
+                                        <Cell
+                                            key={i}
+                                            fill={entry.changePercent >= 0 ? "#34d399" : "#f87171"}
+                                            opacity={expanded && expanded !== entry.symbol ? 0.35 : 1}
+                                        />
+                                    ))}
+                                </Bar>
+                            </BarChart>
+                        </ResponsiveContainer>
+                        <p className="mt-2 text-xs text-zinc-500">
+                            Each bar is that instrument&apos;s price move since the previous close, in percent. Bars above
+                            the 0% line are up on the day; below it, down. Hover a bar for the exact number, or click a
+                            card above to expand it here.
+                        </p>
+                    </div>
+                </>
+            )}
+
+            {!loading && (!data || Object.keys(data.quotes ?? {}).length === 0) && (
+                <div className="rounded-xl border border-zinc-800 bg-zinc-900 p-4 text-sm text-zinc-500">
+                    {data?.pulse.reason ?? "Market data unavailable."}
+                </div>
+            )}
+
+            {!loading && data?.pulse.available && (
+                <div className="space-y-4">
+                    <div className="flex items-center gap-1.5 text-xs font-medium text-violet-400">
+                        <Sparkles size={12} />
+                        AI ANALYSIS — educational interpretation, not verified fact or advice
+                    </div>
+
+                    {data.pulse.headline && (
+                        <h2 className="text-xl font-bold text-white">{data.pulse.headline}</h2>
+                    )}
+
+                    {/* Evidence + uncertainty come first and get their own visual weight —
+                        this is the "justify reasoning, name uncertainty, say what would
+                        change your mind" framing, front and center rather than buried
+                        among the other Q&A cards. */}
+                    {(data.pulse.evidenceForThisRead?.length || data.pulse.uncertainty || data.pulse.whatWouldChangeThisView) && (
+                        <div className="rounded-xl border border-cyan-900/50 bg-cyan-950/10 p-4 space-y-3">
+                            {data.pulse.evidenceForThisRead && data.pulse.evidenceForThisRead.length > 0 && (
+                                <div>
+                                    <p className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-cyan-400 mb-1.5">
+                                        <ShieldQuestion size={13} /> Evidence this read is based on
+                                    </p>
+                                    <BulletList items={data.pulse.evidenceForThisRead} />
+                                </div>
+                            )}
+                            {data.pulse.uncertainty && (
+                                <div>
+                                    <p className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-zinc-400 mb-1">
+                                        <HelpCircle size={13} /> What today&apos;s data doesn&apos;t tell you
+                                    </p>
+                                    <p className="text-sm text-zinc-300">{data.pulse.uncertainty}</p>
+                                </div>
+                            )}
+                            {data.pulse.whatWouldChangeThisView && (
+                                <div>
+                                    <p className="text-xs font-semibold uppercase tracking-wide text-zinc-400 mb-1">
+                                        What would change this read
+                                    </p>
+                                    <p className="text-sm text-zinc-300">{data.pulse.whatWouldChangeThisView}</p>
+                                </div>
+                            )}
+                        </div>
+                    )}
+
+                    <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-4">
+                        <QASection title="What's Happening">
+                            <p className="text-sm text-zinc-300">{data.pulse.whatsHappening}</p>
+                        </QASection>
+                        <QASection title="Why It's Happening">
+                            <p className="text-sm text-zinc-300">{data.pulse.whyItsHappening}</p>
+                        </QASection>
+                        <QASection title="Sectors Affected">
+                            <BulletList items={data.pulse.sectorsAffected} />
+                        </QASection>
+                        <QASection title="Ripple Effects">
+                            <p className="text-sm text-zinc-300">{data.pulse.rippleEffects}</p>
+                        </QASection>
+                        <QASection title="Root Causes">
+                            <BulletList items={data.pulse.rootCauses} />
+                        </QASection>
+                        <QASection title="Who Benefits vs. Who's Hurt">
+                            <p className="text-xs uppercase tracking-wide text-emerald-500 mb-1">Likely Winners</p>
+                            <BulletList items={data.pulse.likelyWinners} />
+                            <p className="text-xs uppercase tracking-wide text-red-500 mt-3 mb-1">Likely Losers</p>
+                            <BulletList items={data.pulse.likelyLosers} />
+                        </QASection>
+                        <QASection title="Risk vs. Reward">
+                            <p className="text-sm text-zinc-300">{data.pulse.riskRewardNote}</p>
+                        </QASection>
+                        <QASection title="Safe-Haven Flows (Gold & Precious Metals)">
+                            <p className="text-sm text-zinc-300">{data.pulse.safeHavenNote}</p>
+                        </QASection>
+                        <QASection title="Elections, War &amp; Macro Risk">
+                            <p className="text-sm text-zinc-300">{data.pulse.macroPoliticalNote}</p>
+                        </QASection>
+                        <QASection title="General Risk-Mitigation Concepts">
+                            <BulletList items={data.pulse.riskMitigationConsiderations} />
+                        </QASection>
+                    </div>
+                </div>
+            )}
+
+            {!loading && data && !data.pulse.available && (
+                <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-3 text-sm text-zinc-500">
+                    AI analysis unavailable — {data.pulse.reason ?? "not configured."}
+                    {data.pulse.reason?.includes("ANTHROPIC_API_KEY") && (
+                        <span className="block mt-1 text-xs text-zinc-600">
+                            Set ANTHROPIC_API_KEY in your .env.local and restart the dev server to enable the
+                            AI explainer — the index cards and chart above use real data either way.
+                        </span>
+                    )}
+                </div>
+            )}
+
+            {!loading && data && data.headlines.length > 0 && (
+                <div className="rounded-xl border border-zinc-800 bg-zinc-900 p-4">
+                    <h3 className="text-sm font-semibold text-zinc-200 mb-3">Sources</h3>
+                    <ul className="space-y-2">
+                        {data.headlines.map((h, i) => (
+                            <li key={i}>
+                                {h.url ? (
+                                    <a
+                                        href={h.url}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="group flex items-start gap-2 text-sm text-zinc-300 hover:text-white"
+                                    >
+                                        <ExternalLink size={13} className="mt-0.5 shrink-0 text-zinc-500 group-hover:text-zinc-300" />
+                                        <span>
+                                            {h.headline}{" "}
+                                            <span className="text-zinc-500">— {h.source}</span>
+                                        </span>
+                                    </a>
+                                ) : (
+                                    <span className="text-sm text-zinc-400">
+                                        {h.headline} <span className="text-zinc-500">— {h.source}</span>
+                                    </span>
+                                )}
+                            </li>
+                        ))}
+                    </ul>
+                </div>
+            )}
+
+            <a
+                href="/api/education/share-image"
+                download="market-pulse.png"
+                className="inline-flex items-center gap-2 rounded-lg border border-zinc-700 bg-zinc-900 px-4 py-2.5 text-sm font-medium text-zinc-200 hover:border-emerald-600 hover:text-white transition"
+            >
+                <Download size={14} />
+                Download for Twitter / X
+            </a>
+        </div>
+    );
+}

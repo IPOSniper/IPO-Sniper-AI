@@ -1,0 +1,74 @@
+import { RevenueInvestigationResult } from "../models/RevenueInvestigationResult";
+
+export class RevenueGrowthInvestigation {
+
+    investigate(growth: number): RevenueInvestigationResult {
+
+        let score = 30;
+        let recommendation = "Sell";
+
+        if (growth >= 30) {
+            score = 95;
+            recommendation = "Strong Buy";
+        }
+        else if (growth >= 20) {
+            score = 85;
+            recommendation = "Buy";
+        }
+        else if (growth >= 10) {
+            score = 75;
+            recommendation = "Buy";
+        }
+        else if (growth >= 0) {
+            score = 60;
+            recommendation = "Hold";
+        }
+
+        return {
+
+            breakdown: {
+
+                overall: score,
+
+                confidence: 100,
+
+                components: {
+
+                    growth: score,
+
+                    consistency: 0,
+
+                    acceleration: 0,
+
+                    margins: 0,
+
+                    guidance: 0
+
+                }
+
+            },
+
+            findings: [
+                `Revenue growth measured ${growth.toFixed(2)}%.`
+            ],
+
+            positives:
+                growth >= 20
+                    ? ["Revenue growth exceeds 20%."]
+                    : [],
+
+            warnings:
+                growth < 10
+                    ? ["Revenue growth is slowing."]
+                    : [],
+
+            reasoning:
+                `Revenue score derived from ${growth.toFixed(2)}% growth.`,
+
+            recommendation
+
+        };
+
+    }
+
+}

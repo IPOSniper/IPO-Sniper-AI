@@ -1,0 +1,74 @@
+﻿import type { ResearchReport } from "@/engine/models/ResearchReport";
+import type { ResearchWorkstation } from "@/types/ResearchWorkstation";
+
+export class ResearchAssembler {
+
+    static assemble(
+        report: ResearchReport
+    ): ResearchWorkstation {
+
+        return {
+
+            company: {
+                ticker: report.ticker,
+                name: report.companyName,
+                exchange: "NASDAQ",
+                industry: "Unknown"
+            },
+
+            market: {
+                price: 0,
+                change: 0,
+                percentChange: 0,
+                volume: 0,
+                marketCap: 0
+            },
+
+            recommendation: {
+                recommendation: report.recommendation,
+                conviction: report.conviction
+            },
+
+            committee: {
+                agreement: report.confidence
+            },
+
+            executiveSummary: {
+                summary: report.executiveSummary
+            },
+
+            investmentThesis: {
+                bullCase: "",
+                bearCase: ""
+            },
+
+            evidence: {
+                items: report.evidence
+            },
+
+            financials: {},
+
+            valuation: {},
+
+            catalysts: {},
+
+            risks: {},
+
+            earnings: {},
+
+            news: {},
+
+            filings: {},
+
+            timeline: {},
+
+            metadata: {
+                generatedAt: report.generatedAt,
+                source: "ResearchAssembler"
+            }
+
+        };
+
+    }
+
+}

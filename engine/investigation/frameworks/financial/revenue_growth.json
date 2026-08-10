@@ -1,0 +1,15 @@
+{
+  "id": "revenue_growth",
+  "question": "Is revenue growth accelerating?",
+  "category": "Revenue",
+  "requiredEvidence": [
+    "Quarterly Revenue",
+    "Annual Revenue"
+  ],
+  "decisionRules": [
+    "Growth > Previous Quarter",
+    "Growth > Industry"
+  ],
+  "weight": 10,
+  "required": true
+}

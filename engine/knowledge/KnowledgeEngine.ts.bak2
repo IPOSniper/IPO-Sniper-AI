@@ -1,0 +1,61 @@
+import type { EvidencePackage } from "../evidence/package";
+
+import { KnowledgeFact } from "./contracts/KnowledgeFact";
+import { KnowledgeReport } from "./contracts/KnowledgeReport";
+import { RevenueGrowthInterpreter } from "./interpreters/RevenueGrowthInterpreter";
+
+export class KnowledgeEngine {
+
+    private readonly revenueInterpreter =
+        new RevenueGrowthInterpreter();
+
+    public build(
+        evidence: EvidencePackage
+    ): KnowledgeReport {
+
+        const facts: KnowledgeFact[] = [];
+
+        const revenue =
+            this.revenueInterpreter.interpret([
+                evidence.financial.revenueGrowth.value
+            ]);
+
+        facts.push({
+
+            id: "revenue_growth",
+
+            category: "Revenue",
+
+            name: "Revenue Growth",
+
+            description: revenue.summary,
+
+            value: revenue.accelerating,
+
+            confidence: revenue.confidence,
+
+            evidence: revenue.quarterlyGrowthRates.map(
+                rate => `${rate.toFixed(2)}%`
+            )
+
+        });
+
+        const overallConfidence =
+            facts.length === 0
+                ? 0
+                : facts.reduce(
+                    (sum, fact) => sum + fact.confidence,
+                    0
+                ) / facts.length;
+
+        return {
+
+            facts,
+
+            overallConfidence
+
+        };
+
+    }
+
+}

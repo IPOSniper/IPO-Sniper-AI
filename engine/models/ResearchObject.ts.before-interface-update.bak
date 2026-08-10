@@ -1,0 +1,22 @@
+export interface ResearchObject {
+
+    company:any;
+
+    evidence:any;
+
+    financial:any;
+
+    reasoning:any;
+
+    committee:any;
+
+    conviction:any;
+
+    valuation:any;
+
+    report:any;
+
+    runtime:any;
+
+    ui:any;
+}

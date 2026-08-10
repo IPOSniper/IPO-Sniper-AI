@@ -1,0 +1,53 @@
+import { FinancialStatement } from "../../types/FinancialStatement";
+import { FinancialStatementsProvider } from "./FinancialStatementsProvider";
+
+export class FinnhubFinancialStatementsProvider
+  implements FinancialStatementsProvider {
+
+  async getFinancialStatements(
+    ticker: string
+  ): Promise<FinancialStatement[]> {
+
+    const apiKey = process.env.FINNHUB_API_KEY;
+
+    if (!apiKey) {
+      throw new Error("FINNHUB_API_KEY is missing.");
+    }
+
+    console.log("Request URL:");
+    console.log(
+      `https://finnhub.io/api/v1/stock/financials-reported?symbol=${ticker}&token=${apiKey}`
+    );
+
+    const response = await fetch(
+      `https://finnhub.io/api/v1/stock/financials-reported?symbol=${ticker}&token=${apiKey}`,
+      {
+        cache: "no-store",
+      }
+    );
+
+    console.log("HTTP Status:", response.status);
+
+    if (!response.ok) {
+
+      const body = await response.text();
+
+      console.log("Response Body:");
+      console.log(body);
+
+      throw new Error("Finnhub request failed.");
+
+    }
+
+    const data = await response.json();
+
+    console.dir(data, {
+      depth: null,
+      colors: true,
+    });
+
+    return [];
+
+  }
+
+}

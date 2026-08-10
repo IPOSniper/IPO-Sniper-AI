@@ -1,0 +1,88 @@
+{
+  "compilerOptions": {
+    "target": "ES2017",
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "types": ["node"],
+
+    "allowJs": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "noEmit": true,
+
+    "esModuleInterop": true,
+    "module": "esnext",
+    "moduleResolution": "bundler",
+
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+
+    "jsx": "react-jsx",
+
+    "incremental": true,
+
+    "baseUrl": ".",
+
+    "paths": {
+      "@/*": ["./*"]
+    },
+
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ]
+  },
+
+  "include": [
+    "next-env.d.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    ".next/types/**/*.ts",
+    ".next/dev/types/**/*.ts",
+    "**/*.mts"
+  ],
+
+  "exclude": [
+    "node_modules",
+
+    "audit",
+    "backups",
+    "bootstrap",
+    "controllers",
+    "devtools",
+    "features",
+    "logs",
+    "reports",
+    "scripts",
+    "services",
+    "src",
+    "terminal-export",
+    "testing",
+    "tools",
+
+    "frontend",
+
+    "engine/gen3",
+    "engine/evidence/builders/v2",
+    "engine/evidence/EvidenceEngineV2.ts",
+    "engine/evidence/EvidenceEngine.preV2.ts",
+    "engine/backup",
+    "engine/reasoning/intelligence_backup_20260730_225439",
+    "engine/workstation.disabled",
+    "engine/knowledge/KnowledgeEngine.v1.ts",
+    "engine/orchestration",
+    "engine/committee/CommitteeFactory.ts",
+
+    "**/*.bak",
+    "**/*.bak2",
+    "**/*.backup.ts",
+    "**/*.backup.json",
+    "**/*.backup.ignore",
+    "**/*.legacy.ts",
+    "**/*.disabled",
+    "**/*.before-*.ts",
+    "**/*.pre-*.ts",
+    "**/*.pre*.txt",
+    "**/*.old"
+  ]
+}

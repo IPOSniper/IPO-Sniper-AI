@@ -1,0 +1,32 @@
+{
+  "sec": {
+    "reliability": 100,
+    "credibility": 100,
+    "factualAccuracy": 100,
+    "primarySource": true
+  },
+  "reuters": {
+    "reliability": 96,
+    "credibility": 95,
+    "factualAccuracy": 95,
+    "primarySource": false
+  },
+  "bloomberg": {
+    "reliability": 95,
+    "credibility": 94,
+    "factualAccuracy": 94,
+    "primarySource": false
+  },
+  "financial times": {
+    "reliability": 94,
+    "credibility": 93,
+    "factualAccuracy": 94,
+    "primarySource": false
+  },
+  "wall street journal": {
+    "reliability": 94,
+    "credibility": 94,
+    "factualAccuracy": 94,
+    "primarySource": false
+  }
+}

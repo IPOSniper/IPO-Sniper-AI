@@ -1,0 +1,186 @@
+import { EvidenceBuilder } from "../types";
+import { FinancialEvidence } from "../package";
+
+import {
+  FinancialProvider,
+} from "../providers/FinancialProvider";
+
+import {
+  DemoFinancialProvider,
+} from "../providers/DemoFinancialProvider";
+
+export class FinancialBuilder
+  implements EvidenceBuilder<FinancialEvidence>
+{
+  private readonly provider: FinancialProvider;
+
+  constructor(
+    provider: FinancialProvider = new DemoFinancialProvider()
+  ) {
+    this.provider = provider;
+  }
+
+  async build(
+    ticker = "DEMO"
+  ): Promise<FinancialEvidence> {
+
+    const financials =
+      await this.provider.getFinancials(ticker);
+
+    const now = new Date();
+
+    return {
+
+      // ============================
+      // Growth
+      // ============================
+
+      revenueGrowth: {
+        value: financials.revenueGrowth,
+        source: this.provider.constructor.name,
+        confidence: 100,
+        verified: true,
+        collectedAt: now,
+      },
+
+      // ============================
+      // Profitability
+      // ============================
+
+      grossMargin: {
+        value: financials.grossMargin,
+        source: this.provider.constructor.name,
+        confidence: 100,
+        verified: true,
+        collectedAt: now,
+      },
+
+      operatingMargin: {
+        value: financials.operatingMargin,
+        source: this.provider.constructor.name,
+        confidence: 100,
+        verified: true,
+        collectedAt: now,
+      },
+
+      // ============================
+      // Cash Flow
+      // ============================
+
+      operatingCashFlow: {
+        value: 0,
+        source: this.provider.constructor.name,
+        confidence: 0,
+        verified: false,
+        collectedAt: now,
+      },
+
+      freeCashFlow: {
+        value: 0,
+        source: this.provider.constructor.name,
+        confidence: 0,
+        verified: false,
+        collectedAt: now,
+      },
+
+      // ============================
+      // Balance Sheet
+      // ============================
+
+      cashAndEquivalents: {
+        value: 0,
+        source: this.provider.constructor.name,
+        confidence: 0,
+        verified: false,
+        collectedAt: now,
+      },
+
+      totalDebt: {
+        value: 0,
+        source: this.provider.constructor.name,
+        confidence: 0,
+        verified: false,
+        collectedAt: now,
+      },
+
+      debtToEquity: {
+        value: 0,
+        source: this.provider.constructor.name,
+        confidence: 0,
+        verified: false,
+        collectedAt: now,
+      },
+
+      // ============================
+      // Liquidity
+      // ============================
+
+      currentRatio: {
+        value: 0,
+        source: this.provider.constructor.name,
+        confidence: 0,
+        verified: false,
+        collectedAt: now,
+      },
+
+      quickRatio: {
+        value: 0,
+        source: this.provider.constructor.name,
+        confidence: 0,
+        verified: false,
+        collectedAt: now,
+      },
+
+      // ============================
+      // Valuation
+      // ============================
+
+      peRatio: {
+        value: 0,
+        source: this.provider.constructor.name,
+        confidence: 0,
+        verified: false,
+        collectedAt: now,
+      },
+
+      psRatio: {
+        value: 0,
+        source: this.provider.constructor.name,
+        confidence: 0,
+        verified: false,
+        collectedAt: now,
+      },
+
+      evToRevenue: {
+        value: 0,
+        source: this.provider.constructor.name,
+        confidence: 0,
+        verified: false,
+        collectedAt: now,
+      },
+
+      // ============================
+      // Guidance & Execution
+      // ============================
+
+      revenueGuidance: {
+        value: 0,
+        source: this.provider.constructor.name,
+        confidence: 0,
+        verified: false,
+        collectedAt: now,
+      },
+
+      epsGuidance: {
+        value: 0,
+        source: this.provider.constructor.name,
+        confidence: 0,
+        verified: false,
+        collectedAt: now,
+      },
+
+    };
+  }
+}
+
+

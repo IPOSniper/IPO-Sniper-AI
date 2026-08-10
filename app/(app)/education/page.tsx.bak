@@ -1,0 +1,15 @@
+import MarketPulseSection from "@/components/education/MarketPulseSection";
+
+export default function EducationPage() {
+    return (
+        <div className="text-white max-w-5xl">
+            <h1 className="text-2xl font-bold mb-1">Market Pulse</h1>
+            <p className="text-zinc-400 mb-6">
+                What&apos;s moving markets today, why, and the general concepts investors use to think about it —
+                real index/instrument data with an AI explainer layered on top.
+            </p>
+
+            <MarketPulseSection />
+        </div>
+    );
+}

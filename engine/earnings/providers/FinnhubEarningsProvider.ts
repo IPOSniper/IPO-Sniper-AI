@@ -1,0 +1,79 @@
+import { finnhubFetch } from "../../../lib/data/finnhub";
+import { EarningsEvent } from "../models/EarningsEvent";
+
+interface FinnhubEarningsResponse {
+    quarter: number;
+    year: number;
+    period: string;
+    estimate: number;
+    actual: number;
+    revenueEstimate?: number;
+    revenueActual?: number;
+}
+
+export class FinnhubEarningsProvider {
+
+    public async getLatest(
+        symbol: string
+    ): Promise<EarningsEvent> {
+
+        // limit=2, not 1 — the prior quarter's ACTUALS are what
+        // "previous" should mean for a growth calc. Reusing the
+        // current quarter's estimate as a stand-in for "previous"
+        // (the old behavior) silently produced a meaningless growth
+        // number every time.
+        const result =
+            await finnhubFetch<FinnhubEarningsResponse[]>(
+                `/stock/earnings?symbol=${symbol}&limit=2`
+            );
+
+        if (!Array.isArray(result) || result.length === 0) {
+            throw new Error(
+                `No earnings found for ${symbol}.`
+            );
+        }
+
+        const earnings = result[0];
+        const prior = result[1];
+
+        return {
+
+            company: symbol,
+
+            fiscalQuarter:
+                `Q${earnings.quarter}`,
+
+            fiscalYear:
+                earnings.year,
+
+            reportDate:
+                new Date(earnings.period),
+
+            estimatedEPS:
+                earnings.estimate,
+
+            actualEPS:
+                earnings.actual,
+
+            estimatedRevenue:
+                earnings.revenueEstimate ?? 0,
+
+            actualRevenue:
+                earnings.revenueActual ?? 0,
+
+            // Real prior-period actuals when Finnhub returned a
+            // second row, null when it didn't (e.g. a company's
+            // first reported quarter) — never backfilled with the
+            // estimate.
+            previousEPS:
+                prior?.actual ?? null,
+
+            previousRevenue:
+                prior?.revenueActual ?? null
+
+        };
+
+    }
+
+}
+

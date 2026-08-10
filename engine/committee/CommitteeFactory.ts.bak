@@ -1,0 +1,60 @@
+import { ResearchEngine } from "../research/ResearchEngine";
+import { EvidenceEngine } from "../evidence/EvidenceEngine";
+import { InvestigationEngine } from "../investigation/InvestigationEngine";
+import { KnowledgeEngine } from "../knowledge/KnowledgeEngine";
+import { ConvictionEngine } from "../convictions/ConvictionEngine";
+import { ScoreEngine } from "../scoring/ScoreEngine";
+import { DueDiligenceEngine } from "../duediligence/DueDiligenceEngine";
+import { InvestmentBrain } from "../brain/InvestmentBrain";
+
+import { InvestmentResearchSession } from "./InvestmentResearchSession";
+
+export class InvestmentOrchestrator {
+
+  private readonly research: ResearchEngine;
+  private readonly evidence: EvidenceEngine;
+  private readonly investigation: InvestigationEngine;
+  private readonly knowledge: KnowledgeEngine;
+  private readonly conviction: ConvictionEngine;
+  private readonly scoring: ScoreEngine;
+  private readonly dueDiligence: DueDiligenceEngine;
+  private readonly brain: InvestmentBrain;
+
+  constructor() {
+
+    this.research = new ResearchEngine();
+
+    this.evidence = new EvidenceEngine();
+
+    this.investigation =
+      new InvestigationEngine();
+
+    this.knowledge =
+      new KnowledgeEngine();
+
+    this.conviction =
+      new ConvictionEngine();
+
+    this.scoring =
+      new ScoreEngine();
+
+    this.dueDiligence =
+      new DueDiligenceEngine();
+
+    this.brain =
+      new InvestmentBrain(
+        this.research.getCommitteeEngine()
+      );
+  }
+
+  async analyze(
+    company: string
+  ): Promise<InvestmentResearchSession> {
+
+    throw new Error(
+      "InvestmentOrchestrator.analyze() not implemented."
+    );
+
+  }
+
+}

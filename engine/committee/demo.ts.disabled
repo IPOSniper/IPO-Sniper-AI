@@ -1,0 +1,14 @@
+import { CommitteeEngine } from "./committeeEngine";
+import { CEOAnalyst } from "./analysts/CEOAnalyst";
+
+async function run() {
+  const engine = new CommitteeEngine([
+    new CEOAnalyst()
+  ]);
+
+  const result = await engine.analyze({});
+
+  console.log(JSON.stringify(result, null, 2));
+}
+
+run();

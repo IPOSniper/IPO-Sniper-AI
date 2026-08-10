@@ -1,0 +1,60 @@
+import { EvidenceEngine } from "../evidence/evidenceEngine";
+import type { EvidencePackage } from "../evidence/package";
+
+import { CommitteeEngine } from "../committee/committeeEngine";
+import { BrainThesisEngine } from "../brain/thesis/BrainThesisEngine";
+import { FinancialAnalystAdapter } from "../committee/adapters/FinancialAnalystAdapter";
+
+export interface ResearchRequest {
+  ticker: string;
+}
+
+export interface ResearchReport {
+  ticker: string;
+  recommendation: string;
+  conviction: number;
+  confidence: number;
+  executiveSummary: string;
+  catalysts: string[];
+  risks: string[];
+  generatedAt: Date;
+}
+
+export class ResearchEngine {
+
+  private readonly evidence = new EvidenceEngine();
+
+  private readonly brain = new BrainThesisEngine();
+
+  private readonly committee =
+    new CommitteeEngine<EvidencePackage>([
+      new FinancialAnalystAdapter(),
+    ]);
+
+  getCommitteeEngine() {
+    return this.committee;
+  }
+
+  async analyze(
+    request: ResearchRequest
+  ): Promise<ResearchReport> {
+
+    const evidence =
+      await this.evidence.build(request.ticker);
+
+    const committee =
+      await this.committee.analyze(evidence);
+
+    return {
+      ticker: request.ticker,
+      recommendation: committee.recommendation,
+      conviction: committee.overallScore,
+      confidence: committee.confidence,
+      executiveSummary: committee.summary,
+      catalysts: [],
+      risks: [],
+      generatedAt: new Date(),
+    };
+  }
+
+}

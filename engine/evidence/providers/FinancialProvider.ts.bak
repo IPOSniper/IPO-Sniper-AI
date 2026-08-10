@@ -1,0 +1,53 @@
+export interface FinancialSnapshot {
+
+  // ============================
+  // Current Metrics
+  // ============================
+
+  revenueGrowth: number;
+  grossMargin: number;
+  operatingMargin: number;
+
+  // ============================
+  // Historical Data
+  // ============================
+
+  // ============================
+  // Cash Flow
+  // ============================
+
+  operatingCashFlow: number;
+  freeCashFlow: number;
+
+  // ============================
+  // Balance Sheet
+  // ============================
+
+  cashAndEquivalents: number;
+  totalDebt: number;
+  debtToEquity: number;
+
+  // ============================
+  // Liquidity
+  // ============================
+
+  currentRatio: number;
+  quickRatio: number;
+
+  // ============================
+  // Valuation
+  // ============================
+
+  peRatio: number;
+  psRatio: number;
+  evToRevenue: number;
+
+  // ============================
+  // Historical Data
+  // ============================
+
+  revenueHistory: number[];
+  grossMarginHistory: number[];
+  operatingMarginHistory: number[];
+
+}

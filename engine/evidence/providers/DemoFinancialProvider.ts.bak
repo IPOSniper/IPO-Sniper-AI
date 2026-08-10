@@ -1,0 +1,50 @@
+import {
+  FinancialProvider,
+  FinancialSnapshot,
+} from "./FinancialProvider";
+
+export class DemoFinancialProvider
+  implements FinancialProvider
+{
+  async getFinancials(
+    ticker: string
+  ): Promise<FinancialSnapshot> {
+
+    return {
+
+      // Current Metrics
+      revenueGrowth: 32,
+      grossMargin: 48,
+      operatingMargin: 12,
+
+      // Historical Data
+      revenueHistory: [
+        180,
+        205,
+        240,
+        290,
+        340,
+        410,
+      ],
+
+      grossMarginHistory: [
+        39,
+        41,
+        43,
+        45,
+        47,
+        48,
+      ],
+
+      operatingMarginHistory: [
+        2,
+        4,
+        6,
+        8,
+        10,
+        12,
+      ],
+
+    };
+  }
+}
