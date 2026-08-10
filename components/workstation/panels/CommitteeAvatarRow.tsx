@@ -27,14 +27,44 @@ import { WorkstationPanelProps } from "../contracts/WorkstationPanelProps";
  */
 
 const PHOTOS = [
-    "lina", "sarah", "jasmine", "priya", "marcus_j",
+    "lina", "sarah", "jasmine", "priya", "marcus_j", "donald",
     "arjun", "chris", "kenji", "declan", "olivia", "ethan", "mei",
 ];
 
-function photoFor(name: string): string {
+const GRADIENTS = [
+    "from-violet-600 to-indigo-700",
+    "from-blue-600 to-cyan-700",
+    "from-emerald-600 to-teal-700",
+    "from-amber-600 to-orange-700",
+    "from-rose-600 to-pink-700",
+    "from-fuchsia-600 to-purple-700",
+    "from-sky-600 to-blue-700",
+];
+
+/**
+ * Guaranteed-unique photo assignment, not hash-based -- a hash-mod
+ * assignment can (and did) collide once analyst count exceeded the
+ * 12-photo pool, showing the same face for two different analysts.
+ * This sorts analysts into a stable order (alphabetical by name, so
+ * it's deterministic across reloads without depending on
+ * committee.reports' array order) and assigns each a DIFFERENT photo
+ * by index. Once the 13-photo pool is exhausted, remaining analysts
+ * fall back to a gradient-initials avatar instead of reusing a face
+ * -- two different analysts must never show the same person.
+ */
+function buildPhotoAssignments(analystNames: string[]): Map<string, string | null> {
+    const sorted = [...analystNames].sort();
+    const map = new Map<string, string | null>();
+    sorted.forEach((name, i) => {
+        map.set(name, i < PHOTOS.length ? `/committee/${PHOTOS[i]}.png` : null);
+    });
+    return map;
+}
+
+function gradientFor(name: string): string {
     let hash = 0;
     for (let i = 0; i < name.length; i++) hash = (hash * 31 + name.charCodeAt(i)) >>> 0;
-    return `/committee/${PHOTOS[hash % PHOTOS.length]}.png`;
+    return GRADIENTS[hash % GRADIENTS.length];
 }
 
 const RECOMMENDATION_COLOR: Record<string, string> = {
@@ -56,6 +86,7 @@ const RECOMMENDATION_LABEL: Record<string, string> = {
 export default function CommitteeAvatarRow({ research }: WorkstationPanelProps) {
     const { committee } = research;
     const votingAnalysts = committee.reports.filter(r => r.confidence > 0);
+    const photoAssignments = buildPhotoAssignments(committee.reports.map(r => r.analyst));
 
     const buyCount = votingAnalysts.filter(r => r.recommendation === "STRONG_BUY" || r.recommendation === "BUY").length;
     const sellCount = votingAnalysts.filter(r => r.recommendation === "REDUCE" || r.recommendation === "SELL").length;
@@ -77,19 +108,28 @@ export default function CommitteeAvatarRow({ research }: WorkstationPanelProps) 
                 {committee.reports.map(report => {
                     const hasOpinion = report.confidence > 0;
                     const color = hasOpinion ? (RECOMMENDATION_COLOR[report.recommendation] ?? "#8A8FA3") : "#3F3F46";
+                    const photoSrc = photoAssignments.get(report.analyst) ?? null;
                     return (
                         <div key={report.analyst} className="flex w-24 flex-col items-center text-center">
                             <div
                                 className="relative h-14 w-14 overflow-hidden rounded-full border-2"
                                 style={{ borderColor: color, opacity: hasOpinion ? 1 : 0.4 }}
                             >
-                                <Image
-                                    src={photoFor(report.analyst)}
-                                    alt={`AI ${report.analyst}`}
-                                    fill
-                                    sizes="56px"
-                                    className="object-cover"
-                                />
+                                {photoSrc ? (
+                                    <Image
+                                        src={photoSrc}
+                                        alt={`AI ${report.analyst}`}
+                                        fill
+                                        sizes="56px"
+                                        className="object-cover"
+                                    />
+                                ) : (
+                                    <div className={`flex h-full w-full items-center justify-center bg-gradient-to-br ${gradientFor(report.analyst)}`}>
+                                        <span className="text-xs font-bold text-white">
+                                            {report.analyst.split(" ")[0].slice(0, 2).toUpperCase()}
+                                        </span>
+                                    </div>
+                                )}
                             </div>
                             {/* Only "AI [Role]" — the underlying photo's fictional
                                 human name is never rendered. */}
