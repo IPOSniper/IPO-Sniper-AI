@@ -1,0 +1,197 @@
+/**
+ * Real Alpaca Paper Trading API client — same request/response shape
+ * as Alpaca's live trading API per their docs, pointed at the paper
+ * base URL so nothing here can touch real money. See
+ * docs/HEDGE_FUND_ARCHITECTURE.md for why paper-first is the only
+ * acceptable starting point.
+ *
+ * Requires ALPACA_API_KEY_ID + ALPACA_SECRET_KEY from a Paper Trading
+ * account (Alpaca issues separate key pairs for paper vs. live — a
+ * live key pair will not authenticate against the paper base URL).
+ *
+ * Written against Alpaca's documented Trading API
+ * (https://docs.alpaca.markets/reference/trading-api), not run live
+ * — no network access in this sandbox. Verify against a real paper
+ * account before trusting order placement.
+ */
+
+import type {
+    TradingAccount,
+    TradingPosition,
+    TradeOrderRequest,
+    TradeOrderResult,
+} from "../contracts/TradeOrder";
+
+const DEFAULT_BASE_URL = "https://paper-api.alpaca.markets";
+
+export class AlpacaPaperTradingProvider {
+
+    private baseUrl: string;
+
+    constructor() {
+        // Allow override for anyone pointed at a different paper
+        // endpoint, but default to Alpaca's documented paper URL —
+        // never defaults to the live-trading URL.
+        this.baseUrl = process.env.ALPACA_PAPER_BASE_URL || DEFAULT_BASE_URL;
+    }
+
+    private headers(): HeadersInit {
+
+        const keyId = process.env.ALPACA_API_KEY_ID;
+        const secret = process.env.ALPACA_SECRET_KEY;
+
+        if (!keyId || !secret) {
+            throw new Error(
+                "ALPACA_API_KEY_ID / ALPACA_SECRET_KEY are missing. Generate a Paper Trading key pair at app.alpaca.markets (toggle to Paper Trading first — live and paper keys are separate)."
+            );
+        }
+
+        return {
+            "APCA-API-KEY-ID": keyId,
+            "APCA-API-SECRET-KEY": secret,
+            "Content-Type": "application/json",
+        };
+    }
+
+    async getAccount(): Promise<TradingAccount> {
+
+        const response = await fetch(`${this.baseUrl}/v2/account`, {
+            headers: this.headers(),
+            cache: "no-store",
+        });
+
+        if (!response.ok) {
+            throw new Error(`Alpaca account request failed: ${response.status} ${await this.safeText(response)}`);
+        }
+
+        const data = await response.json();
+
+        return {
+            equity: Number(data.equity),
+            cash: Number(data.cash),
+            buyingPower: Number(data.buying_power),
+            patternDayTraderFlag: Boolean(data.pattern_day_trader),
+            tradingBlocked: Boolean(data.trading_blocked),
+        };
+    }
+
+    async getPositions(): Promise<TradingPosition[]> {
+
+        const response = await fetch(`${this.baseUrl}/v2/positions`, {
+            headers: this.headers(),
+            cache: "no-store",
+        });
+
+        if (!response.ok) {
+            throw new Error(`Alpaca positions request failed: ${response.status} ${await this.safeText(response)}`);
+        }
+
+        const data = await response.json();
+
+        if (!Array.isArray(data)) {
+            return [];
+        }
+
+        return data.map((p: Record<string, string>) => ({
+            ticker: p.symbol,
+            qty: Number(p.qty),
+            avgEntryPrice: Number(p.avg_entry_price),
+            marketValue: Number(p.market_value),
+            unrealizedPl: Number(p.unrealized_pl),
+            unrealizedPlPercent: Number(p.unrealized_plpc) * 100,
+            currentPrice: Number(p.current_price),
+        }));
+    }
+
+    /**
+     * Places a market, day-duration order. No limit/stop/bracket
+     * support yet — see contracts/TradeOrder.ts for why this stage
+     * is deliberately narrow. Caller (the order route) is
+     * responsible for running this through RiskEngine BEFORE calling
+     * this method — this method does not re-check limits itself, so
+     * it must never be called directly from anywhere that skips the
+     * risk gate.
+     */
+    async placeOrder(order: TradeOrderRequest): Promise<TradeOrderResult> {
+
+        const response = await fetch(`${this.baseUrl}/v2/orders`, {
+            method: "POST",
+            headers: this.headers(),
+            body: JSON.stringify({
+                symbol: order.ticker,
+                qty: order.qty,
+                side: order.side,
+                type: "market",
+                time_in_force: "day",
+            }),
+        });
+
+        if (!response.ok) {
+            throw new Error(`Alpaca order request failed: ${response.status} ${await this.safeText(response)}`);
+        }
+
+        const data = await response.json();
+
+        return {
+            brokerOrderId: data.id,
+            ticker: data.symbol,
+            side: data.side,
+            qty: Number(data.qty),
+            status: data.status,
+            submittedAt: data.submitted_at,
+        };
+    }
+
+    async listOrders(limit = 20): Promise<TradeOrderResult[]> {
+
+        const response = await fetch(
+            `${this.baseUrl}/v2/orders?status=all&limit=${limit}&direction=desc`,
+            { headers: this.headers(), cache: "no-store" }
+        );
+
+        if (!response.ok) {
+            throw new Error(`Alpaca order-history request failed: ${response.status} ${await this.safeText(response)}`);
+        }
+
+        const data = await response.json();
+
+        if (!Array.isArray(data)) {
+            return [];
+        }
+
+        return data.map((o: Record<string, string>) => ({
+            brokerOrderId: o.id,
+            ticker: o.symbol,
+            side: o.side as "buy" | "sell",
+            qty: Number(o.qty),
+            status: o.status,
+            submittedAt: o.submitted_at,
+        }));
+    }
+
+    /**
+     * Independent kill switch — cancels every open order. Reachable
+     * on its own, not dependent on whatever code path is placing
+     * orders, per the "kill switch" requirement in
+     * docs/HEDGE_FUND_ARCHITECTURE.md.
+     */
+    async cancelAllOrders(): Promise<void> {
+
+        const response = await fetch(`${this.baseUrl}/v2/orders`, {
+            method: "DELETE",
+            headers: this.headers(),
+        });
+
+        if (!response.ok && response.status !== 207) {
+            throw new Error(`Alpaca cancel-all request failed: ${response.status} ${await this.safeText(response)}`);
+        }
+    }
+
+    private async safeText(response: Response): Promise<string> {
+        try {
+            return await response.text();
+        } catch {
+            return "";
+        }
+    }
+}
