@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { FinnhubQuoteProvider, type Quote } from "@/engine/evidence/providers/FinnhubQuoteProvider";
 import { MarketPulseSynthesizer } from "@/engine/education/MarketPulseSynthesizer";
+import { fetchMarketHeadlines } from "@/engine/education/fetchMarketHeadlines";
 
 /**
  * DIA/SPY/QQQ/IWM = broad equity proxies (Dow, S&P 500, Nasdaq 100,
@@ -14,30 +15,6 @@ import { MarketPulseSynthesizer } from "@/engine/education/MarketPulseSynthesize
 const INSTRUMENTS = ["DIA", "SPY", "QQQ", "IWM", "^VIX", "GLD", "TLT"];
 
 export const revalidate = 900; // 15 minutes — this is an explainer, not a live tape
-
-async function fetchHeadlines(): Promise<Array<{ headline: string; source: string; url: string }>> {
-    const apiKey = process.env.FINNHUB_API_KEY;
-    if (!apiKey) return [];
-
-    try {
-        const response = await fetch(
-            `https://finnhub.io/api/v1/news?category=general&token=${apiKey}`,
-            { next: { revalidate } }
-        );
-        if (!response.ok) return [];
-
-        const data: Array<{ headline: string; source: string; url: string }> = await response.json();
-        // Keep only entries with a real source link — this list is
-        // rendered as "Sources" on the page, so a headline without a
-        // url isn't citable and shouldn't show up as if it were.
-        return data
-            .filter(d => d.url)
-            .slice(0, 8)
-            .map(d => ({ headline: d.headline, source: d.source, url: d.url }));
-    } catch {
-        return [];
-    }
-}
 
 export async function GET() {
     if (!process.env.FINNHUB_API_KEY) {
@@ -57,7 +34,7 @@ export async function GET() {
         if (r.status === "fulfilled") quotes[symbol.replace("^", "")] = r.value;
     });
 
-    const headlines = await fetchHeadlines();
+    const headlines = await fetchMarketHeadlines();
 
     if (Object.keys(quotes).length === 0) {
         return NextResponse.json({

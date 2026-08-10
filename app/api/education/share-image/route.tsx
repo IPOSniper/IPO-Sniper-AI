@@ -1,14 +1,24 @@
 import { ImageResponse } from "next/og";
 import { FinnhubQuoteProvider, type Quote } from "@/engine/evidence/providers/FinnhubQuoteProvider";
+import { fetchMarketHeadlines } from "@/engine/education/fetchMarketHeadlines";
 
 export const runtime = "edge";
 
+/**
+ * Same 7 instruments as the full /education page (see
+ * market-pulse/route.ts's docstring for why these specifically) --
+ * this card used to track only 5 and skip headlines entirely, which
+ * is why it felt thin. Same real data as the full page now, just a
+ * different, downloadable presentation of it.
+ */
 const INSTRUMENTS = [
     { symbol: "DIA", label: "Dow Jones" },
     { symbol: "SPY", label: "S&P 500" },
     { symbol: "QQQ", label: "Nasdaq 100" },
+    { symbol: "IWM", label: "Russell 2000" },
     { symbol: "^VIX", label: "VIX" },
     { symbol: "GLD", label: "Gold" },
+    { symbol: "TLT", label: "Long Bonds" },
 ];
 
 /**
@@ -20,36 +30,31 @@ const INSTRUMENTS = [
  * about *why* the numbers look the way they do, not just show them.
  */
 function describePattern(rows: Array<{ symbol: string; quote: Quote | null }>): string {
-    const equities = rows.filter(r => r.symbol !== "^VIX" && r.symbol !== "GLD").map(r => r.quote).filter(Boolean) as Quote[];
+    const equities = rows.filter(r => !["^VIX", "GLD", "TLT"].includes(r.symbol)).map(r => r.quote).filter(Boolean) as Quote[];
     const gold = rows.find(r => r.symbol === "GLD")?.quote ?? null;
+    const bonds = rows.find(r => r.symbol === "TLT")?.quote ?? null;
     if (equities.length === 0) return "Market data unavailable today.";
 
     const avgEquity = equities.reduce((sum, q) => sum + q.changePercent, 0) / equities.length;
     const equitiesDown = avgEquity < -0.05;
     const equitiesUp = avgEquity > 0.05;
     const goldUp = gold ? gold.changePercent > 0.5 : false;
+    const bondsUp = bonds ? bonds.changePercent > 0.1 : false;
 
-    if (equitiesDown && goldUp) {
-        return "Stocks down, gold up -- a classic \"risk-off\" day: money rotating out of equities into safe havens.";
+    if (equitiesDown && (goldUp || bondsUp)) {
+        return "Stocks down, gold/bonds up -- a classic \"risk-off\" day: money rotating out of equities into safe havens. That combination is what actually signals broader market caution, not just one index falling.";
     }
     if (equitiesUp && !goldUp) {
-        return "Stocks broadly higher with gold flat/down -- a \"risk-on\" day: investors more willing to hold riskier assets.";
+        return "Stocks broadly higher with gold/bonds flat or down -- a \"risk-on\" day: investors more willing to hold riskier assets across the board, not just one sector.";
     }
     if (equitiesDown) {
-        return "Equities down today, without a clear offsetting move into safe havens like gold.";
+        return "Equities down today, without a clear offsetting move into safe havens like gold or bonds -- a broad pullback rather than a flight to safety.";
     }
-    return "A mixed day -- no clear risk-on or risk-off pattern across equities and safe havens.";
+    return "A mixed day -- no clear risk-on or risk-off pattern across equities and safe havens, meaning today's moves likely reflect stock-specific news more than a broad market shift.";
 }
 
-/**
- * Short sentiment label for the gauge row. Deliberately tied to the
- * EXACT same branching logic as describePattern() above rather than
- * a separately-invented editorial label -- "Cautious" vs "Risk-off
- * tilt" would be two different claims about the same data if they
- * weren't derived from the same computation.
- */
 function sentimentLabel(rows: Array<{ symbol: string; quote: Quote | null }>): { text: string; color: string } {
-    const equities = rows.filter(r => r.symbol !== "^VIX" && r.symbol !== "GLD").map(r => r.quote).filter(Boolean) as Quote[];
+    const equities = rows.filter(r => !["^VIX", "GLD", "TLT"].includes(r.symbol)).map(r => r.quote).filter(Boolean) as Quote[];
     const gold = rows.find(r => r.symbol === "GLD")?.quote ?? null;
     if (equities.length === 0) return { text: "No data", color: "#8A8FA3" };
 
@@ -64,15 +69,6 @@ function sentimentLabel(rows: Array<{ symbol: string; quote: Quote | null }>): {
     return { text: "Mixed", color: "#F5A524" };
 }
 
-/**
- * Best/worst performer among the real instruments already fetched --
- * a genuine, derivable fact ("which of these five actually moved the
- * most today"), not an invented sector or news narrative. The
- * mockup's "root cause" / "winners today" boxes implied AI-written
- * commentary this route deliberately doesn't generate (no AI call
- * here -- see describePattern's docstring) -- this is the honest
- * substitute: real numbers, not a guessed cause.
- */
 function bestAndWorst(rows: Array<{ symbol: string; label: string; quote: Quote | null }>) {
     const withData = rows.filter(r => r.quote !== null) as Array<{ symbol: string; label: string; quote: Quote }>;
     if (withData.length === 0) return { best: null, worst: null };
@@ -80,12 +76,22 @@ function bestAndWorst(rows: Array<{ symbol: string; label: string; quote: Quote 
     return { best: sorted[0], worst: sorted[sorted.length - 1] };
 }
 
+function marketBreadth(rows: Array<{ quote: Quote | null }>): { upCount: number; total: number; upPercent: number } | null {
+    const withData = rows.filter(r => r.quote !== null) as Array<{ quote: Quote }>;
+    if (withData.length === 0) return null;
+    const upCount = withData.filter(r => r.quote.changePercent >= 0).length;
+    return { upCount, total: withData.length, upPercent: Math.round((upCount / withData.length) * 100) };
+}
+
 export async function GET() {
     const provider = new FinnhubQuoteProvider();
-    const results = await Promise.allSettled(INSTRUMENTS.map(i => provider.getQuote(i.symbol)));
+    const [quoteResults, headlines] = await Promise.all([
+        Promise.allSettled(INSTRUMENTS.map(i => provider.getQuote(i.symbol))),
+        fetchMarketHeadlines(3), // real headlines, same source as the full page -- capped to 3 to keep the card a reasonable size
+    ]);
 
     const rows = INSTRUMENTS.map((instrument, i) => {
-        const r = results[i];
+        const r = quoteResults[i];
         const quote: Quote | null = r.status === "fulfilled" ? r.value : null;
         return { ...instrument, quote };
     });
@@ -93,6 +99,7 @@ export async function GET() {
     const whyLine = describePattern(rows);
     const sentiment = sentimentLabel(rows);
     const { best, worst } = bestAndWorst(rows);
+    const breadth = marketBreadth(rows);
 
     const dateStr = new Date().toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric", year: "numeric" });
     const timeStr = new Date().toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", timeZone: "America/New_York" });
@@ -106,7 +113,7 @@ export async function GET() {
                     display: "flex",
                     flexDirection: "column",
                     backgroundColor: "#060A12",
-                    padding: "56px",
+                    padding: "52px",
                     fontFamily: "sans-serif",
                 }}
             >
@@ -131,25 +138,25 @@ export async function GET() {
                     <span style={{ fontSize: 18, color: "#8A8FA3" }}>{dateStr}</span>
                 </div>
 
-                <span style={{ fontSize: 40, fontWeight: 700, color: "#fff", marginTop: 28 }}>Market Pulse</span>
-                <span style={{ fontSize: 18, color: "#8A8FA3", marginTop: 4 }}>Today&apos;s move, with real data</span>
+                <span style={{ fontSize: 38, fontWeight: 700, color: "#fff", marginTop: 24 }}>Market Pulse</span>
+                <span style={{ fontSize: 17, color: "#8A8FA3", marginTop: 2 }}>Today&apos;s move, with real data</span>
 
                 <div
                     style={{
                         display: "flex",
                         flexDirection: "column",
-                        marginTop: 28,
-                        padding: "20px 24px",
+                        marginTop: 20,
+                        padding: "16px 22px",
                         backgroundColor: "#131A26",
                         borderLeft: "4px solid #5B2DD1",
                         borderRadius: "0 12px 12px 0",
                     }}
                 >
-                    <span style={{ fontSize: 18, fontWeight: 700, color: "#E7E9F0" }}>What&apos;s driving markets today?</span>
-                    <span style={{ fontSize: 16, color: "#B9BECC", marginTop: 8, lineHeight: 1.5 }}>{whyLine}</span>
+                    <span style={{ fontSize: 17, fontWeight: 700, color: "#E7E9F0" }}>What&apos;s driving markets today?</span>
+                    <span style={{ fontSize: 14, color: "#B9BECC", marginTop: 6, lineHeight: 1.45 }}>{whyLine}</span>
                 </div>
 
-                <div style={{ display: "flex", marginTop: 24, gap: 16 }}>
+                <div style={{ display: "flex", marginTop: 18, gap: 10 }}>
                     {rows.map(row => {
                         const up = (row.quote?.changePercent ?? 0) >= 0;
                         return (
@@ -160,20 +167,20 @@ export async function GET() {
                                     flexDirection: "column",
                                     flex: 1,
                                     backgroundColor: "#0D111B",
-                                    borderRadius: 12,
-                                    padding: "16px",
+                                    borderRadius: 10,
+                                    padding: "12px",
                                     border: "1px solid rgba(255,255,255,0.06)",
                                 }}
                             >
-                                <span style={{ fontSize: 14, color: "#8A8FA3" }}>{row.label}</span>
-                                <span style={{ fontSize: 22, fontWeight: 700, color: "#fff", marginTop: 6 }}>
+                                <span style={{ fontSize: 11, color: "#8A8FA3" }}>{row.label}</span>
+                                <span style={{ fontSize: 17, fontWeight: 700, color: "#fff", marginTop: 4 }}>
                                     {row.quote ? row.quote.price.toFixed(2) : "—"}
                                 </span>
                                 <span
                                     style={{
-                                        fontSize: 15,
+                                        fontSize: 12,
                                         fontWeight: 600,
-                                        marginTop: 4,
+                                        marginTop: 3,
                                         color: !row.quote ? "#52525b" : up ? "#16D47B" : "#F04452",
                                     }}
                                 >
@@ -184,39 +191,53 @@ export async function GET() {
                     })}
                 </div>
 
-                <div style={{ display: "flex", marginTop: 20, gap: 16 }}>
-                    <div style={{ display: "flex", flexDirection: "column", flex: 1, backgroundColor: "#0D111B", border: "1px solid rgba(255,255,255,0.06)", borderRadius: 12, padding: "14px 16px" }}>
-                        <span style={{ fontSize: 12, fontWeight: 700, color: "#5B85E0", textTransform: "uppercase", letterSpacing: 1 }}>Best today</span>
-                        <span style={{ fontSize: 16, color: "#D3D6E0", marginTop: 6 }}>
+                <div style={{ display: "flex", marginTop: 16, gap: 14 }}>
+                    <div style={{ display: "flex", flexDirection: "column", flex: 1, backgroundColor: "#0D111B", border: "1px solid rgba(255,255,255,0.06)", borderRadius: 10, padding: "12px 14px" }}>
+                        <span style={{ fontSize: 11, fontWeight: 700, color: "#5B85E0", textTransform: "uppercase", letterSpacing: 1 }}>Trading higher</span>
+                        <span style={{ fontSize: 15, color: "#D3D6E0", marginTop: 4 }}>
                             {best ? `${best.label} ${best.quote.changePercent >= 0 ? "+" : ""}${best.quote.changePercent.toFixed(2)}%` : "No data"}
                         </span>
                     </div>
-                    <div style={{ display: "flex", flexDirection: "column", flex: 1, backgroundColor: "#0D111B", border: "1px solid rgba(255,255,255,0.06)", borderRadius: 12, padding: "14px 16px" }}>
-                        <span style={{ fontSize: 12, fontWeight: 700, color: "#5B85E0", textTransform: "uppercase", letterSpacing: 1 }}>Worst today</span>
-                        <span style={{ fontSize: 16, color: "#D3D6E0", marginTop: 6 }}>
+                    <div style={{ display: "flex", flexDirection: "column", flex: 1, backgroundColor: "#0D111B", border: "1px solid rgba(255,255,255,0.06)", borderRadius: 10, padding: "12px 14px" }}>
+                        <span style={{ fontSize: 11, fontWeight: 700, color: "#5B85E0", textTransform: "uppercase", letterSpacing: 1 }}>Trading lower</span>
+                        <span style={{ fontSize: 15, color: "#D3D6E0", marginTop: 4 }}>
                             {worst ? `${worst.label} ${worst.quote.changePercent >= 0 ? "+" : ""}${worst.quote.changePercent.toFixed(2)}%` : "No data"}
                         </span>
                     </div>
-                    <div style={{ display: "flex", flexDirection: "column", flex: 1, backgroundColor: "#0D111B", border: "1px solid rgba(255,255,255,0.06)", borderRadius: 12, padding: "14px 16px" }}>
-                        <span style={{ fontSize: 12, fontWeight: 700, color: "#5B85E0", textTransform: "uppercase", letterSpacing: 1 }}>Data as of</span>
-                        <span style={{ fontSize: 16, color: "#D3D6E0", marginTop: 6 }}>{timeStr} ET</span>
+                    <div style={{ display: "flex", flexDirection: "column", flex: 1, backgroundColor: "#0D111B", border: "1px solid rgba(255,255,255,0.06)", borderRadius: 10, padding: "12px 14px" }}>
+                        <span style={{ fontSize: 11, fontWeight: 700, color: "#5B85E0", textTransform: "uppercase", letterSpacing: 1 }}>Market breadth</span>
+                        <span style={{ fontSize: 15, color: "#D3D6E0", marginTop: 4 }}>
+                            {breadth ? `${breadth.upCount}/${breadth.total} up (${breadth.upPercent}%)` : "No data"}
+                        </span>
                     </div>
                 </div>
 
+                {/* Real headlines -- same source as the full page's "Sources" list, not a fabricated summary of "what's in the news" */}
+                {headlines.length > 0 && (
+                    <div style={{ display: "flex", flexDirection: "column", marginTop: 16, backgroundColor: "#0D111B", border: "1px solid rgba(255,255,255,0.06)", borderRadius: 10, padding: "14px 16px" }}>
+                        <span style={{ fontSize: 11, fontWeight: 700, color: "#5B85E0", textTransform: "uppercase", letterSpacing: 1, marginBottom: 8 }}>In the news</span>
+                        {headlines.map((h, i) => (
+                            <span key={i} style={{ fontSize: 13, color: "#D3D6E0", marginTop: i === 0 ? 0 : 6, lineHeight: 1.4 }}>
+                                {h.headline} <span style={{ color: "#5A5E70" }}>— {h.source}</span>
+                            </span>
+                        ))}
+                    </div>
+                )}
+
                 <div
                     style={{
                         display: "flex",
                         alignItems: "center",
                         justifyContent: "space-between",
-                        marginTop: 20,
+                        marginTop: 16,
                         backgroundColor: "#0D111B",
                         border: "1px solid rgba(255,255,255,0.06)",
-                        borderRadius: 12,
-                        padding: "16px 20px",
+                        borderRadius: 10,
+                        padding: "12px 18px",
                     }}
                 >
-                    <span style={{ fontSize: 16, color: "#8A8FA3" }}>Market sentiment</span>
-                    <span style={{ fontSize: 20, fontWeight: 700, color: sentiment.color }}>{sentiment.text}</span>
+                    <span style={{ fontSize: 14, color: "#8A8FA3" }}>Market sentiment · Data as of {timeStr} ET</span>
+                    <span style={{ fontSize: 18, fontWeight: 700, color: sentiment.color }}>{sentiment.text}</span>
                 </div>
 
                 <div
@@ -224,22 +245,22 @@ export async function GET() {
                         display: "flex",
                         alignItems: "center",
                         justifyContent: "space-between",
-                        marginTop: 20,
+                        marginTop: 14,
                         backgroundColor: "#160B3D",
                         border: "1px solid rgba(91,45,209,0.5)",
-                        borderRadius: 12,
-                        padding: "16px 20px",
+                        borderRadius: 10,
+                        padding: "12px 18px",
                     }}
                 >
-                    <span style={{ fontSize: 16, fontWeight: 700, color: "#E7E9F0" }}>See the full AI committee inside IPO Sniper AI</span>
-                    <span style={{ fontSize: 20, color: "#C3AEFF" }}>&rarr;</span>
+                    <span style={{ fontSize: 14, fontWeight: 700, color: "#E7E9F0" }}>See the full AI committee inside IPO Sniper AI</span>
+                    <span style={{ fontSize: 18, color: "#C3AEFF" }}>&rarr;</span>
                 </div>
 
-                <div style={{ display: "flex", marginTop: 20, color: "#5A5E70", fontSize: 14 }}>
+                <div style={{ display: "flex", marginTop: 16, color: "#5A5E70", fontSize: 12 }}>
                     Educational content only -- not financial advice. IPO Sniper AI is not a registered investment adviser.
                 </div>
             </div>
         ),
-        { width: 1200, height: 900 }
+        { width: 1200, height: 1150 }
     );
 }
