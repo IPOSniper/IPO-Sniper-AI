@@ -1,5 +1,6 @@
 ﻿import { WorkstationPanelProps } from "../contracts/WorkstationPanelProps";
 
+import MissionControlHeader from "../panels/MissionControlHeader";
 import AIVerdictRow from "../panels/AIVerdictRow";
 import CommitteeAvatarRow from "../panels/CommitteeAvatarRow";
 import AnalystLayer from "./AnalystLayer";
@@ -12,6 +13,7 @@ export default function ResearchSession({
 
 return(
 <div className="space-y-8">
+<MissionControlHeader research={research} />
 <AIVerdictRow research={research} />
 <CommitteeAvatarRow research={research} />
 <AnalystLayer research={research} />

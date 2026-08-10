@@ -1,6 +1,11 @@
+"use client";
+
+import { useState } from "react";
 import Image from "next/image";
 import { Bot } from "lucide-react";
 import { WorkstationPanelProps } from "../contracts/WorkstationPanelProps";
+import AnalystWorkspace from "./AnalystWorkspace";
+import type { AnalystReport } from "@/engine/committee/contracts/AnalystReport";
 
 /**
  * Final revision of the committee-avatar decision: real submitted
@@ -74,6 +79,7 @@ export default function CommitteeAvatarRow({ research }: WorkstationPanelProps) 
     const { committee } = research;
     const votingAnalysts = committee.reports.filter(r => r.confidence > 0);
     const photoAssignments = buildPhotoAssignments(committee.reports.map(r => r.analyst));
+    const [selectedReport, setSelectedReport] = useState<AnalystReport | null>(null);
 
     const buyCount = votingAnalysts.filter(r => r.recommendation === "STRONG_BUY" || r.recommendation === "BUY").length;
     const sellCount = votingAnalysts.filter(r => r.recommendation === "REDUCE" || r.recommendation === "SELL").length;
@@ -97,7 +103,12 @@ export default function CommitteeAvatarRow({ research }: WorkstationPanelProps) 
                     const color = hasOpinion ? (RECOMMENDATION_COLOR[report.recommendation] ?? "#8A8FA3") : "#3F3F46";
                     const photoSrc = photoAssignments.get(report.analyst) ?? null;
                     return (
-                        <div key={report.analyst} className="flex w-24 flex-col items-center text-center">
+                        <button
+                            key={report.analyst}
+                            type="button"
+                            onClick={() => setSelectedReport(report)}
+                            className="flex w-24 flex-col items-center text-center transition hover:opacity-80"
+                        >
                             <div
                                 className="relative h-14 w-14 overflow-hidden rounded-full border-2"
                                 style={{ borderColor: color, opacity: hasOpinion ? 1 : 0.4 }}
@@ -127,10 +138,12 @@ export default function CommitteeAvatarRow({ research }: WorkstationPanelProps) 
                             >
                                 {hasOpinion ? RECOMMENDATION_LABEL[report.recommendation] ?? report.recommendation : "NO DATA"}
                             </span>
-                        </div>
+                        </button>
                     );
                 })}
             </div>
+
+            <AnalystWorkspace report={selectedReport} onClose={() => setSelectedReport(null)} />
 
             <div className="flex h-2 w-full overflow-hidden rounded-full bg-zinc-800">
                 {buyCount > 0 && <div className="h-full bg-emerald-500" style={{ width: `${(buyCount / total) * 100}%` }} />}
