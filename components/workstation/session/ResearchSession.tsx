@@ -15,7 +15,7 @@ return(
 <div className="space-y-8">
 <MissionControlHeader research={research} />
 <AIVerdictRow research={research} />
-<CommitteeAvatarRow research={research} />
+<CommitteeAvatarRow committee={research.committee} />
 <AnalystLayer research={research} />
 <IntelligenceLayer research={research} />
 <OperationsLayer research={research} />

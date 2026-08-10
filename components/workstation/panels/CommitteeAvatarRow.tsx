@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Image from "next/image";
 import { Bot } from "lucide-react";
-import { WorkstationPanelProps } from "../contracts/WorkstationPanelProps";
+import type { CommitteeReport } from "@/engine/committee/contracts/CommitteeReport";
 import AnalystWorkspace from "./AnalystWorkspace";
 import type { AnalystReport } from "@/engine/committee/contracts/AnalystReport";
 
@@ -75,8 +75,7 @@ const RECOMMENDATION_LABEL: Record<string, string> = {
     SELL: "SELL",
 };
 
-export default function CommitteeAvatarRow({ research }: WorkstationPanelProps) {
-    const { committee } = research;
+export default function CommitteeAvatarRow({ committee }: { committee: CommitteeReport }) {
     const votingAnalysts = committee.reports.filter(r => r.confidence > 0);
     const photoAssignments = buildPhotoAssignments(committee.reports.map(r => r.analyst));
     const [selectedReport, setSelectedReport] = useState<AnalystReport | null>(null);
