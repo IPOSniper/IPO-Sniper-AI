@@ -69,11 +69,12 @@ export default function Header() {
           {/* Notifications aren't built yet (no notifications table/
               feed exists in this repo) — cursor-not-allowed and a
               title tell the truth instead of looking clickable and
-              doing nothing, matching the Sidebar's "Soon" pattern. */}
-          <Bell
-            className="cursor-not-allowed text-zinc-600"
-            title="Notifications — coming soon"
-          />
+              doing nothing, matching the Sidebar's "Soon" pattern.
+              title lives on the wrapping span, not the icon itself —
+              LucideProps doesn't accept a title prop directly. */}
+          <span title="Notifications — coming soon" className="cursor-not-allowed">
+            <Bell className="text-zinc-600" />
+          </span>
 
           {!loading && !profile ? (
             <Link

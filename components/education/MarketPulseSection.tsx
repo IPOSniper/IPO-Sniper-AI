@@ -237,7 +237,11 @@ export default function MarketPulseSection() {
                                 <Tooltip
                                     contentStyle={{ background: "#18181b", border: "1px solid #3f3f46", borderRadius: 8, fontSize: 12 }}
                                     labelStyle={{ color: "#e4e4e7" }}
-                                    formatter={(value: number) => [`${value > 0 ? "+" : ""}${value}%`, "Change"]}
+                                    formatter={(value) => {
+                                        const n = typeof value === "number" ? value : Number(value);
+                                        if (!Number.isFinite(n)) return ["—", "Change"];
+                                        return [`${n > 0 ? "+" : ""}${n}%`, "Change"];
+                                    }}
                                 />
                                 <Bar dataKey="changePercent" radius={[4, 4, 0, 0]}>
                                     {chartData.map((entry, i) => (

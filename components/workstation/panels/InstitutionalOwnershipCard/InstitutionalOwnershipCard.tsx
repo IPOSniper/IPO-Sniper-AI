@@ -33,7 +33,7 @@ async function getNotableHolders(ticker: string): Promise<{ holders: NotableHold
     const filerKeys = Object.keys(NOTABLE_13F_FILERS) as NotableFilerKey[];
 
     const results = await Promise.all(
-        filerKeys.map(async key => {
+        filerKeys.map(async (key): Promise<NotableHolder | null> => {
             try {
                 const filing = await provider.getLatestFiling(NOTABLE_13F_FILERS[key].cik);
                 if (!filing) return null;

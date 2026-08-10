@@ -80,7 +80,11 @@ export default function PriceChart({ ticker }: { ticker: string }) {
                             <Tooltip
                                 contentStyle={{ background: "#18181b", border: "1px solid #3f3f46", fontSize: 12 }}
                                 labelStyle={{ color: "#a1a1aa" }}
-                                formatter={(value: number) => [`$${value.toFixed(2)}`, "Close"]}
+                                formatter={(value) => {
+                                    const n = typeof value === "number" ? value : Number(value);
+                                    if (!Number.isFinite(n)) return ["—", "Close"];
+                                    return [`$${n.toFixed(2)}`, "Close"];
+                                }}
                             />
                             <Area
                                 type="monotone"
