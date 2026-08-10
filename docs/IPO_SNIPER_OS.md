@@ -149,9 +149,15 @@ Naming: the "Hedge Fund" page is being reconsidered — that name carries
 regulatory/expectation baggage for what's currently a research/demo view.
 Candidates: "Institutional Research" or "Strategy Lab."
 
-Committee UI: no photorealistic human portraits or invented names for AI
-analysts. Each gets a distinctive icon/abstract avatar, a clear role
-label, and a visible description of its inputs and responsibilities.
+Committee UI (refined, superseding the earlier "abstract icon only"
+version): visual avatars are fine and can be premium/gradient-styled —
+what's non-negotiable is that every label explicitly says "AI [Role]"
+(never a bare human-sounding name + role, e.g. "AI Revenue Analyst" not
+"Marcus Williams, Revenue Analyst"), and a prominent, always-visible
+disclosure states these are AI personas, not real people. Photorealistic
+human photos are still out — an actual photo next to an "AI"-labeled
+name is the exact ambiguity this rule exists to prevent, even with the
+label present.
 
 **Runtime infrastructure gap, dev vs. production:**
 
