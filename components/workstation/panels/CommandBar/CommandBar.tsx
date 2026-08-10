@@ -24,7 +24,7 @@ export default function CommandBar({ research }: WorkstationPanelProps) {
         <div className="flex flex-wrap items-center gap-x-8 gap-y-3 rounded-xl border border-zinc-800 bg-zinc-950 px-6 py-4">
             <Link
                 href="/workstation"
-                className="flex items-center gap-2 rounded-lg border border-zinc-700 bg-zinc-900 px-3.5 py-2.5 text-sm font-semibold text-zinc-300 hover:border-cyan-600 hover:text-white hover:bg-zinc-800 transition"
+                className="flex items-center gap-2 rounded-lg border border-zinc-700 bg-zinc-900 px-3.5 py-2.5 text-sm font-semibold text-zinc-300 hover:border-violet-600 hover:text-white hover:bg-zinc-800 transition"
                 aria-label="Back to Workstation home"
             >
                 <Home size={18} />

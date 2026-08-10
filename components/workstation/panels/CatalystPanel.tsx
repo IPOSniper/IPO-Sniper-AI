@@ -15,7 +15,7 @@ export default function CatalystPanel({ research }: WorkstationPanelProps) {
                 <ul className="mt-3 space-y-2">
                     {catalysts.map((item, i) => (
                         <li key={i} className="flex items-start gap-2 text-sm text-zinc-300">
-                            <span className="mt-0.5 text-cyan-400">→</span>
+                            <span className="mt-0.5 text-violet-400">→</span>
                             {item}
                         </li>
                     ))}

@@ -141,7 +141,7 @@ export default function EarningsPreviewPanel({ ticker, companyName, sector, indu
                 <div>
                     <h2 className="text-lg font-semibold text-zinc-100">Earnings Preview</h2>
                     <p className="mt-1 flex items-center gap-1.5 text-sm text-zinc-400">
-                        <CalendarClock size={14} className="text-cyan-400" />
+                        <CalendarClock size={14} className="text-violet-400" />
                         {calendar.fiscalQuarter && calendar.fiscalYear
                             ? `Q${calendar.fiscalQuarter} ${calendar.fiscalYear} · `
                             : ""}
@@ -239,7 +239,7 @@ export default function EarningsPreviewPanel({ ticker, companyName, sector, indu
                                         <span className="text-zinc-300 w-40 shrink-0">{p.outcome}</span>
                                         <div className="flex-1 h-1.5 rounded-full bg-zinc-800 overflow-hidden">
                                             <div
-                                                className="h-full bg-cyan-500"
+                                                className="h-full bg-violet-500"
                                                 style={{ width: `${Math.min(100, Math.max(0, p.probabilityPercent))}%` }}
                                             />
                                         </div>

@@ -8,7 +8,7 @@ export default function ProgressRing({
 
     return(
 
-        <div className="flex h-24 w-24 items-center justify-center rounded-full border-4 border-cyan-500 text-xl font-bold">
+        <div className="flex h-24 w-24 items-center justify-center rounded-full border-4 border-violet-500 text-xl font-bold">
 
             {percent}%
 

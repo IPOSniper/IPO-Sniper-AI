@@ -54,7 +54,7 @@ export default function ResearchTarget({ defaultTicker }: ResearchTargetProps) {
             value={ticker}
             onChange={(e) => setTicker(e.target.value)}
             placeholder="Enter ticker (e.g. AAPL)"
-            className="w-full rounded-lg border border-zinc-700 bg-zinc-950 py-2 pl-9 pr-3 text-sm uppercase outline-none focus:border-cyan-400"
+            className="w-full rounded-lg border border-zinc-700 bg-zinc-950 py-2 pl-9 pr-3 text-sm uppercase outline-none focus:border-violet-400"
             disabled={submitting}
             autoFocus
           />
@@ -63,7 +63,7 @@ export default function ResearchTarget({ defaultTicker }: ResearchTargetProps) {
         <button
           type="submit"
           disabled={submitting}
-          className="flex items-center justify-center gap-2 rounded-lg bg-cyan-500 py-2 text-sm font-semibold text-black transition hover:bg-cyan-400 disabled:cursor-not-allowed disabled:opacity-60"
+          className="flex items-center justify-center gap-2 rounded-lg bg-violet-600 py-2 text-sm font-semibold text-white transition hover:bg-violet-500 disabled:cursor-not-allowed disabled:opacity-60"
         >
           {submitting ? (
             <>

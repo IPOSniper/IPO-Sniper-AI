@@ -73,8 +73,8 @@ export default function NewsRail() {
             <div className="flex items-center justify-between px-4 pt-4 pb-2">
                 <div className="flex items-center gap-2">
                     <span className="relative flex h-2 w-2">
-                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75" />
-                        <span className="relative inline-flex rounded-full h-2 w-2 bg-cyan-400" />
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-violet-400 opacity-75" />
+                        <span className="relative inline-flex rounded-full h-2 w-2 bg-violet-400" />
                     </span>
                     <h2 className="text-lg font-semibold">Market Feed</h2>
                 </div>
@@ -94,7 +94,7 @@ export default function NewsRail() {
                         onClick={() => setFilter(f.key)}
                         className={`text-xs px-2.5 py-1 rounded-full border transition ${
                             filter === f.key
-                                ? "border-cyan-400 text-cyan-400 bg-cyan-400/10"
+                                ? "border-violet-400 text-violet-400 bg-violet-400/10"
                                 : "border-zinc-700 text-zinc-400 hover:border-zinc-600"
                         }`}
                     >
@@ -143,7 +143,7 @@ export default function NewsRail() {
                             rel="noopener noreferrer"
                             className="flex gap-3 py-2.5 px-2 -mx-2 rounded-lg hover:bg-zinc-800/60 transition group"
                         >
-                            <Icon size={14} className="mt-0.5 shrink-0 text-zinc-500 group-hover:text-cyan-400" />
+                            <Icon size={14} className="mt-0.5 shrink-0 text-zinc-500 group-hover:text-violet-400" />
                             <div className="min-w-0 flex-1">
                                 <p className="text-sm text-zinc-200 leading-snug line-clamp-2">
                                     {item.headline}

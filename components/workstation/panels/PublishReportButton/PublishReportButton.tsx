@@ -50,7 +50,7 @@ export default function PublishReportButton({ research }: WorkstationPanelProps)
                     href={xIntent}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="rounded-lg bg-cyan-500 px-3 py-2 text-xs font-semibold text-black hover:bg-cyan-400"
+                    className="rounded-lg bg-violet-600 px-3 py-2 text-xs font-semibold text-white hover:bg-violet-500"
                 >
                     Share on X
                 </a>

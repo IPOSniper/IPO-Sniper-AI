@@ -20,7 +20,7 @@ const SESSION_LABEL: Record<string, string> = {
 };
 
 const SESSION_COLOR: Record<string, string> = {
-    bmo: "bg-cyan-950 text-cyan-400 border-cyan-900",
+    bmo: "bg-violet-950 text-violet-400 border-violet-900",
     amc: "bg-violet-950 text-violet-400 border-violet-900",
     dmh: "bg-amber-950 text-amber-400 border-amber-900",
     unknown: "bg-zinc-900 text-zinc-500 border-zinc-800",
@@ -58,7 +58,7 @@ export default function UpcomingEarnings() {
     return (
         <section className="rounded-xl border border-zinc-800 bg-zinc-900/60 p-4">
             <div className="flex items-center gap-2 mb-3">
-                <CalendarClock size={16} className="text-cyan-400" />
+                <CalendarClock size={16} className="text-violet-400" />
                 <h2 className="text-lg font-semibold text-white">Upcoming Earnings</h2>
                 {!loading && available && items.length > 0 && (
                     <span className="ml-auto text-xs text-zinc-500">{items.length} this week</span>
@@ -86,7 +86,7 @@ export default function UpcomingEarnings() {
                             className="flex items-center justify-between gap-2 rounded-lg border border-transparent bg-zinc-950/60 px-3 py-2.5 hover:border-zinc-700 hover:bg-zinc-800/60 transition group"
                         >
                             <div className="flex min-w-0 items-center gap-2.5">
-                                <span className="text-sm font-semibold text-zinc-200 group-hover:text-cyan-400">
+                                <span className="text-sm font-semibold text-zinc-200 group-hover:text-violet-400">
                                     {item.symbol}
                                 </span>
                                 <span className="text-xs text-zinc-500 whitespace-nowrap">
