@@ -1,25 +1,41 @@
+import Image from "next/image";
 import { WorkstationPanelProps } from "../contracts/WorkstationPanelProps";
 
 /**
- * Option 3 from the committee-avatar decision: premium-feeling
- * visual avatars, but every one explicitly labeled "AI [Role]", plus
- * a prominent, unmissable disclosure banner that these are AI
- * personas, not real people. This directly supersedes the earlier
- * pure-abstract-icon version of this component -- see git history
- * for that decision, and docs/IPO_SNIPER_OS.md, which should be
- * updated to reflect this refinement.
+ * Final revision of the committee-avatar decision: real submitted
+ * photos, cropped from the provided committee board image, used as
+ * the avatar -- but the fictional human names (Lina Park, Sarah
+ * Miller, etc.) are never rendered anywhere. Only "AI [Role]" is
+ * shown, matching each real analyst's actual function in
+ * committee.reports. This is the specific instruction: use the
+ * submitted avatars, omit the names, use the job description as the
+ * representation instead.
  *
- * IMPORTANT LIMITATION, stated plainly: there's no image-generation
- * or photo tooling available to produce or host actual photorealistic
- * headshots, so these avatars are gradient-styled initials, not
- * photos. That's not a compromise on the goal here -- Option 3's
- * actual requirement is "clearly AI, not ambiguous," and a stylized
- * avatar next to an explicit "AI [Role]" label satisfies that better
- * than a photorealistic face would, which is closer to the exact
- * ambiguity Option 1 was rejected for. If real photo assets are
- * added later, the "AI" label and the disclosure banner below must
- * stay -- they're the actual requirement, the avatar style is not.
+ * The prominent "not real people" disclosure stays -- a real photo
+ * next to only a role label (no name) is closer to a stock-photo
+ * illustration convention (like a generic "customer support"
+ * icon using a photo) than to presenting an individual identity, but
+ * the disclosure is what actually removes the ambiguity, not the
+ * absence of a name alone. Keeping it is not optional.
+ *
+ * There are 12 available photos (one board member, "Founder &
+ * Chairman", was excluded -- that role isn't an AI analyst persona
+ * at all). committee.reports can have more or fewer real analysts
+ * than 12, so photos are assigned deterministically by a hash of the
+ * real analyst name -- stable across reloads, not random, and cycles
+ * through the available 12 if there are more analysts than photos.
  */
+
+const PHOTOS = [
+    "lina", "sarah", "jasmine", "priya", "marcus_j",
+    "arjun", "chris", "kenji", "declan", "olivia", "ethan", "mei",
+];
+
+function photoFor(name: string): string {
+    let hash = 0;
+    for (let i = 0; i < name.length; i++) hash = (hash * 31 + name.charCodeAt(i)) >>> 0;
+    return `/committee/${PHOTOS[hash % PHOTOS.length]}.png`;
+}
 
 const RECOMMENDATION_COLOR: Record<string, string> = {
     STRONG_BUY: "#16D47B",
@@ -37,23 +53,6 @@ const RECOMMENDATION_LABEL: Record<string, string> = {
     SELL: "SELL",
 };
 
-/** Deterministic per-analyst gradient, keyed off the real analyst name so it's stable across renders/refreshes, not random. */
-const GRADIENTS = [
-    "from-violet-600 to-indigo-700",
-    "from-blue-600 to-cyan-700",
-    "from-emerald-600 to-teal-700",
-    "from-amber-600 to-orange-700",
-    "from-rose-600 to-pink-700",
-    "from-fuchsia-600 to-purple-700",
-    "from-sky-600 to-blue-700",
-];
-
-function gradientFor(name: string): string {
-    let hash = 0;
-    for (let i = 0; i < name.length; i++) hash = (hash * 31 + name.charCodeAt(i)) >>> 0;
-    return GRADIENTS[hash % GRADIENTS.length];
-}
-
 export default function CommitteeAvatarRow({ research }: WorkstationPanelProps) {
     const { committee } = research;
     const votingAnalysts = committee.reports.filter(r => r.confidence > 0);
@@ -70,9 +69,6 @@ export default function CommitteeAvatarRow({ research }: WorkstationPanelProps) 
                 <span className="text-xs text-emerald-400">Live</span>
             </div>
 
-            {/* The actual requirement from the Option 3 decision — not
-                fine print, not collapsible, always visible above the
-                avatars themselves. */}
             <p className="mb-4 rounded-md border border-violet-900/40 bg-violet-950/20 px-3 py-1.5 text-xs text-violet-300">
                 These are AI analyst personas, not real people — each represents a specialized research process that contributes evidence to the committee&apos;s recommendation.
             </p>
@@ -81,19 +77,22 @@ export default function CommitteeAvatarRow({ research }: WorkstationPanelProps) 
                 {committee.reports.map(report => {
                     const hasOpinion = report.confidence > 0;
                     const color = hasOpinion ? (RECOMMENDATION_COLOR[report.recommendation] ?? "#8A8FA3") : "#3F3F46";
-                    const gradient = gradientFor(report.analyst);
                     return (
                         <div key={report.analyst} className="flex w-24 flex-col items-center text-center">
                             <div
-                                className="flex h-14 w-14 items-center justify-center rounded-full border-2 bg-gradient-to-br"
+                                className="relative h-14 w-14 overflow-hidden rounded-full border-2"
                                 style={{ borderColor: color, opacity: hasOpinion ? 1 : 0.4 }}
                             >
-                                <div className={`flex h-full w-full items-center justify-center rounded-full bg-gradient-to-br ${gradient}`}>
-                                    <span className="text-xs font-bold text-white">
-                                        {report.analyst.split(" ")[0].slice(0, 2).toUpperCase()}
-                                    </span>
-                                </div>
+                                <Image
+                                    src={photoFor(report.analyst)}
+                                    alt={`AI ${report.analyst}`}
+                                    fill
+                                    sizes="56px"
+                                    className="object-cover"
+                                />
                             </div>
+                            {/* Only "AI [Role]" — the underlying photo's fictional
+                                human name is never rendered. */}
                             <span className="mt-1.5 text-[10px] font-medium leading-tight text-zinc-300">
                                 AI {report.analyst}
                             </span>

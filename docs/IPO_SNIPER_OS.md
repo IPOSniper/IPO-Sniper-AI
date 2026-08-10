@@ -149,15 +149,14 @@ Naming: the "Hedge Fund" page is being reconsidered — that name carries
 regulatory/expectation baggage for what's currently a research/demo view.
 Candidates: "Institutional Research" or "Strategy Lab."
 
-Committee UI (refined, superseding the earlier "abstract icon only"
-version): visual avatars are fine and can be premium/gradient-styled —
-what's non-negotiable is that every label explicitly says "AI [Role]"
-(never a bare human-sounding name + role, e.g. "AI Revenue Analyst" not
-"Marcus Williams, Revenue Analyst"), and a prominent, always-visible
-disclosure states these are AI personas, not real people. Photorealistic
-human photos are still out — an actual photo next to an "AI"-labeled
-name is the exact ambiguity this rule exists to prevent, even with the
-label present.
+Committee UI (final revision): real submitted photos are used as avatars
+(cropped from the provided committee board image, stored in
+`public/committee/`), but the underlying fictional human names are never
+rendered anywhere in the app — only "AI [Role]" is shown, assigned
+deterministically per real analyst. The prominent, always-visible
+disclosure that these are AI personas, not real people, remains
+non-negotiable regardless of avatar style — it's what actually removes
+the ambiguity, not the absence of a name by itself.
 
 **Runtime infrastructure gap, dev vs. production:**
 
