@@ -115,6 +115,52 @@ function describePattern(quotes: Record<string, Quote>): string | null {
     return "Markets are mixed today, without a clear risk-on or risk-off pattern across equities and safe-haven assets.";
 }
 
+/**
+ * Real, computed directly from the same quotes already fetched for
+ * the index row above — % of tracked instruments up vs down today.
+ * Zero new API calls, zero interpretation layered on top.
+ */
+function marketBreadth(quotes: Record<string, Quote>): { upCount: number; downCount: number; upPercent: number } | null {
+    const entries = Object.values(quotes);
+    if (entries.length === 0) return null;
+    const upCount = entries.filter(q => q.changePercent >= 0).length;
+    const downCount = entries.length - upCount;
+    return { upCount, downCount, upPercent: Math.round((upCount / entries.length) * 100) };
+}
+
+/**
+ * Short sentiment label + a 0-100 gauge position, derived from the
+ * EXACT same branching logic as describePattern() so the gauge and
+ * the paragraph can never contradict each other — this is one
+ * classification computed once, presented two ways.
+ */
+function sentimentGauge(quotes: Record<string, Quote>): { label: string; position: number; color: string } | null {
+    const equities = ["DIA", "SPY", "QQQ", "IWM"].map(s => quotes[s]).filter(Boolean) as Quote[];
+    const gold = quotes.GLD;
+    const bonds = quotes.TLT;
+    if (equities.length === 0) return null;
+
+    const avgEquity = equities.reduce((sum, q) => sum + q.changePercent, 0) / equities.length;
+    const equitiesDown = avgEquity < -0.05;
+    const equitiesUp = avgEquity > 0.05;
+    const goldUp = gold ? gold.changePercent > 0.5 : false;
+    const bondsUp = bonds ? bonds.changePercent > 0.1 : false;
+
+    if (equitiesDown && (goldUp || bondsUp)) return { label: "Risk-off", position: 15, color: "#F04452" };
+    if (equitiesUp && !goldUp) return { label: "Risk-on", position: 85, color: "#16D47B" };
+    if (equitiesDown) return { label: "Cautious", position: 35, color: "#F5A524" };
+    return { label: "Mixed", position: 50, color: "#F5A524" };
+}
+
+const CONCEPT_LIBRARY: Array<{ term: string; definition: string }> = [
+    { term: "Risk-on / Risk-off", definition: "Shorthand for whether investors are broadly seeking riskier assets (stocks, small-caps) or rotating into safer ones (gold, long bonds, cash)." },
+    { term: "Basis point (bp)", definition: "1/100th of a percentage point. A move from 4.00% to 4.25% is \"25 basis points\" — more precise than percentages for small rate changes." },
+    { term: "Market breadth", definition: "How many individual instruments are participating in a move, not just the headline index number — a rally on narrow breadth reads differently than one where almost everything is up." },
+    { term: "Volatility (VIX)", definition: "The market's expectation of how much the S&P 500 will swing over the next 30 days, priced from options. Often called the \"fear gauge.\"" },
+    { term: "Safe haven", definition: "An asset investors rotate into during uncertainty because it's expected to hold value — gold and long-dated government bonds are the classic examples." },
+    { term: "Yield", definition: "The return an investor earns on a bond. Yields rise when bond prices fall, and vice versa — they move in opposite directions." },
+];
+
 export default function MarketPulseSection() {
     const [data, setData] = useState<Response | null>(null);
     const [loading, setLoading] = useState(true);
@@ -168,6 +214,37 @@ export default function MarketPulseSection() {
                     security.
                 </span>
             </div>
+
+            {/* Sentiment gauge + market breadth — both computed directly
+                from the same quotes fetched for the index row below,
+                no new data source, no AI call. Real numbers, not the
+                mockup's decorative arc — a plain bar and a percentage. */}
+            {!loading && data && Object.keys(data.quotes).length > 0 && (
+                <div className="grid gap-3 sm:grid-cols-2">
+                    {sentimentGauge(data.quotes) && (
+                        <div className="flex items-center justify-between rounded-xl border border-zinc-800 bg-zinc-900 p-4">
+                            <span className="text-sm text-zinc-400">Market sentiment</span>
+                            <span className="text-lg font-semibold" style={{ color: sentimentGauge(data.quotes)!.color }}>
+                                {sentimentGauge(data.quotes)!.label}
+                            </span>
+                        </div>
+                    )}
+                    {marketBreadth(data.quotes) && (
+                        <div className="rounded-xl border border-zinc-800 bg-zinc-900 p-4">
+                            <div className="mb-1.5 flex items-center justify-between text-xs text-zinc-500">
+                                <span>{marketBreadth(data.quotes)!.upCount} of {Object.keys(data.quotes).length} instruments up</span>
+                                <span>{marketBreadth(data.quotes)!.upPercent}%</span>
+                            </div>
+                            <div className="flex h-2 w-full overflow-hidden rounded-full bg-red-950">
+                                <div
+                                    className="h-full bg-emerald-500 transition-all duration-700"
+                                    style={{ width: `${marketBreadth(data.quotes)!.upPercent}%` }}
+                                />
+                            </div>
+                        </div>
+                    )}
+                </div>
+            )}
 
             {loading && (
                 <div className="rounded-xl border border-zinc-800 bg-zinc-900 p-8 text-center text-sm text-zinc-500">
@@ -390,6 +467,40 @@ export default function MarketPulseSection() {
                             </li>
                         ))}
                     </ul>
+                </div>
+            )}
+
+            {!loading && data && Object.keys(data.quotes).length > 0 && (
+                <div className="rounded-xl border border-zinc-800 bg-zinc-900 p-4">
+                    <h3 className="text-sm font-semibold text-zinc-200 mb-3">Concept Library</h3>
+                    <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                        {CONCEPT_LIBRARY.map(c => (
+                            <div key={c.term}>
+                                <p className="text-sm font-medium text-violet-300">{c.term}</p>
+                                <p className="mt-0.5 text-xs text-zinc-400">{c.definition}</p>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            )}
+
+            {!loading && data && Object.keys(data.quotes).length > 0 && (
+                <div className="rounded-xl border border-zinc-800 bg-zinc-900 p-4">
+                    <h3 className="text-sm font-semibold text-zinc-200 mb-3">Related Reading</h3>
+                    <div className="grid gap-2 sm:grid-cols-2">
+                        <a
+                            href="/workstation"
+                            className="flex items-center gap-2 rounded-lg border border-zinc-800 bg-zinc-950 px-3 py-2 text-sm text-zinc-300 hover:border-violet-700 hover:text-white transition"
+                        >
+                            Research a specific ticker in the Workstation
+                        </a>
+                        <a
+                            href="/watchlist"
+                            className="flex items-center gap-2 rounded-lg border border-zinc-800 bg-zinc-950 px-3 py-2 text-sm text-zinc-300 hover:border-violet-700 hover:text-white transition"
+                        >
+                            See how today's move affects your watchlist
+                        </a>
+                    </div>
                 </div>
             )}
 
