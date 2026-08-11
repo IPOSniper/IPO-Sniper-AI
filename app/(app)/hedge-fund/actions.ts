@@ -2,7 +2,8 @@
 
 import { createClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/client";
-import { PortfolioRiskAggregator, type PortfolioRiskReport } from "@/engine/portfolio/PortfolioRiskAggregator";
+import { PortfolioRiskAggregator, type PortfolioRiskReport, type PortfolioPosition } from "@/engine/portfolio/PortfolioRiskAggregator";
+import { AlpacaPaperTradingProvider } from "@/engine/trading/providers/AlpacaPaperTradingProvider";
 
 export interface PositionRow {
     id: string;
@@ -148,24 +149,50 @@ export interface PortfolioRiskResult {
  * are no positions yet, or the user isn't signed in — the page
  * decides how to render each case instead of catching an exception.
  */
+/**
+ * Real fix: this previously only ever analyzed manually-entered
+ * "Research-Based Positions" -- which meant real Alpaca paper
+ * positions (with real P/L) never had portfolio risk calculated
+ * against them at all, since they're stored/fetched through a
+ * completely separate path. Now combines both real sources into one
+ * risk view. Deliberately NOT deduplicated if the same ticker
+ * appears in both lists -- silently merging two positions with
+ * different real cost bases would be guessing at how the user wants
+ * them combined, not a decision to make silently. Each shows as its
+ * own line item; the user can remove the manual entry if it's meant
+ * to represent the same holding as an Alpaca position.
+ */
 export async function getPortfolioRisk(): Promise<PortfolioRiskResult> {
 
-    const positions = await getPositions();
+    const manualPositions = await getPositions();
 
-    if (positions.length === 0) {
+    let alpacaPositions: PortfolioPosition[] = [];
+    try {
+        const tradingPositions = await new AlpacaPaperTradingProvider().getPositions();
+        alpacaPositions = tradingPositions.map(p => ({
+            ticker: p.ticker,
+            shares: p.qty,
+            costBasis: p.avgEntryPrice,
+        }));
+    } catch {
+        // Alpaca not configured/reachable -- fall back to manual
+        // positions only, same as before this fix, rather than
+        // failing the whole risk view over a real Alpaca outage.
+    }
+
+    const combined: PortfolioPosition[] = [
+        ...alpacaPositions,
+        ...manualPositions.map(p => ({ ticker: p.ticker, shares: p.shares, costBasis: p.costBasis })),
+    ];
+
+    if (combined.length === 0) {
         return { success: false, error: "No positions yet." };
     }
 
     try {
         const aggregator = new PortfolioRiskAggregator();
 
-        const report = await aggregator.build(
-            positions.map(p => ({
-                ticker: p.ticker,
-                shares: p.shares,
-                costBasis: p.costBasis,
-            }))
-        );
+        const report = await aggregator.build(combined);
 
         return { success: true, report };
     } catch (err) {

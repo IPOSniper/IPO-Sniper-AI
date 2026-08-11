@@ -59,6 +59,9 @@ export default async function HedgeFundPage() {
 
             <div className="mb-6 max-w-xl">
                 <h2 className="mb-3 text-lg font-semibold">Research-Based Positions</h2>
+                <p className="mb-2 text-xs text-zinc-500">
+                    For tracking positions held elsewhere (a real brokerage, etc.) — real Alpaca paper positions above already feed the risk view below on their own.
+                </p>
                 <PositionManager positions={positions} />
             </div>
 
@@ -68,7 +71,7 @@ export default async function HedgeFundPage() {
                 <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-4">
                     <p className="text-sm text-zinc-400">
                         {positions.length === 0
-                            ? "Add a position above to see portfolio risk."
+                            ? "No positions yet — open a trade above, or add a manually-tracked position, to see portfolio risk."
                             : (risk.error ?? "Portfolio risk analysis is unavailable.")}
                     </p>
                 </div>
