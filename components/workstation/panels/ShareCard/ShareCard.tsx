@@ -2,6 +2,7 @@ import { forwardRef } from "react";
 import { WorkstationPanelProps } from "../../contracts/WorkstationPanelProps";
 import { excludeAnalysts, recommendationToRating, strengthLabel } from "../../shared/scorePresentation";
 import { buildCommitteePhotoAssignments } from "../committeeAvatars";
+import { SHARE_CARD_DISCLOSURE } from "@/config/shareCardDisclosure";
 import { BarChart, Bar, ResponsiveContainer } from "recharts";
 
 const RATING_STYLE: Record<string, string> = {
@@ -63,7 +64,16 @@ const ShareCard = forwardRef<HTMLDivElement, WorkstationPanelProps>(
         const { quote, financialStatements } = research.report.evidence;
         const company = research.report.evidence.company;
 
-        const safe = excludeAnalysts(committee, ["News Analyst"]);
+        // News is excluded from the vote/score aggregate unless BOTH
+        // includeNewsVote and includeNewsScore are true -- you can't
+        // meaningfully include a vote without its confidence, or vice
+        // versa. Today, both default false, so this list is
+        // ["News Analyst"], identical to before this config existed.
+        const excludedFromAggregate = (SHARE_CARD_DISCLOSURE.includeNewsVote && SHARE_CARD_DISCLOSURE.includeNewsScore)
+            ? []
+            : ["News Analyst"];
+
+        const safe = excludeAnalysts(committee, excludedFromAggregate);
         const rating = recommendationToRating(safe.recommendation);
 
         const statements = financialStatements.statements.verified
@@ -73,7 +83,7 @@ const ShareCard = forwardRef<HTMLDivElement, WorkstationPanelProps>(
         // Real per-analyst scores, excluding News -- replaces the
         // revenue chart with something that actually explains the
         // recommendation, per direct feedback.
-        const scoredAnalysts = committee.reports.filter(r => r.confidence > 0 && r.analyst !== "News Analyst");
+        const scoredAnalysts = committee.reports.filter(r => r.confidence > 0 && !excludedFromAggregate.includes(r.analyst));
         const photoAssignments = buildCommitteePhotoAssignments(scoredAnalysts.map(r => r.analyst));
         const scoreChartData = scoredAnalysts
             .map(r => ({ name: r.analyst.replace(" Analyst", ""), score: r.score }))
@@ -87,7 +97,7 @@ const ShareCard = forwardRef<HTMLDivElement, WorkstationPanelProps>(
         const grossMarginPct = latest && latest.revenue !== 0 ? (latest.grossProfit / latest.revenue) * 100 : null;
         const debtToEquity = latest && latest.shareholdersEquity !== 0 ? latest.debt / latest.shareholdersEquity : null;
 
-        const votingAnalysts = committee.reports.filter(r => r.confidence > 0 && r.analyst !== "News Analyst");
+        const votingAnalysts = committee.reports.filter(r => r.confidence > 0 && !excludedFromAggregate.includes(r.analyst));
         const avgEvidenceStrength = votingAnalysts.length > 0
             ? Math.round(votingAnalysts.reduce((s, r) => s + r.evidenceStrength, 0) / votingAnalysts.length)
             : null;
@@ -95,6 +105,25 @@ const ShareCard = forwardRef<HTMLDivElement, WorkstationPanelProps>(
         const bullishAnalysts = votingAnalysts.filter(r => r.recommendation === "STRONG_BUY" || r.recommendation === "BUY");
         const bearishAnalysts = votingAnalysts.filter(r => r.recommendation === "REDUCE" || r.recommendation === "SELL");
         const holdAnalysts = votingAnalysts.length - bullishAnalysts.length - bearishAnalysts.length;
+
+        // Separate from vote inclusion: even if a future config change
+        // lets News Analyst's vote count toward the aggregate, its
+        // written thesis text only appears here if includeNewsReasoning
+        // is also true -- and even then, any headline citation inside
+        // that text (see NewsAnalyst.ts's "Most recent: ..." clause) is
+        // stripped unless includeLicensedHeadlines is ALSO true. Today,
+        // with every flag false, this only ever removes text that
+        // wouldn't have been visible anyway (News is excluded from
+        // votingAnalysts entirely) -- written this way so toggling
+        // includeNewsReasoning/includeLicensedHeadlines later works
+        // correctly without touching this rendering logic again.
+        function displayThesis(analyst: string, thesis: string): string {
+            if (analyst === "News Analyst" && !SHARE_CARD_DISCLOSURE.includeNewsReasoning) return "";
+            if (analyst === "News Analyst" && !SHARE_CARD_DISCLOSURE.includeLicensedHeadlines) {
+                return thesis.replace(/\s*Most recent:.*$/, "");
+            }
+            return thesis;
+        }
 
         const scenarios = investmentDecision?.scenarios;
 
@@ -232,18 +261,24 @@ const ShareCard = forwardRef<HTMLDivElement, WorkstationPanelProps>(
                     <div className="grid grid-cols-2 gap-3">
                         <div className="rounded-lg border border-emerald-900/40 bg-[#0D111B] p-3">
                             <p className="mb-2 text-[10px] font-semibold uppercase tracking-wide text-emerald-400">🐂 Bull case</p>
-                            {bullishAnalysts.slice(0, 3).map(a => (
+                            {bullishAnalysts
+                                .filter(a => displayThesis(a.analyst, a.thesis) !== "")
+                                .slice(0, 3)
+                                .map(a => (
                                 <p key={a.analyst} className="mb-1.5 text-[11px] leading-snug text-zinc-300">
-                                    <span className="text-zinc-500">{a.analyst}: </span>{a.thesis}
+                                    <span className="text-zinc-500">{a.analyst}: </span>{displayThesis(a.analyst, a.thesis)}
                                 </p>
                             ))}
                             {bullishAnalysts.length === 0 && <p className="text-[11px] text-zinc-600">No analysts currently bullish.</p>}
                         </div>
                         <div className="rounded-lg border border-red-900/40 bg-[#0D111B] p-3">
                             <p className="mb-2 text-[10px] font-semibold uppercase tracking-wide text-red-400">🐻 Bear case</p>
-                            {bearishAnalysts.slice(0, 3).map(a => (
+                            {bearishAnalysts
+                                .filter(a => displayThesis(a.analyst, a.thesis) !== "")
+                                .slice(0, 3)
+                                .map(a => (
                                 <p key={a.analyst} className="mb-1.5 text-[11px] leading-snug text-zinc-300">
-                                    <span className="text-zinc-500">{a.analyst}: </span>{a.thesis}
+                                    <span className="text-zinc-500">{a.analyst}: </span>{displayThesis(a.analyst, a.thesis)}
                                 </p>
                             ))}
                             {bearishAnalysts.length === 0 && <p className="text-[11px] text-zinc-600">No analysts currently bearish.</p>}
@@ -295,7 +330,7 @@ const ShareCard = forwardRef<HTMLDivElement, WorkstationPanelProps>(
                     <p className="mb-1 font-medium text-zinc-500">Evidence Sources</p>
                     <p>✓ SEC EDGAR &nbsp; ✓ Exchange Data (Finnhub) &nbsp; ✓ Financial Statements &nbsp; ✓ AI Reasoning Engine</p>
                     <p className="mt-2">AI-synthesized research, not investment advice. Data may be incomplete — verify independently before acting. IPO Sniper AI is not a registered investment advisor.</p>
-                    <p className="mt-1">ⓘ Recommendation excludes News Analyst — NewsAPI.org and Currents API free-tier terms restrict public/production redistribution of their data.</p>
+                    <p className="mt-1">ⓘ Public Research Snapshot — certain proprietary and licensed research inputs are omitted from this public report.</p>
                 </div>
             </div>
         );
