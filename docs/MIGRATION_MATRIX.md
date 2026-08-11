@@ -79,3 +79,11 @@ New `engine/quant/QuantStrategist.ts` + `QuantStrategistPanel.tsx`, wired onto t
 Honesty discipline maintained: the DTE/delta/profit/stop numbers are clearly labeled as standard conventions, not AI-optimized-for-this-ticker values — no fabricated "strategy confidence" score exists separate from the real committee confidence. Reuses the exact same `ResearchService`/Committee pipeline as every other page — no duplicate research logic for Quant.
 
 Phases 2-6 from the roadmap (Contract Selection Engine, Risk Committee approval flow, Execution Engine, Position Monitor, Learning Engine) are NOT built — Phase 1 only.
+
+## Quant Strategist Phase 2: real contract selection + execution (added this session)
+
+Extended Phase 1 (trade plan) with real contract matching: `QuantStrategist.selectContract()` filters the real live Alpaca chain to contracts matching the plan's real target DTE/delta ranges, picks the closest-to-midpoint match, returns `null` (not a guess) if nothing real qualifies. `suggestQuantity()` derives a starting quantity from real account equity × the plan's standard risk %. `executeTradePlan()` reuses the EXACT SAME `placeOrder`/RiskEngine path the manual order form uses — RiskEngine's real, portfolio-specific check remains the final authority regardless of what Quant suggests. One explicit click required; nothing auto-executes.
+
+Also fixed in this round: `PortfolioRiskPanel` was analyzing only the manual "Research-Based Positions" list — real Alpaca positions (with real P/L) never had portfolio risk calculated against them. Now combines both real sources.
+
+Still not built: Phase 3 (Risk Committee approval shown before execution, distinct from RiskEngine's order-time check), Phase 4 (fully automated execution pipeline), Phase 5 (live position monitoring — Greeks, thesis-still-valid checks), Phase 6 (trade outcome storage / Learning Engine), and a real deployed scheduler.

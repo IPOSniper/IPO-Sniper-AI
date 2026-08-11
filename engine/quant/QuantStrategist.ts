@@ -1,5 +1,6 @@
 import type { CommitteeReport } from "../committee/contracts/CommitteeReport";
 import { excludeAnalysts } from "../../components/workstation/shared/scorePresentation";
+import type { OptionContract } from "../trading/providers/AlpacaOptionsProvider";
 
 /**
  * Phase 1 of the Quant roadmap: converts real committee output into
@@ -115,5 +116,66 @@ export class QuantStrategist {
             reasoning,
             ...STANDARD_PARAMS,
         };
+    }
+
+    /**
+     * Real contract matching -- takes a real option chain (already
+     * fetched from Alpaca) and the plan's real target DTE/delta
+     * ranges, picks the best real match. No fabrication: if nothing
+     * in the real chain falls inside the target ranges, this returns
+     * null rather than picking something outside the plan's own
+     * stated criteria and pretending it matches.
+     *
+     * "Best" = closest to the CENTER of both target ranges
+     * (midpoint DTE, midpoint |delta|) among contracts that fall
+     * within both ranges -- not just the first match found.
+     */
+    selectContract(plan: TradePlan, chain: OptionContract[], now: Date = new Date()): OptionContract | null {
+        if (plan.direction === "none" || !plan.targetDteRange || !plan.targetDeltaRange) return null;
+
+        const [minDte, maxDte] = plan.targetDteRange;
+        const [minDelta, maxDelta] = plan.targetDeltaRange;
+        const midDte = (minDte + maxDte) / 2;
+        const midDelta = (minDelta + maxDelta) / 2;
+
+        const candidates = chain.filter(c => {
+            if (c.type !== plan.direction) return false;
+            if (c.delta === null) return false;
+
+            const dte = Math.round((new Date(c.expirationDate).getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+            if (dte < minDte || dte > maxDte) return false;
+
+            const absDelta = Math.abs(c.delta);
+            if (absDelta < minDelta || absDelta > maxDelta) return false;
+
+            return true;
+        });
+
+        if (candidates.length === 0) return null;
+
+        return candidates.reduce((best, c) => {
+            const dte = (new Date(c.expirationDate).getTime() - now.getTime()) / (1000 * 60 * 60 * 24);
+            const bestDte = (new Date(best.expirationDate).getTime() - now.getTime()) / (1000 * 60 * 60 * 24);
+            const score = Math.abs(dte - midDte) + Math.abs(Math.abs(c.delta!) - midDelta) * 100; // weight delta distance more, it's a 0-1 scale vs. DTE's day scale
+            const bestScore = Math.abs(bestDte - midDte) + Math.abs(Math.abs(best.delta!) - midDelta) * 100;
+            return score < bestScore ? c : best;
+        });
+    }
+
+    /**
+     * Real suggested quantity from the plan's real risk % and real
+     * account equity -- NOT a replacement for RiskEngine's own check
+     * at order submission, which remains the actual authority. This
+     * is a reasonable starting point so the user isn't staring at a
+     * blank quantity field, nothing more.
+     */
+    suggestQuantity(plan: TradePlan, contract: OptionContract, accountEquity: number): number {
+        if (!plan.suggestedMaxRiskPercent) return 1;
+        const premiumPerContract = (contract.askPrice ?? contract.lastPrice ?? 0) * 100; // real 100x multiplier
+        if (premiumPerContract <= 0) return 1;
+
+        const riskBudget = accountEquity * (plan.suggestedMaxRiskPercent / 100);
+        const qty = Math.floor(riskBudget / premiumPerContract);
+        return Math.max(1, qty);
     }
 }
