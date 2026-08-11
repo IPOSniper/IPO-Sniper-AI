@@ -3,7 +3,6 @@ import { WorkstationPanelProps } from "../../contracts/WorkstationPanelProps";
 import { excludeAnalysts, recommendationToRating, strengthLabel } from "../../shared/scorePresentation";
 import { buildCommitteePhotoAssignments } from "../committeeAvatars";
 import { SHARE_CARD_DISCLOSURE } from "@/config/shareCardDisclosure";
-import { BarChart, Bar, ResponsiveContainer } from "recharts";
 
 const RATING_STYLE: Record<string, string> = {
     Bullish: "text-emerald-400",
@@ -135,16 +134,17 @@ const ShareCard = forwardRef<HTMLDivElement, WorkstationPanelProps>(
             >
                 <div className="flex items-center justify-between">
                     <div>
-                        <p className="text-xs uppercase tracking-widest text-violet-400">Institutional Research Snapshot</p>
+                        <p className="text-xs uppercase tracking-widest text-violet-400">Committee Research Snapshot</p>
                         <h1 className="text-2xl font-bold text-white">
                             {company.name} <span className="text-zinc-500">({company.ticker})</span>
                         </h1>
                     </div>
                     {quote.price.verified && (
                         <div className="text-right">
+                            <p className="text-[10px] uppercase tracking-wide text-zinc-500">Current Price</p>
                             <p className="text-xl font-bold text-white">${quote.price.value.toFixed(2)}</p>
                             <p className={quote.changePercent.value >= 0 ? "text-sm text-emerald-400" : "text-sm text-red-400"}>
-                                {quote.changePercent.value >= 0 ? "+" : ""}{quote.changePercent.value.toFixed(2)}%
+                                {quote.changePercent.value >= 0 ? "▲" : "▼"} {quote.changePercent.value >= 0 ? "+" : ""}{quote.changePercent.value.toFixed(2)}% Today
                             </p>
                         </div>
                     )}
@@ -165,23 +165,36 @@ const ShareCard = forwardRef<HTMLDivElement, WorkstationPanelProps>(
                     </div>
                 </div>
 
-                {/* Committee avatars -- real photos, real votes, News excluded */}
+                {/* Committee Split -- real agreement %, same computation excludeAnalysts already does */}
                 <div className="rounded-lg border border-zinc-800 bg-[#0D111B] p-3">
-                    <div className="flex flex-wrap justify-center gap-2">
+                    <div className="mb-1.5 flex items-center justify-between text-xs">
+                        <span className="text-zinc-400">Committee Split</span>
+                        <span className="font-semibold text-white">{safe.agreement}% agreement</span>
+                    </div>
+                    <div className="flex h-2.5 w-full overflow-hidden rounded-full bg-zinc-800">
+                        <div className="h-full bg-violet-500" style={{ width: `${safe.agreement}%` }} />
+                    </div>
+                </div>
+
+                {/* Committee avatars -- real photos, real votes, News excluded.
+                    Name + vote are VISIBLE text, not a hover title -- a
+                    static downloaded PNG has no hover state, so a
+                    tooltip-only label would never actually be seen. */}
+                <div className="rounded-lg border border-zinc-800 bg-[#0D111B] p-3">
+                    <div className="flex flex-wrap justify-center gap-x-4 gap-y-2">
                         {scoredAnalysts.map(r => {
                             const photoSrc = photoAssignments.get(r.analyst);
                             const color = VOTE_COLOR[r.recommendation] ?? "#8A8FA3";
                             return (
-                                <div
-                                    key={r.analyst}
-                                    className="h-9 w-9 overflow-hidden rounded-full border-2"
-                                    style={{ borderColor: color }}
-                                    title={`${r.analyst}: ${r.recommendation.replace("_", " ")}`}
-                                >
-                                    {photoSrc && (
-                                        // eslint-disable-next-line @next/next/no-img-element -- off-screen capture, avoiding next/image lazy-load risk
-                                        <img src={photoSrc} alt={r.analyst} className="h-full w-full object-cover" />
-                                    )}
+                                <div key={r.analyst} className="flex w-16 flex-col items-center text-center">
+                                    <div className="h-9 w-9 overflow-hidden rounded-full border-2" style={{ borderColor: color }}>
+                                        {photoSrc && (
+                                            // eslint-disable-next-line @next/next/no-img-element -- off-screen capture, avoiding next/image lazy-load risk
+                                            <img src={photoSrc} alt={r.analyst} className="h-full w-full object-cover" />
+                                        )}
+                                    </div>
+                                    <p className="mt-1 text-[8px] leading-tight text-zinc-500">{r.analyst.replace(" Analyst", "")}</p>
+                                    <p className="text-[8px] font-semibold" style={{ color }}>{r.recommendation.replace("_", " ")}</p>
                                 </div>
                             );
                         })}
@@ -243,15 +256,15 @@ const ShareCard = forwardRef<HTMLDivElement, WorkstationPanelProps>(
                     <div className="flex gap-2 rounded-lg border border-zinc-800 bg-[#0D111B] p-3">
                         <div className="flex-1 rounded-md bg-emerald-950/30 p-2 text-center">
                             <p className="text-sm font-bold text-emerald-400">{scenarios.bull.probability}%</p>
-                            <p className="text-[9px] text-zinc-500">Bull</p>
+                            <p className="text-[9px] text-zinc-500">🐂 Bull</p>
                         </div>
                         <div className="flex-1 rounded-md bg-zinc-800/40 p-2 text-center">
                             <p className="text-sm font-bold text-zinc-300">{scenarios.base.probability}%</p>
-                            <p className="text-[9px] text-zinc-500">Base</p>
+                            <p className="text-[9px] text-zinc-500">⚪ Neutral</p>
                         </div>
                         <div className="flex-1 rounded-md bg-red-950/30 p-2 text-center">
                             <p className="text-sm font-bold text-red-400">{scenarios.bear.probability}%</p>
-                            <p className="text-[9px] text-zinc-500">Bear</p>
+                            <p className="text-[9px] text-zinc-500">🐻 Bear</p>
                         </div>
                     </div>
                 )}
@@ -286,26 +299,48 @@ const ShareCard = forwardRef<HTMLDivElement, WorkstationPanelProps>(
                     </div>
                 )}
 
-                {/* AI reasoning */}
+                {/* Committee Conclusion -- real bullets from the same bull/bear
+                    thesis data already shown above (not new/invented content,
+                    just a skimmable summary of it), ending with the
+                    recommendation restated for anyone who only reads this box. */}
                 <div className="rounded-lg border border-violet-900/40 bg-[#160B3D] p-3.5">
-                    <p className="mb-1.5 text-[10px] font-semibold uppercase tracking-wide text-violet-300">Committee reasoning</p>
-                    <p className="text-xs leading-relaxed text-zinc-200">{committee.summary}</p>
-                    {investmentDecision?.executiveDecision.summary &&
-                        investmentDecision.executiveDecision.summary.trim() !== committee.summary.trim() && (
-                        <p className="mt-2 text-xs leading-relaxed text-zinc-300">{investmentDecision.executiveDecision.summary}</p>
-                    )}
+                    <p className="mb-2 text-[10px] font-semibold uppercase tracking-wide text-violet-300">Committee Conclusion</p>
+                    <div className="space-y-1">
+                        {bullishAnalysts.slice(0, 2).map(a => (
+                            <p key={a.analyst} className="text-xs leading-snug text-emerald-300">✓ {a.thesis}</p>
+                        ))}
+                        {bearishAnalysts.slice(0, 2).map(a => (
+                            <p key={a.analyst} className="text-xs leading-snug text-red-300">✕ {a.thesis}</p>
+                        ))}
+                    </div>
+                    <div className="mt-3 flex items-center justify-between border-t border-violet-900/40 pt-2">
+                        <span className="text-[10px] uppercase tracking-wide text-zinc-500">Final Recommendation</span>
+                        <span className={`text-sm font-black ${RATING_STYLE[rating]}`}>{RATING_HEADLINE[rating]}</span>
+                    </div>
                 </div>
 
-                {/* Real per-analyst score chart -- replaces the revenue chart, actually explains the recommendation */}
+                {/* Real per-analyst score bars -- explains the recommendation.
+                    Deliberately plain CSS/div bars, NOT a recharts
+                    ResponsiveContainer -- that measures its parent via the
+                    DOM to size itself, and this card renders off-screen
+                    (position: fixed, -left-9999px) before being captured
+                    by html-to-image. Off-screen DOM measurement is a real,
+                    known failure mode for that pattern -- likely the exact
+                    cause of the empty chart space reported. Plain bars
+                    have no such dependency. */}
                 {scoreChartData.length > 0 && (
                     <div>
-                        <p className="mb-1 text-xs uppercase tracking-wide text-zinc-500">AI Conviction by Analyst</p>
-                        <div className="h-40 w-full">
-                            <ResponsiveContainer width="100%" height="100%">
-                                <BarChart data={scoreChartData} layout="vertical" margin={{ left: 20 }}>
-                                    <Bar dataKey="score" fill="#8B5CF6" radius={[0, 4, 4, 0]} />
-                                </BarChart>
-                            </ResponsiveContainer>
+                        <p className="mb-2 text-xs uppercase tracking-wide text-zinc-500">AI Conviction by Analyst</p>
+                        <div className="space-y-1.5">
+                            {scoreChartData.map(d => (
+                                <div key={d.name} className="flex items-center gap-2">
+                                    <span className="w-20 shrink-0 text-right text-[10px] text-zinc-400">{d.name}</span>
+                                    <div className="h-3 flex-1 overflow-hidden rounded bg-zinc-800">
+                                        <div className="h-full rounded bg-violet-500" style={{ width: `${Math.max(2, d.score)}%` }} />
+                                    </div>
+                                    <span className="w-7 shrink-0 text-[10px] text-zinc-500">{d.score}</span>
+                                </div>
+                            ))}
                         </div>
                     </div>
                 )}
@@ -325,12 +360,21 @@ const ShareCard = forwardRef<HTMLDivElement, WorkstationPanelProps>(
                     </div>
                 </div>
 
-                {/* Footer -- honest sources, disclosure moved here per direct feedback (not hidden, just not first) */}
-                <div className="border-t border-zinc-800 pt-3 text-xs text-zinc-600">
-                    <p className="mb-1 font-medium text-zinc-500">Evidence Sources</p>
-                    <p>✓ SEC EDGAR &nbsp; ✓ Exchange Data (Finnhub) &nbsp; ✓ Financial Statements &nbsp; ✓ AI Reasoning Engine</p>
-                    <p className="mt-2">AI-synthesized research, not investment advice. Data may be incomplete — verify independently before acting. IPO Sniper AI is not a registered investment advisor.</p>
-                    <p className="mt-1">ⓘ Public Research Snapshot — certain proprietary and licensed research inputs are omitted from this public report.</p>
+                {/* Footer -- branding-forward, sources as a checklist, legal notice smaller and last */}
+                <div className="border-t border-zinc-800 pt-3">
+                    <div className="mb-2 flex items-center justify-between">
+                        <div>
+                            <p className="text-[9px] uppercase tracking-wide text-zinc-600">Powered by</p>
+                            <p className="text-sm font-bold text-violet-300">IPO Sniper AI</p>
+                            <p className="text-[9px] text-zinc-600">AI Research Platform</p>
+                        </div>
+                    </div>
+                    <p className="mb-1 text-[9px] font-medium uppercase tracking-wide text-zinc-500">Sources</p>
+                    <p className="text-[10px] text-zinc-500">✓ SEC EDGAR &nbsp; ✓ Exchange Data &nbsp; ✓ Financial Statements &nbsp; ✓ AI Reasoning Engine</p>
+                    <p className="mt-2 text-[9px] leading-relaxed text-zinc-700">
+                        AI-synthesized research, not investment advice. Data may be incomplete — verify independently before acting. IPO Sniper AI is not a registered investment advisor.
+                        {" "}ⓘ Public Research Snapshot — certain proprietary and licensed research inputs are omitted from this public report.
+                    </p>
                 </div>
             </div>
         );
