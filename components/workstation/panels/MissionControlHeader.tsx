@@ -35,7 +35,7 @@ export default function MissionControlHeader({ research }: WorkstationPanelProps
             </span>
             {avgEvidence !== null && (
                 <span className="text-zinc-500">
-                    Research Confidence <span className="font-semibold text-white">{avgEvidence}%</span>
+                    Evidence Quality <span className="font-semibold text-white">{avgEvidence}%</span>
                 </span>
             )}
             <span className="ml-auto text-zinc-600">

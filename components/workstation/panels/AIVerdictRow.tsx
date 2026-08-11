@@ -47,6 +47,7 @@ export default function AIVerdictRow({ research }: WorkstationPanelProps) {
                     {RECOMMENDATION_LABEL[committee.recommendation] ?? committee.recommendation}
                 </p>
                 <p className="mt-1 text-xs text-zinc-500">{committee.confidence}% confidence · {committee.agreement}% agreement</p>
+                <p className="mt-0.5 text-[10px] text-zinc-600">Full committee (all 15 analysts) — some other views of this research use a News-Analyst-excluded number instead, which may differ from this.</p>
             </div>
 
             <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-4">
