@@ -63,3 +63,11 @@ Real finding: Alpaca (already integrated for paper trading) has a real, document
 Built `AlpacaOptionsProvider.ts` + `OptionsChainPanel.tsx` (real near-the-money call/put for the nearest expiration, wired into the research page's Operations section) — NOT yet live-tested, field names need confirming against a real response.
 
 **This is the data foundation only.** The broader "Adaptive Options Engine" proposal (Price Probability Engine, Volatility Engine, Options Valuation Engine, Strategy Engine, a real Learning Engine comparing predictions to stored trade outcomes, Model Governance) is a real, much larger body of work this does NOT build — it makes that work *possible*, since real options data now exists in this codebase, but every layer above raw data access is unbuilt.
+
+## Options order execution (added this session)
+
+Real finding: options orders go through the SAME Alpaca `/v2/orders` endpoint as equity orders — just with an OCC-format contract symbol instead of a plain ticker. Paper accounts have options trading enabled by default (confirmed via Alpaca's own docs). No new endpoint needed.
+
+Extended `TradeOrderRequest` with `assetType: "equity" | "option"`. **Real correctness fix in `RiskEngine.ts`**: options contracts represent 100 shares of exposure each — every dollar-value calculation now multiplies by `OPTIONS_CONTRACT_MULTIPLIER` (100) when `assetType === "option"`, or every risk check would have silently understated real options risk by 100x. `actions.ts`'s `placeOrder` now routes price lookup correctly — Finnhub for equities, the specific option contract's real bid/ask via `AlpacaOptionsProvider` for options (Finnhub's `/quote` doesn't understand OCC symbols). UI (`PaperTradingPanel.tsx`) got an Asset Type toggle.
+
+NOT yet live-tested. Also NOT built: a contract picker wired to the real `OptionsChainPanel` data — the contract symbol is currently a manually-typed text field, not a dropdown of real available contracts. A real, worthwhile next refinement.

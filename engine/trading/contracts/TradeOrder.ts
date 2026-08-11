@@ -8,12 +8,21 @@
 
 export type OrderSide = "buy" | "sell";
 
+/** Real options contract multiplier -- 1 option contract represents
+ * 100 shares of real exposure. Getting this wrong would mean the
+ * risk engine silently underestimates real dollar risk by 100x for
+ * every options order. */
+export const OPTIONS_CONTRACT_MULTIPLIER = 100;
+
 /** What the app is asking to do, before any risk check. */
 export interface TradeOrderRequest {
+    /** For equity: a plain ticker (e.g. "AAPL"). For options: the real OCC-format contract symbol (e.g. "AAPL260320C00220000") -- same field, since Alpaca's own /v2/orders endpoint treats both identically at the API level. */
     ticker: string;
     side: OrderSide;
-    /** Whole shares only for this stage — no fractional-share math yet. */
+    /** Whole shares for equity, whole contracts for options -- no fractional-share/contract math yet. */
     qty: number;
+    /** Defaults to "equity" for backward compatibility with every existing caller. Options orders MUST set this explicitly -- RiskEngine derives the real 100x contract multiplier from it. */
+    assetType?: "equity" | "option";
     /** Free-text link back to the research/conviction that produced this order, for the audit log. */
     reasoning?: string;
 }

@@ -40,6 +40,7 @@ export default function PaperTradingPanel({
     const router = useRouter();
     const [isPending, startTransition] = useTransition();
     const [ticker, setTicker] = useState("");
+    const [assetType, setAssetType] = useState<"equity" | "option">("equity");
     const [side, setSide] = useState<OrderSide>("buy");
     const [qty, setQty] = useState("");
     const [reasoning, setReasoning] = useState("");
@@ -66,7 +67,7 @@ export default function PaperTradingPanel({
         const qtyNum = Number(qty);
 
         startTransition(async () => {
-            const result = await placeOrder(ticker, side, qtyNum, reasoning || undefined);
+            const result = await placeOrder(ticker, side, qtyNum, reasoning || undefined, undefined, assetType);
 
             if (!result.success) {
                 setMessage({ kind: "error", text: result.error ?? "Order failed." });
@@ -116,7 +117,7 @@ export default function PaperTradingPanel({
 
             <div className="rounded-lg border border-amber-900/50 bg-amber-950/20 p-3">
                 <p className="text-xs text-amber-400">
-                    Paper trading only — Alpaca&apos;s simulated environment, no real money. Orders are market/day orders sized against real live quotes, gated by hard risk limits (max position size, max concurrent positions, daily loss circuit breaker, minimum cash reserve) enforced in RiskEngine before anything reaches Alpaca.
+                    Paper trading only — Alpaca&apos;s simulated environment, no real money. Orders are market/day orders sized against real live quotes, gated by hard risk limits (max position size, max concurrent positions, daily loss circuit breaker, minimum cash reserve) enforced in RiskEngine before anything reaches Alpaca. Options orders are sized at their real 100x contract multiplier — 1 contract represents 100 shares of exposure, not 1.
                 </p>
             </div>
 
@@ -154,12 +155,25 @@ export default function PaperTradingPanel({
                 <h3 className="mb-3 text-sm font-medium text-zinc-300">Place order</h3>
                 <form onSubmit={handleSubmit} className="flex flex-wrap items-end gap-2">
                     <div>
-                        <label className="mb-1 block text-xs text-zinc-500">Ticker</label>
+                        <label className="mb-1 block text-xs text-zinc-500">Asset Type</label>
+                        <select
+                            value={assetType}
+                            onChange={e => setAssetType(e.target.value as "equity" | "option")}
+                            className="rounded-md border border-zinc-700 bg-zinc-950 px-2 py-1 text-sm text-white"
+                        >
+                            <option value="equity">Equity</option>
+                            <option value="option">Option</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label className="mb-1 block text-xs text-zinc-500">
+                            {assetType === "option" ? "Contract Symbol" : "Ticker"}
+                        </label>
                         <input
                             value={ticker}
                             onChange={e => setTicker(e.target.value)}
-                            placeholder="AMD"
-                            className="w-24 rounded-md border border-zinc-700 bg-zinc-950 px-2 py-1 text-sm text-white"
+                            placeholder={assetType === "option" ? "AAPL260320C00220000" : "AMD"}
+                            className={assetType === "option" ? "w-48 rounded-md border border-zinc-700 bg-zinc-950 px-2 py-1 text-sm text-white" : "w-24 rounded-md border border-zinc-700 bg-zinc-950 px-2 py-1 text-sm text-white"}
                             required
                         />
                     </div>
@@ -175,7 +189,9 @@ export default function PaperTradingPanel({
                         </select>
                     </div>
                     <div>
-                        <label className="mb-1 block text-xs text-zinc-500">Qty (shares)</label>
+                        <label className="mb-1 block text-xs text-zinc-500">
+                            {assetType === "option" ? "Qty (contracts)" : "Qty (shares)"}
+                        </label>
                         <input
                             value={qty}
                             onChange={e => setQty(e.target.value)}

@@ -18,6 +18,7 @@
  */
 
 import type { TradeOrderRequest, TradingAccount, TradingPosition } from "../contracts/TradeOrder";
+import { OPTIONS_CONTRACT_MULTIPLIER } from "../contracts/TradeOrder";
 
 export interface RiskLimits {
     /** Max size of any single order, as a fraction of account equity. */
@@ -69,6 +70,12 @@ export class RiskEngine {
             return { allowed: false, reason: "Order quantity must be a positive number.", estimatedOrderValue: null };
         }
 
+        // Real options contract multiplier -- 1 contract = 100 shares
+        // of real exposure. Every dollar-value calculation below MUST
+        // use this, or an options order's real risk is silently
+        // understated by 100x.
+        const contractMultiplier = order.assetType === "option" ? OPTIONS_CONTRACT_MULTIPLIER : 1;
+
         // Daily loss circuit breaker — checked before anything else,
         // so a bad day halts BOTH buys and sells-that-aren't-closing-
         // risk... except closing risk (a sell that reduces or exits
@@ -102,7 +109,7 @@ export class RiskEngine {
                     estimatedOrderValue: null,
                 };
             }
-            return { allowed: true, estimatedOrderValue: estimatedPrice ? estimatedPrice * order.qty : null };
+            return { allowed: true, estimatedOrderValue: estimatedPrice ? estimatedPrice * order.qty * contractMultiplier : null };
         }
 
         // From here down: BUY-side checks only.
@@ -111,7 +118,7 @@ export class RiskEngine {
             return { allowed: false, reason: "No current quote available to size this order against account equity.", estimatedOrderValue: null };
         }
 
-        const orderValue = estimatedPrice * order.qty;
+        const orderValue = estimatedPrice * order.qty * contractMultiplier;
 
         const alreadyHoldsTicker = positions.some(p => p.ticker === order.ticker);
         if (!alreadyHoldsTicker && positions.length >= this.limits.maxConcurrentPositions) {

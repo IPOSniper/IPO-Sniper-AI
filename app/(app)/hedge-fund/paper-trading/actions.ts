@@ -3,12 +3,25 @@
 import { createClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/client";
 import { AlpacaPaperTradingProvider } from "@/engine/trading/providers/AlpacaPaperTradingProvider";
+import { AlpacaOptionsProvider } from "@/engine/trading/providers/AlpacaOptionsProvider";
 import { RiskEngine, DEFAULT_RISK_LIMITS, type RiskLimits } from "@/engine/trading/risk/RiskEngine";
 import { FinnhubQuoteProvider } from "@/engine/evidence/providers/FinnhubQuoteProvider";
 import type { TradingAccount, TradingPosition, TradeOrderResult, OrderSide } from "@/engine/trading/contracts/TradeOrder";
 
 const provider = new AlpacaPaperTradingProvider();
+const optionsProvider = new AlpacaOptionsProvider();
 const riskEngine = new RiskEngine();
+
+/**
+ * An OCC contract symbol starts with the underlying ticker, followed
+ * by a 6-digit date (YYMMDD). Extracting the ticker this way avoids
+ * asking the caller to separately track "what's the underlying for
+ * this contract" -- it's already encoded in the symbol itself.
+ */
+function extractUnderlyingFromOccSymbol(occSymbol: string): string | null {
+    const match = occSymbol.match(/^([A-Z]+)\d{6}[CP]\d{8}$/);
+    return match ? match[1] : null;
+}
 
 export interface AccountResult {
     success: boolean;
@@ -80,17 +93,18 @@ export async function placeOrder(
     side: OrderSide,
     qty: number,
     reasoning?: string,
-    limits: RiskLimits = DEFAULT_RISK_LIMITS
+    limits: RiskLimits = DEFAULT_RISK_LIMITS,
+    assetType: "equity" | "option" = "equity"
 ): Promise<PlaceOrderResult> {
 
     const normalizedTicker = ticker.trim().toUpperCase();
 
     if (!normalizedTicker) {
-        return { success: false, error: "Ticker is required." };
+        return { success: false, error: assetType === "option" ? "Option contract symbol is required." : "Ticker is required." };
     }
 
     if (!Number.isFinite(qty) || qty <= 0 || !Number.isInteger(qty)) {
-        return { success: false, error: "Quantity must be a positive whole number of shares." };
+        return { success: false, error: assetType === "option" ? "Quantity must be a positive whole number of contracts." : "Quantity must be a positive whole number of shares." };
     }
 
     let account: TradingAccount;
@@ -106,18 +120,41 @@ export async function placeOrder(
     }
 
     let estimatedPrice: number | null = null;
-    try {
-        const quote = await new FinnhubQuoteProvider().getQuote(normalizedTicker);
-        estimatedPrice = quote.price;
-    } catch {
-        // Sell orders can proceed without a fresh quote (see
-        // RiskEngine.check) — buys cannot, and RiskEngine will
-        // reject with a clear reason when estimatedPrice is null.
+
+    if (assetType === "option") {
+        // Real price comes from the SPECIFIC contract's own bid/ask,
+        // not a Finnhub equity quote -- Finnhub's /quote endpoint
+        // doesn't understand OCC option symbols at all.
+        const underlying = extractUnderlyingFromOccSymbol(normalizedTicker);
+        if (!underlying) {
+            return { success: false, error: `"${normalizedTicker}" doesn't look like a valid OCC option contract symbol (expected format: TICKER + YYMMDD + C/P + 8-digit strike, e.g. AAPL260320C00220000).` };
+        }
+        try {
+            const chain = await optionsProvider.getOptionChain(underlying);
+            const contract = chain.find(c => c.symbol === normalizedTicker);
+            // Ask price for buys (what you'd actually pay), bid for
+            // sells (what you'd actually receive) -- mid/last would
+            // understate real transaction cost on either side.
+            estimatedPrice = side === "buy" ? (contract?.askPrice ?? contract?.lastPrice ?? null) : (contract?.bidPrice ?? contract?.lastPrice ?? null);
+        } catch {
+            // Sells can still proceed without a fresh quote (same
+            // rule as equities below) -- buys cannot, and RiskEngine
+            // will reject with a clear reason when estimatedPrice is null.
+        }
+    } else {
+        try {
+            const quote = await new FinnhubQuoteProvider().getQuote(normalizedTicker);
+            estimatedPrice = quote.price;
+        } catch {
+            // Sell orders can proceed without a fresh quote (see
+            // RiskEngine.check) — buys cannot, and RiskEngine will
+            // reject with a clear reason when estimatedPrice is null.
+        }
     }
 
     const riskEngineInstance = new RiskEngine(limits);
     const result = riskEngineInstance.check(
-        { ticker: normalizedTicker, side, qty, reasoning },
+        { ticker: normalizedTicker, side, qty, reasoning, assetType },
         account,
         positions,
         estimatedPrice
@@ -139,7 +176,7 @@ export async function placeOrder(
     }
 
     try {
-        const order = await provider.placeOrder({ ticker: normalizedTicker, side, qty, reasoning });
+        const order = await provider.placeOrder({ ticker: normalizedTicker, side, qty, reasoning, assetType });
 
         await logOrderAttempt({
             ticker: normalizedTicker,
