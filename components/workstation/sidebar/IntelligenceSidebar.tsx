@@ -4,6 +4,7 @@ import { WorkstationPanelProps } from "../contracts/WorkstationPanelProps";
 import type { EvidenceItem } from "@/engine/evidence/types";
 import MarketContext from "../panels/MarketContext/MarketContext";
 import ResearchHistory from "../panels/ResearchHistory/ResearchHistory";
+import { SECForm4Provider } from "@/engine/evidence/providers/SECForm4Provider";
 
 const RECOMMENDATION_COLOR: Record<string, string> = {
     STRONG_BUY: "text-emerald-400",
@@ -13,7 +14,7 @@ const RECOMMENDATION_COLOR: Record<string, string> = {
     SELL: "text-red-400",
 };
 
-export default function IntelligenceSidebar({
+export default async function IntelligenceSidebar({
     research,
 }: WorkstationPanelProps) {
 
@@ -28,6 +29,16 @@ export default function IntelligenceSidebar({
         : 0;
 
     const topThesis = committee.reports.find(r => r.confidence > 0)?.thesis;
+
+    // Real, compact summary -- genuinely new content for this sidebar,
+    // not duplicated from OperationsLayer's full InsiderActivityPanel
+    // (that one lists every transaction; this is just real counts +
+    // the single most recent one, sized for the sidebar).
+    const insiderTransactions = await new SECForm4Provider()
+        .getRecentInsiderTransactions(report.evidence.company.ticker, 10);
+    const buys = insiderTransactions.filter(t => t.acquiredOrDisposed === "A" && t.transactionCode === "P").length;
+    const sells = insiderTransactions.filter(t => t.acquiredOrDisposed === "D" && t.transactionCode === "S").length;
+    const mostRecent = insiderTransactions[0];
 
     return (
 
@@ -54,6 +65,30 @@ export default function IntelligenceSidebar({
 
             <MarketContext />
 
+            {/* Real, compact insider-activity summary -- fills real
+                space with real data, doesn't duplicate the full list
+                already shown in the Operations section below. */}
+            <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-4">
+                <p className="text-xs uppercase tracking-wide text-zinc-500">Insider Activity (30d)</p>
+                {insiderTransactions.length === 0 ? (
+                    <p className="mt-1 text-sm text-zinc-600">No recent Form 4 filings found.</p>
+                ) : (
+                    <>
+                        <p className="mt-1 text-sm text-zinc-300">
+                            <span className="text-emerald-400">{buys} buy{buys === 1 ? "" : "s"}</span>
+                            {" · "}
+                            <span className="text-red-400">{sells} sale{sells === 1 ? "" : "s"}</span>
+                            {" "}in last {insiderTransactions.length} filings
+                        </p>
+                        {mostRecent && (
+                            <p className="mt-1 text-xs text-zinc-600">
+                                Most recent: {mostRecent.insiderName} — {mostRecent.transactionDate}
+                            </p>
+                        )}
+                    </>
+                )}
+            </div>
+
             {(() => {
                 const articles = report.evidence.news.recentArticles.value;
 
@@ -66,9 +101,11 @@ export default function IntelligenceSidebar({
                             </p>
                         ) : (
                             <ul className="mt-2 space-y-2">
-                                {articles.slice(0, 3).map((a, i) => (
+                                {articles.slice(0, 6).map((a, i) => (
                                     <li key={i} className="text-sm">
-                                        <p className="text-zinc-300 line-clamp-2">{a.title}</p>
+                                        <a href={a.url} target="_blank" rel="noopener noreferrer" className="block hover:text-violet-300">
+                                            <p className="text-zinc-300 line-clamp-2 hover:underline">{a.title}</p>
+                                        </a>
                                         <p className="text-xs text-zinc-600">{a.source} · {new Date(a.publishedAt).toLocaleDateString()}</p>
                                     </li>
                                 ))}
