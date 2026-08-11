@@ -55,3 +55,11 @@ Added `CurrentsAPIProvider.ts` as a second source, merged with NewsAPI.org's res
 Real `qrcode` npm library added (not a hand-rolled encoder — QR encoding has real failure modes, like a code that renders but doesn't scan, that can't be caught without live testing). QR links to `${NEXT_PUBLIC_SITE_URL}/research/{ticker}` — **omitted entirely** when `NEXT_PUBLIC_SITE_URL` isn't configured, since a QR pointing at localhost or nothing would be worse than no QR at all. This env var needs setting once the app has a real public domain.
 
 Second format added: `ShareCardCompact.tsx`, a genuinely separate ~600px-wide component (not a conditional inside the full card) with only the essentials — hero recommendation, price, committee avatars, evidence gauge, top bull/bear line, QR. `ShareCardButton.tsx` now offers both formats as separate buttons.
+
+## Options data (added this session — foundation only)
+
+Real finding: Alpaca (already integrated for paper trading) has a real, documented options chain endpoint (`data.alpaca.markets/v1beta1/options/snapshots/{symbol}`) — strikes, expirations, bid/ask, implied volatility, and Greeks, using the SAME `ALPACA_API_KEY_ID`/`ALPACA_SECRET_KEY` already configured. No new vendor, no new key.
+
+Built `AlpacaOptionsProvider.ts` + `OptionsChainPanel.tsx` (real near-the-money call/put for the nearest expiration, wired into the research page's Operations section) — NOT yet live-tested, field names need confirming against a real response.
+
+**This is the data foundation only.** The broader "Adaptive Options Engine" proposal (Price Probability Engine, Volatility Engine, Options Valuation Engine, Strategy Engine, a real Learning Engine comparing predictions to stored trade outcomes, Model Governance) is a real, much larger body of work this does NOT build — it makes that work *possible*, since real options data now exists in this codebase, but every layer above raw data access is unbuilt.
