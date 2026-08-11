@@ -147,7 +147,7 @@ const ShareCard = forwardRef<HTMLDivElement, Props>(
         return (
             <div
                 ref={ref}
-                className="flex w-[680px] flex-col gap-4 bg-[#060A12] p-8"
+                className="flex w-[680px] flex-col gap-2.5 bg-[#060A12] p-6"
                 style={{ fontFamily: "Georgia, serif" }}
             >
                 <div className="flex items-center justify-between">
@@ -169,11 +169,11 @@ const ShareCard = forwardRef<HTMLDivElement, Props>(
                 </div>
 
                 {/* Hero recommendation -- made impossible to miss, per direct feedback */}
-                <div className="rounded-xl border border-zinc-800 bg-[#0D111B] p-5 text-center">
+                <div className="rounded-xl border border-zinc-800 bg-[#0D111B] p-3.5 text-center">
                     <p className={`text-3xl font-black tracking-tight ${RATING_STYLE[rating]}`}>
                         {RATING_HEADLINE[rating]}
                     </p>
-                    <div className="mt-2 flex items-center justify-center gap-6 text-sm">
+                    <div className="mt-1.5 flex items-center justify-center gap-6 text-sm">
                         <span className="text-zinc-400">
                             <span className="text-lg font-bold text-white">{safe.score}</span>/100 Conviction
                         </span>
@@ -217,7 +217,7 @@ const ShareCard = forwardRef<HTMLDivElement, Props>(
                             );
                         })}
                     </div>
-                    <p className="mt-2 text-center text-xs text-zinc-500">
+                    <p className="mt-1.5 text-center text-xs text-zinc-500">
                         <span className="text-emerald-400">{bullishAnalysts.length} bull</span>
                         {" · "}
                         <span className="text-zinc-400">{holdAnalysts} hold</span>
@@ -289,9 +289,9 @@ const ShareCard = forwardRef<HTMLDivElement, Props>(
 
                 {/* Bull/bear case -- real per-analyst thesis text, with icons */}
                 {(bullishAnalysts.length > 0 || bearishAnalysts.length > 0) && (
-                    <div className="grid grid-cols-2 gap-3">
-                        <div className="rounded-lg border border-emerald-900/40 bg-[#0D111B] p-3">
-                            <p className="mb-2 text-[10px] font-semibold uppercase tracking-wide text-emerald-400">🐂 Bull case</p>
+                    <div className="grid grid-cols-2 gap-2.5">
+                        <div className="rounded-lg border border-emerald-900/40 bg-[#0D111B] p-2.5">
+                            <p className="mb-1.5 text-[10px] font-semibold uppercase tracking-wide text-emerald-400">🐂 Bull case</p>
                             {bullishAnalysts
                                 .filter(a => displayThesis(a.analyst, a.thesis) !== "")
                                 .slice(0, 3)
@@ -302,8 +302,8 @@ const ShareCard = forwardRef<HTMLDivElement, Props>(
                             ))}
                             {bullishAnalysts.length === 0 && <p className="text-[11px] text-zinc-600">No analysts currently bullish.</p>}
                         </div>
-                        <div className="rounded-lg border border-red-900/40 bg-[#0D111B] p-3">
-                            <p className="mb-2 text-[10px] font-semibold uppercase tracking-wide text-red-400">🐻 Bear case</p>
+                        <div className="rounded-lg border border-red-900/40 bg-[#0D111B] p-2.5">
+                            <p className="mb-1.5 text-[10px] font-semibold uppercase tracking-wide text-red-400">🐻 Bear case</p>
                             {bearishAnalysts
                                 .filter(a => displayThesis(a.analyst, a.thesis) !== "")
                                 .slice(0, 3)
@@ -321,8 +321,8 @@ const ShareCard = forwardRef<HTMLDivElement, Props>(
                     thesis data already shown above (not new/invented content,
                     just a skimmable summary of it), ending with the
                     recommendation restated for anyone who only reads this box. */}
-                <div className="rounded-lg border border-violet-900/40 bg-[#160B3D] p-3.5">
-                    <p className="mb-2 text-[10px] font-semibold uppercase tracking-wide text-violet-300">Committee Conclusion</p>
+                <div className="rounded-lg border border-violet-900/40 bg-[#160B3D] p-2.5">
+                    <p className="mb-1.5 text-[10px] font-semibold uppercase tracking-wide text-violet-300">Committee Conclusion</p>
                     <div className="space-y-1">
                         {bullishAnalysts.slice(0, 2).map(a => (
                             <p key={a.analyst} className="text-xs leading-snug text-emerald-300">✓ {a.thesis}</p>
@@ -331,7 +331,7 @@ const ShareCard = forwardRef<HTMLDivElement, Props>(
                             <p key={a.analyst} className="text-xs leading-snug text-red-300">✕ {a.thesis}</p>
                         ))}
                     </div>
-                    <div className="mt-3 flex items-center justify-between border-t border-violet-900/40 pt-2">
+                    <div className="mt-2 flex items-center justify-between border-t border-violet-900/40 pt-1.5">
                         <span className="text-[10px] uppercase tracking-wide text-zinc-500">Final Recommendation</span>
                         <span className={`text-sm font-black ${RATING_STYLE[rating]}`}>{RATING_HEADLINE[rating]}</span>
                     </div>
@@ -349,7 +349,7 @@ const ShareCard = forwardRef<HTMLDivElement, Props>(
                 {scoreChartData.length > 0 && (
                     <div>
                         <p className="mb-2 text-xs uppercase tracking-wide text-zinc-500">AI Conviction by Analyst</p>
-                        <div className="space-y-1.5">
+                        <div className="space-y-1">
                             {scoreChartData.map(d => (
                                 <div key={d.name} className="flex items-center gap-2">
                                     <span className="w-20 shrink-0 text-right text-[10px] text-zinc-400">{d.name}</span>
@@ -364,8 +364,8 @@ const ShareCard = forwardRef<HTMLDivElement, Props>(
                 )}
 
                 {/* Full committee table -- the signature closing element */}
-                <div className="rounded-lg border border-zinc-800 bg-[#0D111B] p-3">
-                    <p className="mb-2 text-[10px] font-semibold uppercase tracking-wide text-zinc-500">Committee</p>
+                <div className="rounded-lg border border-zinc-800 bg-[#0D111B] p-2.5">
+                    <p className="mb-1.5 text-[10px] font-semibold uppercase tracking-wide text-zinc-500">Committee</p>
                     <div className="space-y-1">
                         {scoredAnalysts.map(r => (
                             <div key={r.analyst} className="flex items-center justify-between text-xs">

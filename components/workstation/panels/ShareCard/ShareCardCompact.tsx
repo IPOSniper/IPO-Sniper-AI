@@ -41,20 +41,33 @@ interface Props extends WorkstationPanelProps {
  * duplicated computation (same real data, same exclusion rules,
  * same News-Analyst-excluded discipline as the full card).
  *
- * Summary only: hero recommendation, price, committee avatar row,
- * evidence gauge, top bull/bear line, QR. No facts grid, no full
- * committee table, no per-analyst score bars -- those stay on the
- * full "Research Snapshot" format for people who want the detail.
+ * Summary only: hero recommendation, price, real Consensus %,
+ * committee avatar row, a 2-fact row (revenue growth + debt-to-equity
+ * -- added after direct feedback that a bare "STRONG BEARISH" label
+ * with zero supporting numbers felt ambiguous), evidence gauge, top
+ * bull/bear line, QR. Still no full committee table or per-analyst
+ * score bars -- those stay on the full "Research Snapshot" format.
  */
 const ShareCardCompact = forwardRef<HTMLDivElement, Props>(
     function ShareCardCompact({ research, qrCodeDataUrl }, ref) {
         const { committee } = research;
-        const { quote } = research.report.evidence;
+        const { quote, financialStatements } = research.report.evidence;
         const company = research.report.evidence.company;
 
         const excludedFromAggregate = ["News Analyst"]; // see config/shareCardDisclosure.ts -- same rule as the full card
         const safe = excludeAnalysts(committee, excludedFromAggregate);
         const rating = recommendationToRating(safe.recommendation);
+
+        // Real facts, same derivation as the full card -- added
+        // because a "STRONG BEARISH" label with zero supporting
+        // numbers is exactly what made this card feel ambiguous.
+        const statements = financialStatements.statements.verified ? financialStatements.statements.value : [];
+        const latest = statements.length > 0 ? [...statements].sort((a, b) => b.fiscalYear - a.fiscalYear)[0] : null;
+        const prior = statements.length > 1 ? [...statements].sort((a, b) => b.fiscalYear - a.fiscalYear)[1] : null;
+        const revenueGrowthPct = latest && prior && prior.revenue !== 0
+            ? ((latest.revenue - prior.revenue) / Math.abs(prior.revenue)) * 100
+            : null;
+        const debtToEquity = latest && latest.shareholdersEquity !== 0 ? latest.debt / latest.shareholdersEquity : null;
 
         const scoredAnalysts = committee.reports.filter(r => r.confidence > 0 && !excludedFromAggregate.includes(r.analyst));
         const photoAssignments = buildCommitteePhotoAssignments(scoredAnalysts.map(r => r.analyst));
@@ -105,6 +118,16 @@ const ShareCardCompact = forwardRef<HTMLDivElement, Props>(
                 </div>
 
                 <div className="rounded-lg border border-zinc-800 bg-[#0D111B] p-2.5">
+                    <div className="mb-1 flex items-center justify-between text-[10px]">
+                        <span className="text-zinc-400">Consensus</span>
+                        <span className="font-semibold text-white">{safe.agreement}%</span>
+                    </div>
+                    <div className="flex h-2 w-full overflow-hidden rounded-full bg-zinc-800">
+                        <div className="h-full bg-violet-500" style={{ width: `${safe.agreement}%` }} />
+                    </div>
+                </div>
+
+                <div className="rounded-lg border border-zinc-800 bg-[#0D111B] p-2.5">
                     <div className="flex flex-wrap justify-center gap-2">
                         {scoredAnalysts.map(r => {
                             const photoSrc = photoAssignments.get(r.analyst);
@@ -129,6 +152,21 @@ const ShareCardCompact = forwardRef<HTMLDivElement, Props>(
                         {" · "}<span className="text-red-400">{bearishAnalysts.length} bear</span>
                     </p>
                 </div>
+
+                {(revenueGrowthPct !== null || debtToEquity !== null) && (
+                    <div className="grid grid-cols-2 gap-2">
+                        <div className="rounded-lg border border-zinc-800 bg-[#0D111B] p-2">
+                            <p className="text-[8px] text-zinc-500">Revenue growth (YoY)</p>
+                            <p className="mt-0.5 text-xs font-semibold text-white">
+                                {revenueGrowthPct !== null ? `${revenueGrowthPct >= 0 ? "+" : ""}${revenueGrowthPct.toFixed(1)}%` : "—"}
+                            </p>
+                        </div>
+                        <div className="rounded-lg border border-zinc-800 bg-[#0D111B] p-2">
+                            <p className="text-[8px] text-zinc-500">Debt-to-equity</p>
+                            <p className="mt-0.5 text-xs font-semibold text-white">{debtToEquity !== null ? debtToEquity.toFixed(2) : "—"}</p>
+                        </div>
+                    </div>
+                )}
 
                 {avgEvidenceStrength !== null && (
                     <div className="rounded-lg border border-zinc-800 bg-[#0D111B] p-2.5">
