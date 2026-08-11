@@ -18,7 +18,14 @@ import { AlpacaOptionsProvider, type OptionContract } from "@/engine/trading/pro
 export default async function OptionsChainPanel({ research }: WorkstationPanelProps) {
     const { quote, company } = research.report.evidence;
 
-    if (!quote.price.verified) return null;
+    if (!quote.price.verified) {
+        return (
+            <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-4">
+                <h2 className="mb-2 text-sm font-semibold text-zinc-300">Options Chain</h2>
+                <p className="text-xs text-zinc-600">No verified spot price for {company.ticker} — options chain needs a real quote to find near-the-money strikes.</p>
+            </div>
+        );
+    }
     const spotPrice = quote.price.value;
 
     let contracts: OptionContract[] = [];
