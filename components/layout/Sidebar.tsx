@@ -18,49 +18,14 @@ import {
 import { useProfile } from "@/hooks/useProfile";
 
 const links = [
-  {
-    label: "Workstation (Home)",
-    href: "/workstation",
-    icon: Home,
-  },
-  {
-    label: "Market Pulse",
-    href: "/education",
-    icon: GraduationCap,
-  },
-  {
-    label: "IPO Calendar",
-    href: "/calendar",
-    icon: Rocket,
-    comingSoon: true,
-  },
-  {
-    label: "AI Rankings",
-    href: "/rankings",
-    icon: BrainCircuit,
-    comingSoon: true,
-  },
-  {
-    label: "Watchlist",
-    href: "/watchlist",
-    icon: Eye,
-  },
-  {
-    label: "Portfolio",
-    href: "/portfolio",
-    icon: BriefcaseBusiness,
-    comingSoon: true,
-  },
-  {
-    label: "Alerts",
-    href: "/alerts",
-    icon: Bell,
-  },
-  {
-    label: "Settings",
-    href: "/settings",
-    icon: Settings,
-  },
+  { label: "Workstation (Home)", href: "/workstation", icon: Home },
+  { label: "Market Pulse", href: "/education", icon: GraduationCap },
+  { label: "IPO Calendar", href: "/calendar", icon: Rocket, comingSoon: true },
+  { label: "AI Rankings", href: "/rankings", icon: BrainCircuit, comingSoon: true },
+  { label: "Watchlist", href: "/watchlist", icon: Eye },
+  { label: "Portfolio", href: "/portfolio", icon: BriefcaseBusiness, comingSoon: true },
+  { label: "Alerts", href: "/alerts", icon: Bell },
+  { label: "Settings", href: "/settings", icon: Settings },
 ];
 
 // Hedge Fund is real (app/(app)/hedge-fund/page.tsx) and gated
@@ -69,42 +34,43 @@ const links = [
 // roles that would actually get past the gate, so retail accounts
 // don't see a link that 403s.
 
+/**
+ * Shrunk from w-64 (256px) to w-20 (80px) — a real ~69% width
+ * reduction, not a cosmetic tweak. Icon-only with a title attribute
+ * for the native browser tooltip (no new dependency needed) --
+ * matches the same pattern as a collapsed Slack/VS Code activity
+ * bar. Frees real horizontal space for the main content column,
+ * which is the actual point: "shrink this to make room for more
+ * relevant information" only helps if the freed space goes
+ * somewhere, and w-64 -> w-20 gives back 176px across every page,
+ * not just this one.
+ */
 export default function Sidebar() {
   const pathname = usePathname();
   const { profile } = useProfile();
 
   return (
-    <aside className="hidden w-64 border-r bg-zinc-950 text-zinc-100 lg:flex lg:flex-col">
-      <div className="border-b p-6">
-        <h1 className="text-2xl font-bold">
-          IPO Sniper AI
-        </h1>
-
-        <p className="mt-1 text-sm text-zinc-400">
-          AI-Powered IPO Intelligence
-        </p>
+    <aside className="hidden w-20 border-r bg-zinc-950 text-zinc-100 lg:flex lg:flex-col">
+      <div className="flex flex-col items-center border-b p-3">
+        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-violet-950 text-sm font-bold text-violet-300">
+          IS
+        </div>
       </div>
 
-      <nav className="flex-1 space-y-2 p-4">
+      <nav className="flex-1 space-y-1 p-2">
         {links.map((item) => {
           const Icon = item.icon;
-
           const active = pathname === item.href;
 
           if (item.comingSoon) {
             return (
               <div
                 key={item.href}
-                title="Coming soon"
-                className="flex cursor-not-allowed items-center gap-3 rounded-lg px-4 py-3 text-zinc-600"
+                title={`${item.label} — Coming soon`}
+                className="flex cursor-not-allowed flex-col items-center gap-1 rounded-lg px-2 py-2.5 text-zinc-600"
               >
                 <Icon size={20} />
-
-                {item.label}
-
-                <span className="ml-auto rounded bg-zinc-800 px-1.5 py-0.5 text-[10px] uppercase tracking-wide text-zinc-500">
-                  Soon
-                </span>
+                <span className="text-[8px] uppercase tracking-wide text-zinc-700">Soon</span>
               </div>
             );
           }
@@ -113,15 +79,14 @@ export default function Sidebar() {
             <Link
               key={item.href}
               href={item.href}
-              className={`flex items-center gap-3 rounded-lg px-4 py-3 transition ${
+              title={item.label}
+              className={`flex flex-col items-center gap-1 rounded-lg px-2 py-2.5 transition ${
                 active
-                  ? "bg-blue-600 text-white"
+                  ? "bg-violet-950 text-violet-300"
                   : "text-zinc-400 hover:bg-zinc-900 hover:text-white"
               }`}
             >
               <Icon size={20} />
-
-              {item.label}
             </Link>
           );
         })}
@@ -129,54 +94,46 @@ export default function Sidebar() {
         {(profile?.role === "hedge_admin" || profile?.role === "admin") && (
           <Link
             href="/hedge-fund"
-            className={`flex items-center gap-3 rounded-lg px-4 py-3 transition ${
+            title="Hedge Fund"
+            className={`flex flex-col items-center gap-1 rounded-lg px-2 py-2.5 transition ${
               pathname === "/hedge-fund"
-                ? "bg-blue-600 text-white"
+                ? "bg-violet-950 text-violet-300"
                 : "text-zinc-400 hover:bg-zinc-900 hover:text-white"
             }`}
           >
             <ShieldCheck size={20} />
-            Hedge Fund
           </Link>
         )}
       </nav>
 
-      <div className="border-t border-zinc-900 p-4">
+      <div className="flex flex-col items-center gap-2 border-t border-zinc-900 p-2">
         {profile && (
-          <div className="mb-2 px-1">
-            <p className="truncate text-sm text-white">
-              {profile.displayName || profile.email}
-            </p>
-            <p className="text-xs capitalize text-zinc-500">
-              {profile.role.replace("_", " ")}
-            </p>
+          <div title={profile.displayName || profile.email} className="flex h-8 w-8 items-center justify-center rounded-full bg-zinc-800 text-xs font-semibold text-zinc-300">
+            {(profile.displayName || profile.email).charAt(0).toUpperCase()}
           </div>
         )}
 
-        <a
-          href="/#disclosures"
-          className="block px-4 py-1 text-xs text-zinc-600 hover:text-zinc-400"
-        >
-          Disclosures &amp; Terms
+        <a href="/#disclosures" title="Disclosures & Terms" className="text-zinc-600 hover:text-zinc-400">
+          <span className="text-[9px]">Terms</span>
         </a>
 
         {profile ? (
           <form action="/auth/sign-out" method="post">
             <button
               type="submit"
-              className="flex w-full items-center gap-3 rounded-lg px-4 py-2.5 text-sm text-zinc-400 transition hover:bg-zinc-900 hover:text-white"
+              title="Sign out"
+              className="flex items-center justify-center rounded-lg p-2 text-zinc-400 transition hover:bg-zinc-900 hover:text-white"
             >
               <LogOut size={18} />
-              Sign out
             </button>
           </form>
         ) : (
           <Link
             href="/login"
-            className="flex w-full items-center gap-3 rounded-lg bg-cyan-500 px-4 py-2.5 text-sm font-semibold text-black transition hover:bg-cyan-400"
+            title="Sign in"
+            className="flex items-center justify-center rounded-lg bg-violet-600 p-2 text-white transition hover:bg-violet-500"
           >
             <LogIn size={18} />
-            Sign in
           </Link>
         )}
       </div>

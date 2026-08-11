@@ -7,6 +7,7 @@
 export const COMMITTEE_PHOTOS = [
     "lina", "sarah", "jasmine", "priya", "marcus_j", "donald",
     "arjun", "chris", "kenji", "declan", "olivia", "ethan", "mei",
+    "taylor", "darnell",
 ];
 
 /**
