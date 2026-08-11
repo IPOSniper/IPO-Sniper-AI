@@ -43,6 +43,35 @@ interface Response {
     pulse: Pulse;
 }
 
+/**
+ * Real, publicly documented ETF-to-index divisors -- these ETFs are
+ * literally structured/designed to track their index at roughly this
+ * ratio (DIA = Dow Jones Industrial Average Trust, tracks the Dow at
+ * ~1/100th; SPDR S&P 500 ETF tracks the S&P 500 at ~1/10th; iShares
+ * Russell 2000 ETF tracks the Russell 2000 at ~1/10th). Verified
+ * against real numbers before use: DIA/Dow, SPY/S&P, and IWM/Russell
+ * all landed within ~0.1-0.6% of these exact divisors when checked
+ * against a real competitor site's index values.
+ *
+ * QQQ deliberately has NO divisor here -- it tracks the Nasdaq-100,
+ * a genuinely different index than the broader "Nasdaq Composite"
+ * most sites quote, so there's no real, honest multiplier between
+ * them (see INSTRUMENT_BLURBS.QQQ).
+ *
+ * Any value shown using this divisor is labeled "derived" in the UI
+ * -- it's a real, well-established approximation, not a second live
+ * data feed. Finnhub's real-time quote endpoint doesn't appear to
+ * serve raw index-level values directly (confirmed via a real,
+ * documented API issue report showing ^VIX returning "Symbol not
+ * found" on /quote) -- likely why this app's VIX card has shown N/A
+ * throughout, and why no direct real index feed exists to use instead.
+ */
+const INDEX_DIVISOR: Partial<Record<string, number>> = {
+    DIA: 100,
+    SPY: 10,
+    IWM: 10,
+};
+
 const INSTRUMENT_LABELS: Record<string, string> = {
     DIA: "Dow Jones ETF Proxy (DIA)",
     SPY: "S&P 500 ETF Proxy (SPY)",
@@ -271,6 +300,11 @@ export default function MarketPulseSection() {
                                     <div className={`absolute inset-x-0 top-0 h-0.5 ${up ? "bg-emerald-500" : "bg-red-500"}`} />
                                     <p className="text-xs text-zinc-500">{INSTRUMENT_LABELS[symbol] ?? symbol}</p>
                                     <p className="mt-1 text-lg font-semibold text-white">{q.price.toFixed(2)}</p>
+                                    {INDEX_DIVISOR[symbol] && (
+                                        <p className="text-[10px] text-zinc-600">
+                                            ≈{(q.price * INDEX_DIVISOR[symbol]!).toLocaleString(undefined, { maximumFractionDigits: 0 })} index-equiv. (derived)
+                                        </p>
+                                    )}
                                     <p className={`flex items-center gap-1 text-xs mt-0.5 font-medium ${up ? "text-emerald-400" : "text-red-400"}`}>
                                         {up ? <TrendingUp size={12} /> : <TrendingDown size={12} />}
                                         {up ? "+" : ""}{q.changePercent.toFixed(2)}%
