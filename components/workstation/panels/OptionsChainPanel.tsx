@@ -67,6 +67,9 @@ export default async function OptionsChainPanel({ research }: WorkstationPanelPr
                 {nearestCall && (
                     <div className="rounded-lg border border-emerald-900/40 bg-zinc-950 p-3">
                         <p className="mb-1 text-[10px] uppercase tracking-wide text-emerald-400">Call — ${nearestCall.strikePrice.toFixed(2)} strike</p>
+                        <p className="mb-2 select-all rounded bg-zinc-900 px-1.5 py-1 font-mono text-[10px] text-zinc-300" title="Click to select, then copy — this is the real contract symbol for placing an order">
+                            {nearestCall.symbol}
+                        </p>
                         <div className="grid grid-cols-2 gap-1.5 text-xs">
                             <div>
                                 <p className="text-zinc-500">Bid / Ask</p>
@@ -90,6 +93,9 @@ export default async function OptionsChainPanel({ research }: WorkstationPanelPr
                 {nearestPut && (
                     <div className="rounded-lg border border-red-900/40 bg-zinc-950 p-3">
                         <p className="mb-1 text-[10px] uppercase tracking-wide text-red-400">Put — ${nearestPut.strikePrice.toFixed(2)} strike</p>
+                        <p className="mb-2 select-all rounded bg-zinc-900 px-1.5 py-1 font-mono text-[10px] text-zinc-300" title="Click to select, then copy — this is the real contract symbol for placing an order">
+                            {nearestPut.symbol}
+                        </p>
                         <div className="grid grid-cols-2 gap-1.5 text-xs">
                             <div>
                                 <p className="text-zinc-500">Bid / Ask</p>
