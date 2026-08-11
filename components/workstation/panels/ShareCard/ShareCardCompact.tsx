@@ -105,14 +105,14 @@ const ShareCardCompact = forwardRef<HTMLDivElement, Props>(
                 </div>
 
                 <div className="rounded-lg border border-zinc-800 bg-[#0D111B] p-2.5">
-                    <div className="flex flex-wrap justify-center gap-1.5">
+                    <div className="flex flex-wrap justify-center gap-2">
                         {scoredAnalysts.map(r => {
                             const photoSrc = photoAssignments.get(r.analyst);
                             const color = VOTE_COLOR[r.recommendation] ?? "#8A8FA3";
                             return (
                                 <div
                                     key={r.analyst}
-                                    className="h-7 w-7 overflow-hidden rounded-full border-2"
+                                    className="h-9 w-9 overflow-hidden rounded-full border-2"
                                     style={{ borderColor: color }}
                                 >
                                     {photoSrc && (

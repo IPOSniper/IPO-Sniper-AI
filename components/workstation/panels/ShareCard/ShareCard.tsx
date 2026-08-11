@@ -186,8 +186,8 @@ const ShareCard = forwardRef<HTMLDivElement, Props>(
                 {/* Committee Split -- real agreement %, same computation excludeAnalysts already does */}
                 <div className="rounded-lg border border-zinc-800 bg-[#0D111B] p-3">
                     <div className="mb-1.5 flex items-center justify-between text-xs">
-                        <span className="text-zinc-400">Committee Split</span>
-                        <span className="font-semibold text-white">{safe.agreement}% agreement</span>
+                        <span className="text-zinc-400">Consensus</span>
+                        <span className="font-semibold text-white">{safe.agreement}%</span>
                     </div>
                     <div className="flex h-2.5 w-full overflow-hidden rounded-full bg-zinc-800">
                         <div className="h-full bg-violet-500" style={{ width: `${safe.agreement}%` }} />
@@ -204,15 +204,15 @@ const ShareCard = forwardRef<HTMLDivElement, Props>(
                             const photoSrc = photoAssignments.get(r.analyst);
                             const color = VOTE_COLOR[r.recommendation] ?? "#8A8FA3";
                             return (
-                                <div key={r.analyst} className="flex w-16 flex-col items-center text-center">
-                                    <div className="h-9 w-9 overflow-hidden rounded-full border-2" style={{ borderColor: color }}>
+                                <div key={r.analyst} className="flex w-20 flex-col items-center text-center">
+                                    <div className="h-12 w-12 overflow-hidden rounded-full border-2" style={{ borderColor: color }}>
                                         {photoSrc && (
                                             // eslint-disable-next-line @next/next/no-img-element -- off-screen capture, avoiding next/image lazy-load risk
                                             <img src={photoSrc} alt={r.analyst} className="h-full w-full object-cover" />
                                         )}
                                     </div>
-                                    <p className="mt-1 text-[8px] leading-tight text-zinc-500">{r.analyst.replace(" Analyst", "")}</p>
-                                    <p className="text-[8px] font-semibold" style={{ color }}>{r.recommendation.replace("_", " ")}</p>
+                                    <p className="mt-1 text-[9px] leading-tight text-zinc-500">{r.analyst.replace(" Analyst", "")}</p>
+                                    <p className="text-[9px] font-semibold" style={{ color }}>{r.recommendation.replace("_", " ")}</p>
                                 </div>
                             );
                         })}
