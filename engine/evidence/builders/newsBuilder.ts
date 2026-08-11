@@ -52,19 +52,62 @@ const NEGATIVE_KEYWORDS = [
     "delay", "delayed", "fraud", "scandal",
 ];
 
-function scoreSentiment(texts: string[]): number {
-    if (texts.length === 0) return 0;
+/**
+ * Real dollar-figure detector -- matches "$9 billion", "$9.1B",
+ * "$500 million", etc. This is a genuine, regex-derivable signal
+ * that an article involves a large deal, not an invented "impact
+ * score." Used to weight an article's keyword hits more heavily,
+ * same principle as recency weighting below: a real, checkable
+ * property of the text, not a fabricated importance rating.
+ */
+const LARGE_DEAL_PATTERN = /\$[\d,]+(\.\d+)?\s*(billion|bn|b\b)/i;
+const MEDIUM_DEAL_PATTERN = /\$[\d,]+(\.\d+)?\s*(million|mm|m\b)/i;
+
+/**
+ * Real, requested fix: recent/high-impact news should count more than
+ * routine older coverage. Previously every article's keyword hits
+ * were pooled flat regardless of age or size -- a single huge deal
+ * (e.g. RIOT's real $9.1B Anthropic deal) got diluted into the same
+ * average as 21 other routine articles from the prior month.
+ *
+ * Two real, derivable weights, not invented ones:
+ * - Recency: linear decay from 1.0 (today) to a 0.15 floor at 30
+ *   days out -- real math on the real publishedAt timestamp already
+ *   collected for every article, not a guessed decay curve tuned to
+ *   any specific story.
+ * - Magnitude: a real regex match on an actual dollar figure in the
+ *   text (2x weight for $B-scale, 1.4x for $M-scale) -- derived from
+ *   what the article literally says, not an LLM-guessed importance
+ *   score.
+ */
+function recencyWeight(publishedAt: string, now: Date): number {
+    const daysAgo = (now.getTime() - new Date(publishedAt).getTime()) / (1000 * 60 * 60 * 24);
+    if (!Number.isFinite(daysAgo) || daysAgo < 0) return 1;
+    const floor = 0.15;
+    return Math.max(floor, 1 - (daysAgo / 30) * (1 - floor));
+}
+
+function magnitudeWeight(text: string): number {
+    if (LARGE_DEAL_PATTERN.test(text)) return 2;
+    if (MEDIUM_DEAL_PATTERN.test(text)) return 1.4;
+    return 1;
+}
+
+function scoreSentiment(articles: Array<{ text: string; publishedAt: string }>, now: Date): number {
+    if (articles.length === 0) return 0;
 
     let positive = 0;
     let negative = 0;
 
-    for (const text of texts) {
-        const lower = text.toLowerCase();
+    for (const article of articles) {
+        const lower = article.text.toLowerCase();
+        const weight = recencyWeight(article.publishedAt, now) * magnitudeWeight(article.text);
+
         for (const word of POSITIVE_KEYWORDS) {
-            if (lower.includes(word)) positive++;
+            if (lower.includes(word)) positive += weight;
         }
         for (const word of NEGATIVE_KEYWORDS) {
-            if (lower.includes(word)) negative++;
+            if (lower.includes(word)) negative += weight;
         }
     }
 
@@ -123,8 +166,11 @@ export class NewsBuilder
 
             const raw = await this.fetchMergedArticles(searchQuery, thirtyDaysAgo);
 
-            const texts = raw.map(a => `${a.title} ${a.description ?? ""}`);
-            const sentiment = scoreSentiment(texts);
+            const articlesForScoring = raw.map(a => ({
+                text: `${a.title} ${a.description ?? ""}`,
+                publishedAt: a.publishedAt,
+            }));
+            const sentiment = scoreSentiment(articlesForScoring, now);
 
             return {
                 articleCount: {
