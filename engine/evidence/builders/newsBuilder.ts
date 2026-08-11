@@ -4,6 +4,27 @@ import { NewsAPIProvider, toNewsArticle, type RawArticle } from "../providers/Ne
 import { CurrentsAPIProvider } from "../providers/CurrentsAPIProvider";
 
 /**
+ * Real, confirmed bug fix (Aug 11 2026): company.name comes from
+ * Finnhub's /stock/profile2, which returns the full legal name --
+ * e.g. "Riot Platforms, Inc." with the comma and corporate suffix.
+ * Confirmed live: searching Currents API directly with the clean
+ * name "Riot Platforms" returned the real, current Anthropic-deal
+ * headlines within hours of the story breaking; the app's own
+ * pipeline (searching with the full legal name including ", Inc.")
+ * was still showing stale results. The suffix and comma were
+ * breaking strict keyword matching on at least one provider.
+ *
+ * This strips common corporate suffixes before searching either
+ * provider -- can only help matching, never hurts it, and fixes
+ * both providers at once rather than special-casing one.
+ */
+function simplifyCompanyNameForSearch(name: string): string {
+    return name
+        .replace(/,?\s+(Inc|Incorporated|Corp|Corporation|Ltd|Limited|LLC|LLP|plc|Co)\.?$/i, "")
+        .trim();
+}
+
+/**
  * Real news evidence, with one honest limitation: sentimentScore is
  * a basic keyword-polarity heuristic over headlines + descriptions,
  * NOT NLP sentiment analysis. It counts positive/negative financial-
@@ -94,12 +115,13 @@ export class NewsBuilder
 
         const now = new Date();
         const source = "INTERNAL"; // aggregated from multiple outlets/providers, not a single one
+        const searchQuery = simplifyCompanyNameForSearch(companyName);
 
         try {
             const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000)
                 .toISOString().slice(0, 10);
 
-            const raw = await this.fetchMergedArticles(companyName, thirtyDaysAgo);
+            const raw = await this.fetchMergedArticles(searchQuery, thirtyDaysAgo);
 
             const texts = raw.map(a => `${a.title} ${a.description ?? ""}`);
             const sentiment = scoreSentiment(texts);
