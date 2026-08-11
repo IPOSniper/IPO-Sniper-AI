@@ -1,6 +1,7 @@
 import { EvidenceBuilder } from "../types";
 import { NewsEvidence } from "../package";
-import { NewsAPIProvider, toNewsArticle } from "../providers/NewsAPIProvider";
+import { NewsAPIProvider, toNewsArticle, type RawArticle } from "../providers/NewsAPIProvider";
+import { CurrentsAPIProvider } from "../providers/CurrentsAPIProvider";
 
 /**
  * Real news evidence, with one honest limitation: sentimentScore is
@@ -57,16 +58,48 @@ export class NewsBuilder
 
     private readonly provider = new NewsAPIProvider();
 
+    private readonly currentsProvider = new CurrentsAPIProvider();
+
+    /**
+     * Merges both providers' results: deduplicated by URL (the same
+     * real story often gets syndicated across outlets both providers
+     * index), sorted by actual publish date descending. Each
+     * provider is queried independently and allowed to fail on its
+     * own -- if CURRENTS_API_KEY isn't set, or that request fails,
+     * this still returns NewsAPI.org's real results rather than
+     * failing the whole build. Same if NewsAPI.org fails and only
+     * Currents succeeds.
+     */
+    private async fetchMergedArticles(companyName: string, fromDate: string): Promise<RawArticle[]> {
+        const [newsApiResult, currentsResult] = await Promise.allSettled([
+            this.provider.search(companyName, fromDate),
+            this.currentsProvider.search(companyName, fromDate),
+        ]);
+
+        const newsApiArticles = newsApiResult.status === "fulfilled" ? newsApiResult.value : [];
+        const currentsArticles = currentsResult.status === "fulfilled" ? currentsResult.value : [];
+
+        const seen = new Set<string>();
+        const merged: RawArticle[] = [];
+        for (const article of [...currentsArticles, ...newsApiArticles]) {
+            if (seen.has(article.url)) continue;
+            seen.add(article.url);
+            merged.push(article);
+        }
+
+        return merged.sort((a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime());
+    }
+
     async build(companyName: string): Promise<NewsEvidence> {
 
         const now = new Date();
-        const source = "INTERNAL"; // aggregated from multiple outlets, not a single provider
+        const source = "INTERNAL"; // aggregated from multiple outlets/providers, not a single one
 
         try {
             const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000)
                 .toISOString().slice(0, 10);
 
-            const raw = await this.provider.search(companyName, thirtyDaysAgo);
+            const raw = await this.fetchMergedArticles(companyName, thirtyDaysAgo);
 
             const texts = raw.map(a => `${a.title} ${a.description ?? ""}`);
             const sentiment = scoreSentiment(texts);

@@ -37,3 +37,9 @@ needs the Release Readiness Review's status, see the relevant row),
 - `TradeOutcome` contract — not implemented anywhere, blocks the learning loop back to Memory
 - `Strategy` / `StrategyRegistry` — not implemented, the Experiment/Strategy lifecycle split has no code yet
 - Production scheduler (Vercel Cron / Supabase Scheduled Function) — still Windows Task + `localhost` only
+
+## News data sourcing (added this session)
+
+Real, verified finding: NewsAPI.org's free Developer tier has a documented 24-hour article delay, forbids commercial use, and restricts CORS to localhost only. Confirmed live via a real breaking story (RIOT/Anthropic deal, Aug 10 2026) not appearing in this app's feed for hours after major outlets had it.
+
+Added `CurrentsAPIProvider.ts` as a second source, merged with NewsAPI.org's results in `NewsBuilder.ts` (deduplicated by URL, sorted by real publish date, each provider allowed to fail independently). **Before relying on this commercially**: Currents' own documentation states their free tier is for "development, open-source, and non-commercial use" — several third-party blog posts claim otherwise but are contradicted by Currents' own first-party docs. Confirm commercial terms directly with Currents, or budget for their Builder plan ($69/mo), before this is used for real public-facing content.
