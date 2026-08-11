@@ -1,6 +1,7 @@
 import { forwardRef } from "react";
 import { WorkstationPanelProps } from "../../contracts/WorkstationPanelProps";
-import { excludeAnalysts, recommendationToRating } from "../../shared/scorePresentation";
+import { excludeAnalysts, recommendationToRating, strengthLabel } from "../../shared/scorePresentation";
+import { buildCommitteePhotoAssignments } from "../committeeAvatars";
 import { BarChart, Bar, ResponsiveContainer } from "recharts";
 
 const RATING_STYLE: Record<string, string> = {
@@ -9,35 +10,52 @@ const RATING_STYLE: Record<string, string> = {
     Bearish: "text-red-400",
 };
 
+const RATING_HEADLINE: Record<string, string> = {
+    Bullish: "STRONG BULLISH",
+    Neutral: "NEUTRAL",
+    Bearish: "STRONG BEARISH",
+};
+
+const VOTE_COLOR: Record<string, string> = {
+    STRONG_BUY: "#16D47B",
+    BUY: "#16D47B",
+    HOLD: "#8A8FA3",
+    REDUCE: "#F04452",
+    SELL: "#F04452",
+};
+
 /**
- * The actual shareable card, rendered off-screen and captured to
- * PNG by ShareCardButton. Deliberately excludes anything sourced
- * from NewsAPI -- see excludeAnalysts() -- since NewsAPI's free
- * Developer plan ToS forbids production/public use entirely
- * (confirmed directly from newsapi.org/terms), and this recomputes
- * the recommendation from the remaining analysts rather than just
- * hiding News-specific UI while still using it in the aggregate
- * number.
+ * Redesigned per direct feedback: hero recommendation, committee
+ * avatars, evidence gauge, bull/bear panels with icons, a real
+ * per-analyst score chart replacing the revenue chart, and a full
+ * committee table. Every new element maps to a real field --
+ * committee.overallScore (recomputed via excludeAnalysts to exclude
+ * News, same as the rating), each analyst's real 0-100 score, real
+ * photos from the same pool used elsewhere in the app.
  *
- * Also excludes anything from Company (Finnhub /stock/profile2 --
- * only real for sector/industry text, not the flagged concern) and
- * includes Quote/Financial Statements per explicit scope: Finnhub +
- * SEC + Financial Statements only, pending the user's own
- * verification of Finnhub's redistribution terms (see chat -- this
- * was NOT independently confirmed safe, only SEC and the "excluded
- * News" logic were).
+ * Two suggestions deliberately NOT included:
+ * - "What changed vs yesterday" -- no real historical research
+ *   snapshot is currently stored/populated (Research History panel
+ *   is empty). Inventing a past recommendation to show movement
+ *   would be fabricating data that was never actually recorded.
+ * - QR code -- a real feature, but needs a QR-generation capability
+ *   not yet verified/built. Scoped as a likely next addition, not
+ *   rushed in without checking what's actually available.
  *
- * Extended to match institutional_research_card.html's layout --
- * facts grid, probability chips, bull/bear case, AI reasoning box.
- * Every new field below is either a real committee/evidence number,
- * or an honest per-analyst thesis quote. The mockup's "12-month
- * target price" and short/swing "time horizon" text are NOT
- * included -- nothing in ResearchObject computes a real target price
- * or horizon-specific forecast, and inventing one here would be
- * exactly the kind of fabricated number this whole product is built
- * to never produce. investmentDecision.scenarios' probability/
- * catalysts fields ARE real when investmentDecision exists, so those
- * are used for the probability chips instead.
+ * Still excludes News Analyst entirely from every number and list on
+ * this card -- NewsAPI.org and Currents API free tiers both restrict
+ * production/public use (confirmed directly from both providers'
+ * own terms), and this card is specifically built for public sharing.
+ * The disclosure is now in the footer with a small ⓘ marker rather
+ * than the top of the card, per direct feedback that developer-
+ * facing language hurt the first impression -- but the substance
+ * (recommendation is recomputed without News) is still stated
+ * plainly, just not first.
+ *
+ * Off-screen render + immediate capture (see ShareCardButton.tsx) --
+ * uses plain <img> tags for avatars, not next/image, since
+ * next/image's lazy-loading could leave images unloaded at the
+ * moment html-to-image captures the DOM.
  */
 const ShareCard = forwardRef<HTMLDivElement, WorkstationPanelProps>(
     function ShareCard({ research }, ref) {
@@ -52,11 +70,15 @@ const ShareCard = forwardRef<HTMLDivElement, WorkstationPanelProps>(
             ? financialStatements.statements.value
             : [];
 
-        const chartData = statements.map(s => ({ year: s.fiscalYear, revenue: s.revenue }));
+        // Real per-analyst scores, excluding News -- replaces the
+        // revenue chart with something that actually explains the
+        // recommendation, per direct feedback.
+        const scoredAnalysts = committee.reports.filter(r => r.confidence > 0 && r.analyst !== "News Analyst");
+        const photoAssignments = buildCommitteePhotoAssignments(scoredAnalysts.map(r => r.analyst));
+        const scoreChartData = scoredAnalysts
+            .map(r => ({ name: r.analyst.replace(" Analyst", ""), score: r.score }))
+            .sort((a, b) => b.score - a.score);
 
-        // Facts grid -- every value derived directly from a real
-        // FinancialStatement field, or null (rendered as "—") if the
-        // data isn't there. No field is guessed.
         const latest = statements.length > 0 ? [...statements].sort((a, b) => b.fiscalYear - a.fiscalYear)[0] : null;
         const prior = statements.length > 1 ? [...statements].sort((a, b) => b.fiscalYear - a.fiscalYear)[1] : null;
         const revenueGrowthPct = latest && prior && prior.revenue !== 0
@@ -65,16 +87,14 @@ const ShareCard = forwardRef<HTMLDivElement, WorkstationPanelProps>(
         const grossMarginPct = latest && latest.revenue !== 0 ? (latest.grossProfit / latest.revenue) * 100 : null;
         const debtToEquity = latest && latest.shareholdersEquity !== 0 ? latest.debt / latest.shareholdersEquity : null;
 
-        // Evidence quality -- average of each analyst's own
-        // evidenceStrength field (0-100, already computed by the
-        // committee itself), not a separately-invented percentage.
-        const votingAnalysts = committee.reports.filter(r => r.confidence > 0);
+        const votingAnalysts = committee.reports.filter(r => r.confidence > 0 && r.analyst !== "News Analyst");
         const avgEvidenceStrength = votingAnalysts.length > 0
             ? Math.round(votingAnalysts.reduce((s, r) => s + r.evidenceStrength, 0) / votingAnalysts.length)
             : null;
 
-        const bullishAnalysts = committee.reports.filter(r => r.recommendation === "STRONG_BUY" || r.recommendation === "BUY");
-        const bearishAnalysts = committee.reports.filter(r => r.recommendation === "REDUCE" || r.recommendation === "SELL");
+        const bullishAnalysts = votingAnalysts.filter(r => r.recommendation === "STRONG_BUY" || r.recommendation === "BUY");
+        const bearishAnalysts = votingAnalysts.filter(r => r.recommendation === "REDUCE" || r.recommendation === "SELL");
+        const holdAnalysts = votingAnalysts.length - bullishAnalysts.length - bearishAnalysts.length;
 
         const scenarios = investmentDecision?.scenarios;
 
@@ -86,7 +106,7 @@ const ShareCard = forwardRef<HTMLDivElement, WorkstationPanelProps>(
             >
                 <div className="flex items-center justify-between">
                     <div>
-                        <p className="text-xs uppercase tracking-widest text-violet-400">IPO Sniper AI</p>
+                        <p className="text-xs uppercase tracking-widest text-violet-400">Institutional Research Snapshot</p>
                         <h1 className="text-2xl font-bold text-white">
                             {company.name} <span className="text-zinc-500">({company.ticker})</span>
                         </h1>
@@ -101,11 +121,49 @@ const ShareCard = forwardRef<HTMLDivElement, WorkstationPanelProps>(
                     )}
                 </div>
 
-                <div className="flex items-center gap-4 rounded-xl border border-zinc-800 p-4">
-                    <span className={`text-2xl font-bold ${RATING_STYLE[rating]}`}>{rating}</span>
-                    <div className="text-sm text-zinc-500">
-                        AI Committee assessment — {safe.confidence}% confidence, excludes news sentiment
+                {/* Hero recommendation -- made impossible to miss, per direct feedback */}
+                <div className="rounded-xl border border-zinc-800 bg-[#0D111B] p-5 text-center">
+                    <p className={`text-3xl font-black tracking-tight ${RATING_STYLE[rating]}`}>
+                        {RATING_HEADLINE[rating]}
+                    </p>
+                    <div className="mt-2 flex items-center justify-center gap-6 text-sm">
+                        <span className="text-zinc-400">
+                            <span className="text-lg font-bold text-white">{safe.score}</span>/100 Conviction
+                        </span>
+                        <span className="text-zinc-400">
+                            AI Committee Confidence <span className="text-lg font-bold text-white">{safe.confidence}%</span>
+                        </span>
                     </div>
+                </div>
+
+                {/* Committee avatars -- real photos, real votes, News excluded */}
+                <div className="rounded-lg border border-zinc-800 bg-[#0D111B] p-3">
+                    <div className="flex flex-wrap justify-center gap-2">
+                        {scoredAnalysts.map(r => {
+                            const photoSrc = photoAssignments.get(r.analyst);
+                            const color = VOTE_COLOR[r.recommendation] ?? "#8A8FA3";
+                            return (
+                                <div
+                                    key={r.analyst}
+                                    className="h-9 w-9 overflow-hidden rounded-full border-2"
+                                    style={{ borderColor: color }}
+                                    title={`${r.analyst}: ${r.recommendation.replace("_", " ")}`}
+                                >
+                                    {photoSrc && (
+                                        // eslint-disable-next-line @next/next/no-img-element -- off-screen capture, avoiding next/image lazy-load risk
+                                        <img src={photoSrc} alt={r.analyst} className="h-full w-full object-cover" />
+                                    )}
+                                </div>
+                            );
+                        })}
+                    </div>
+                    <p className="mt-2 text-center text-xs text-zinc-500">
+                        <span className="text-emerald-400">{bullishAnalysts.length} bull</span>
+                        {" · "}
+                        <span className="text-zinc-400">{holdAnalysts} hold</span>
+                        {" · "}
+                        <span className="text-red-400">{bearishAnalysts.length} bear</span>
+                    </p>
                 </div>
 
                 {/* Facts grid -- real financial-statement derived values only */}
@@ -133,17 +191,25 @@ const ShareCard = forwardRef<HTMLDivElement, WorkstationPanelProps>(
                     </div>
                 </div>
 
-                {/* Evidence quality + vote split -- real committee numbers */}
-                <div className="flex items-center gap-3 rounded-lg border border-amber-900/40 bg-amber-950/10 p-3 text-xs text-amber-200">
-                    <span className="font-semibold text-amber-400">
-                        {avgEvidenceStrength !== null ? `Evidence quality ${avgEvidenceStrength}%.` : "Evidence quality unavailable."}
-                    </span>
-                    <span>
-                        {votingAnalysts.length} analysts voted — {bullishAnalysts.length} bullish, {bearishAnalysts.length} bearish, {votingAnalysts.length - bullishAnalysts.length - bearishAnalysts.length} hold.
-                    </span>
+                {/* Evidence quality -- real gauge, not just text */}
+                <div className="rounded-lg border border-zinc-800 bg-[#0D111B] p-3">
+                    <div className="mb-1.5 flex items-center justify-between text-xs">
+                        <span className="text-zinc-400">Evidence Quality</span>
+                        <span className="font-semibold text-white">
+                            {avgEvidenceStrength !== null ? `${avgEvidenceStrength}% — ${strengthLabel(avgEvidenceStrength)} Confidence` : "Unavailable"}
+                        </span>
+                    </div>
+                    {avgEvidenceStrength !== null && (
+                        <div className="h-2 w-full overflow-hidden rounded-full bg-zinc-800">
+                            <div
+                                className="h-full rounded-full bg-gradient-to-r from-amber-500 to-emerald-500"
+                                style={{ width: `${avgEvidenceStrength}%` }}
+                            />
+                        </div>
+                    )}
                 </div>
 
-                {/* Probability chips -- only rendered when investmentDecision exists, since scenarios.bull/base/bear.probability isn't computed on every code path */}
+                {/* Probability chips -- only rendered when investmentDecision exists */}
                 {scenarios && (
                     <div className="flex gap-2 rounded-lg border border-zinc-800 bg-[#0D111B] p-3">
                         <div className="flex-1 rounded-md bg-emerald-950/30 p-2 text-center">
@@ -161,11 +227,11 @@ const ShareCard = forwardRef<HTMLDivElement, WorkstationPanelProps>(
                     </div>
                 )}
 
-                {/* Bull/bear case -- real per-analyst thesis text, not invented bullets. Capped to 3 each to keep the card a reasonable size. */}
+                {/* Bull/bear case -- real per-analyst thesis text, with icons */}
                 {(bullishAnalysts.length > 0 || bearishAnalysts.length > 0) && (
                     <div className="grid grid-cols-2 gap-3">
                         <div className="rounded-lg border border-emerald-900/40 bg-[#0D111B] p-3">
-                            <p className="mb-2 text-[10px] font-semibold uppercase tracking-wide text-emerald-400">Bull case</p>
+                            <p className="mb-2 text-[10px] font-semibold uppercase tracking-wide text-emerald-400">🐂 Bull case</p>
                             {bullishAnalysts.slice(0, 3).map(a => (
                                 <p key={a.analyst} className="mb-1.5 text-[11px] leading-snug text-zinc-300">
                                     <span className="text-zinc-500">{a.analyst}: </span>{a.thesis}
@@ -174,7 +240,7 @@ const ShareCard = forwardRef<HTMLDivElement, WorkstationPanelProps>(
                             {bullishAnalysts.length === 0 && <p className="text-[11px] text-zinc-600">No analysts currently bullish.</p>}
                         </div>
                         <div className="rounded-lg border border-red-900/40 bg-[#0D111B] p-3">
-                            <p className="mb-2 text-[10px] font-semibold uppercase tracking-wide text-red-400">Bear case</p>
+                            <p className="mb-2 text-[10px] font-semibold uppercase tracking-wide text-red-400">🐻 Bear case</p>
                             {bearishAnalysts.slice(0, 3).map(a => (
                                 <p key={a.analyst} className="mb-1.5 text-[11px] leading-snug text-zinc-300">
                                     <span className="text-zinc-500">{a.analyst}: </span>{a.thesis}
@@ -185,7 +251,7 @@ const ShareCard = forwardRef<HTMLDivElement, WorkstationPanelProps>(
                     </div>
                 )}
 
-                {/* AI reasoning -- real committee.summary, plus the executive decision summary when investmentDecision exists */}
+                {/* AI reasoning */}
                 <div className="rounded-lg border border-violet-900/40 bg-[#160B3D] p-3.5">
                     <p className="mb-1.5 text-[10px] font-semibold uppercase tracking-wide text-violet-300">Committee reasoning</p>
                     <p className="text-xs leading-relaxed text-zinc-200">{committee.summary}</p>
@@ -195,22 +261,41 @@ const ShareCard = forwardRef<HTMLDivElement, WorkstationPanelProps>(
                     )}
                 </div>
 
-                {chartData.length > 0 && (
+                {/* Real per-analyst score chart -- replaces the revenue chart, actually explains the recommendation */}
+                {scoreChartData.length > 0 && (
                     <div>
-                        <p className="mb-1 text-xs uppercase tracking-wide text-zinc-500">Revenue by Fiscal Year</p>
-                        <div className="h-32 w-full">
+                        <p className="mb-1 text-xs uppercase tracking-wide text-zinc-500">AI Conviction by Analyst</p>
+                        <div className="h-40 w-full">
                             <ResponsiveContainer width="100%" height="100%">
-                                <BarChart data={chartData}>
-                                    <Bar dataKey="revenue" fill="#8B5CF6" radius={[4, 4, 0, 0]} />
+                                <BarChart data={scoreChartData} layout="vertical" margin={{ left: 20 }}>
+                                    <Bar dataKey="score" fill="#8B5CF6" radius={[0, 4, 4, 0]} />
                                 </BarChart>
                             </ResponsiveContainer>
                         </div>
                     </div>
                 )}
 
+                {/* Full committee table -- the signature closing element */}
+                <div className="rounded-lg border border-zinc-800 bg-[#0D111B] p-3">
+                    <p className="mb-2 text-[10px] font-semibold uppercase tracking-wide text-zinc-500">Committee</p>
+                    <div className="space-y-1">
+                        {scoredAnalysts.map(r => (
+                            <div key={r.analyst} className="flex items-center justify-between text-xs">
+                                <span className="text-zinc-300">{r.analyst}</span>
+                                <span className="font-semibold" style={{ color: VOTE_COLOR[r.recommendation] ?? "#8A8FA3" }}>
+                                    {r.recommendation.replace("_", " ")}
+                                </span>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+
+                {/* Footer -- honest sources, disclosure moved here per direct feedback (not hidden, just not first) */}
                 <div className="border-t border-zinc-800 pt-3 text-xs text-zinc-600">
-                    <p>Sources: SEC EDGAR, Finnhub. AI-synthesized research, not investment advice.</p>
-                    <p>Data may be incomplete — verify independently before acting. IPO Sniper AI is not a registered investment advisor.</p>
+                    <p className="mb-1 font-medium text-zinc-500">Evidence Sources</p>
+                    <p>✓ SEC EDGAR &nbsp; ✓ Exchange Data (Finnhub) &nbsp; ✓ Financial Statements &nbsp; ✓ AI Reasoning Engine</p>
+                    <p className="mt-2">AI-synthesized research, not investment advice. Data may be incomplete — verify independently before acting. IPO Sniper AI is not a registered investment advisor.</p>
+                    <p className="mt-1">ⓘ Recommendation excludes News Analyst — NewsAPI.org and Currents API free-tier terms restrict public/production redistribution of their data.</p>
                 </div>
             </div>
         );
