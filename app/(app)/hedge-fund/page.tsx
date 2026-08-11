@@ -4,6 +4,7 @@ import PositionManager from "@/components/hedge-fund/PositionManager";
 import PortfolioRiskPanel from "@/components/hedge-fund/PortfolioRiskPanel";
 import PaperTradingPanel from "@/components/hedge-fund/PaperTradingPanel";
 import SystemStatusPanel from "@/components/hedge-fund/SystemStatusPanel";
+import QuantStrategistPanel from "@/components/hedge-fund/QuantStrategistPanel";
 
 /**
  * Gated by proxy.ts (hedge_admin/admin roles) via the HEDGE_FUND_PREFIX
@@ -38,6 +39,10 @@ export default async function HedgeFundPage() {
 
             <div className="mb-6">
                 <SystemStatusPanel />
+            </div>
+
+            <div className="mb-6">
+                <QuantStrategistPanel />
             </div>
 
             <div className="mb-6">

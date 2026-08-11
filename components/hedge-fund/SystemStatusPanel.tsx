@@ -27,7 +27,7 @@ interface Stage {
 
 const STAGES: Stage[] = [
     { name: "Research & Evidence Scoring", status: "live", detail: "Real — the AI Committee (14 analysts) scores every researched ticker against real evidence" },
-    { name: "Strategy Generation", status: "not-built", detail: "No automated signal-generation loop exists yet — a human picks the ticker and order manually" },
+    { name: "Strategy Generation (Quant Strategist)", status: "live", detail: "Real — rule-based mapping from real committee output to a trade plan (direction + standard risk parameters). Not a trained model — see QuantStrategist.ts" },
     { name: "Risk Gatekeeper", status: "live", detail: "Real — RiskEngine checks every order against position size, concurrency, daily-loss, and cash-reserve limits before it reaches Alpaca" },
     { name: "Options Data & Execution", status: "live", detail: "Real — Alpaca options chain (strikes/IV/Greeks) + real order placement, sized at the correct 100x contract multiplier. No prediction/valuation/strategy layer built on top of it yet" },
     { name: "Portfolio Optimizer", status: "not-built", detail: "No automated rebalancing suggestions yet" },

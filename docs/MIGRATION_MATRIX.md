@@ -71,3 +71,11 @@ Real finding: options orders go through the SAME Alpaca `/v2/orders` endpoint as
 Extended `TradeOrderRequest` with `assetType: "equity" | "option"`. **Real correctness fix in `RiskEngine.ts`**: options contracts represent 100 shares of exposure each — every dollar-value calculation now multiplies by `OPTIONS_CONTRACT_MULTIPLIER` (100) when `assetType === "option"`, or every risk check would have silently understated real options risk by 100x. `actions.ts`'s `placeOrder` now routes price lookup correctly — Finnhub for equities, the specific option contract's real bid/ask via `AlpacaOptionsProvider` for options (Finnhub's `/quote` doesn't understand OCC symbols). UI (`PaperTradingPanel.tsx`) got an Asset Type toggle.
 
 NOT yet live-tested. Also NOT built: a contract picker wired to the real `OptionsChainPanel` data — the contract symbol is currently a manually-typed text field, not a dropdown of real available contracts. A real, worthwhile next refinement.
+
+## Quant Strategist — Phase 1 of the private Quant roadmap (added this session)
+
+New `engine/quant/QuantStrategist.ts` + `QuantStrategistPanel.tsx`, wired onto the private (`hedge_admin`/`admin`-gated) Hedge Fund page. Deliberately scoped: real committee data → direction (call/put/none) + real committee confidence + real reasoning (from actual analyst theses) → standard, well-established options-trading risk parameters (35-45 DTE, 0.30-0.40 delta, 25% profit target, 40% stop loss). **No contract is selected** — that's Phase 2, explicitly deferred, per direct instruction ("no OCC symbol, no strike, no expiration, just the strategy").
+
+Honesty discipline maintained: the DTE/delta/profit/stop numbers are clearly labeled as standard conventions, not AI-optimized-for-this-ticker values — no fabricated "strategy confidence" score exists separate from the real committee confidence. Reuses the exact same `ResearchService`/Committee pipeline as every other page — no duplicate research logic for Quant.
+
+Phases 2-6 from the roadmap (Contract Selection Engine, Risk Committee approval flow, Execution Engine, Position Monitor, Learning Engine) are NOT built — Phase 1 only.
