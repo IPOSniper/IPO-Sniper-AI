@@ -564,7 +564,10 @@ function ShareImageDownload() {
     return (
         <div className="space-y-2">
             {/* eslint-disable-next-line @next/next/no-img-element -- object URL preview, not a static asset */}
-            <img src={previewUrl} alt="Market Pulse share card" className="max-w-md rounded-lg border border-zinc-800" />
+            <a href={previewUrl} target="_blank" rel="noopener noreferrer" title="Click to open full size in a new tab">
+                <img src={previewUrl} alt="Market Pulse share card" className="w-full max-w-2xl rounded-lg border border-zinc-800 transition hover:border-violet-600" />
+            </a>
+            <p className="text-xs text-zinc-500">Click the image to open it full size in a new tab.</p>
             <div className="flex gap-2">
                 <button
                     type="button"
