@@ -5,6 +5,7 @@ import SystemLog from "../panels/SystemLog";
 import UpcomingEvents from "../panels/UpcomingEvents";
 import SnapshotPanel from "../panels/SnapshotPanel";
 import WhatCouldChangeThisPanel from "../panels/WhatCouldChangeThisPanel";
+import InsiderActivityPanel from "../panels/InsiderActivityPanel";
 
 export default function OperationsLayer({
 research,
@@ -16,6 +17,7 @@ return(
 <SnapshotPanel research={research} />
 <WhatCouldChangeThisPanel research={research} />
 </div>
+<InsiderActivityPanel research={research} />
 <ResearchProgress research={research} />
 <SystemLog research={research} />
 <UpcomingEvents research={research} />
