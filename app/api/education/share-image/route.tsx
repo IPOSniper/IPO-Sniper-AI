@@ -12,13 +12,13 @@ export const runtime = "edge";
  * different, downloadable presentation of it.
  */
 const INSTRUMENTS = [
-    { symbol: "DIA", label: "Dow Jones" },
-    { symbol: "SPY", label: "S&P 500" },
-    { symbol: "QQQ", label: "Nasdaq 100" },
-    { symbol: "IWM", label: "Russell 2000" },
+    { symbol: "DIA", label: "Dow ETF (DIA)" },
+    { symbol: "SPY", label: "S&P 500 ETF (SPY)" },
+    { symbol: "QQQ", label: "Nasdaq-100 ETF (QQQ)" },
+    { symbol: "IWM", label: "Russell 2000 ETF (IWM)" },
     { symbol: "^VIX", label: "VIX" },
-    { symbol: "GLD", label: "Gold" },
-    { symbol: "TLT", label: "Long Bonds" },
+    { symbol: "GLD", label: "Gold ETF (GLD)" },
+    { symbol: "TLT", label: "20+ Yr Treasury ETF (TLT)" },
 ];
 
 /**

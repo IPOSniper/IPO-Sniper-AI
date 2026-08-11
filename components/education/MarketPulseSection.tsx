@@ -44,23 +44,23 @@ interface Response {
 }
 
 const INSTRUMENT_LABELS: Record<string, string> = {
-    DIA: "Dow Jones (DIA)",
-    SPY: "S&P 500 (SPY)",
-    QQQ: "Nasdaq 100 (QQQ)",
-    IWM: "Russell 2000 (IWM)",
+    DIA: "Dow Jones ETF Proxy (DIA)",
+    SPY: "S&P 500 ETF Proxy (SPY)",
+    QQQ: "Nasdaq-100 ETF (QQQ)",
+    IWM: "Russell 2000 ETF Proxy (IWM)",
     VIX: "Volatility (VIX)",
-    GLD: "Gold (GLD)",
-    TLT: "Long Bonds (TLT)",
+    GLD: "Gold ETF (GLD)",
+    TLT: "20+ Yr Treasury ETF (TLT)",
 };
 
 // What each instrument actually represents, and why its move matters
 // today — shown when a card is expanded, so clicking an index teaches
 // something instead of just restating the number already on the card.
 const INSTRUMENT_BLURBS: Record<string, string> = {
-    DIA: "Tracks the Dow Jones Industrial Average, 30 large industrial-era blue-chip stocks. Price-weighted (not market-cap weighted), so it can move differently than SPY/QQQ on the same day.",
-    SPY: "Tracks the S&P 500 — the 500 largest U.S. companies, the most common single \"the market\" proxy professionals quote.",
-    QQQ: "Tracks the Nasdaq 100 — heavily weighted toward large tech companies, so it tends to swing harder than SPY on rate and growth-outlook news.",
-    IWM: "Tracks the Russell 2000 — small-cap U.S. stocks. Smaller companies are more sensitive to domestic economic conditions and borrowing costs, so IWM is often read as a gauge of risk appetite.",
+    DIA: "A real ETF tracking the Dow Jones Industrial Average at roughly 1/100th its level (Dow ~53,800 -> DIA ~$538) -- the price shown is the real ETF price, not the raw index level. 30 large industrial-era blue-chip stocks, price-weighted (not market-cap weighted), so it can move differently than SPY/QQQ on the same day.",
+    SPY: "A real ETF tracking the S&P 500 at roughly 1/10th its level (S&P ~7,700 -> SPY ~$770) -- the price shown is the real ETF price, not the raw index level. The 500 largest U.S. companies, the most common single \"the market\" proxy professionals quote.",
+    QQQ: "A real ETF tracking the Nasdaq-100 specifically -- the 100 largest non-financial companies on the Nasdaq, NOT the same as the broader \"Nasdaq Composite\" index (~3,000+ companies) you may see quoted elsewhere. The two are different baskets, not the same index at a different scale, so there's no simple multiplier between QQQ's price and a Nasdaq Composite headline number. Heavily weighted toward large tech, so it tends to swing harder than SPY on rate and growth-outlook news.",
+    IWM: "A real ETF tracking the Russell 2000 at roughly 1/10th its level (Russell ~3,030 -> IWM ~$303) -- the price shown is the real ETF price, not the raw index level. Small-cap U.S. stocks, more sensitive to domestic economic conditions and borrowing costs, so IWM is often read as a gauge of risk appetite.",
     VIX: "The \"fear gauge\" — the market's expectation of S&P 500 volatility over the next 30 days, derived from options prices. Rises when investors pay up for downside protection.",
     GLD: "Tracks the price of gold — a traditional safe-haven asset investors rotate into during uncertainty, inflation concern, or when they distrust currencies/bonds.",
     TLT: "Tracks long-term (20+ year) U.S. Treasury bonds. Prices move opposite to interest-rate expectations — TLT tends to rise when investors expect rates to fall or when they want a safe, government-backed asset.",
