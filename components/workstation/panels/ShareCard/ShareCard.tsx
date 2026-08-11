@@ -4,6 +4,24 @@ import { excludeAnalysts, recommendationToRating, strengthLabel } from "../../sh
 import { buildCommitteePhotoAssignments } from "../committeeAvatars";
 import { SHARE_CARD_DISCLOSURE } from "@/config/shareCardDisclosure";
 
+interface Props extends WorkstationPanelProps {
+    /**
+     * Real QR code (base64 PNG data URL), generated via the
+     * `qrcode` npm package in ShareCardButton.tsx -- NOT hand-rolled
+     * here. QR encoding (Reed-Solomon error correction, matrix/mask
+     * selection) is genuinely easy to get subtly wrong in a way that
+     * LOOKS like a QR code but doesn't actually scan, and there's no
+     * way to test-scan one from this sandbox -- using a real,
+     * battle-tested library is the responsible choice, not a
+     * shortcut.
+     *
+     * Optional and omitted entirely when there's nothing real to
+     * link to -- see ShareCardButton.tsx for why (no configured
+     * public site URL means no real link exists yet).
+     */
+    qrCodeDataUrl?: string;
+}
+
 const RATING_STYLE: Record<string, string> = {
     Bullish: "text-emerald-400",
     Neutral: "text-zinc-300",
@@ -57,8 +75,8 @@ const VOTE_COLOR: Record<string, string> = {
  * next/image's lazy-loading could leave images unloaded at the
  * moment html-to-image captures the DOM.
  */
-const ShareCard = forwardRef<HTMLDivElement, WorkstationPanelProps>(
-    function ShareCard({ research }, ref) {
+const ShareCard = forwardRef<HTMLDivElement, Props>(
+    function ShareCard({ research, qrCodeDataUrl }, ref) {
         const { committee, investmentDecision } = research;
         const { quote, financialStatements } = research.report.evidence;
         const company = research.report.evidence.company;
@@ -368,6 +386,13 @@ const ShareCard = forwardRef<HTMLDivElement, WorkstationPanelProps>(
                             <p className="text-sm font-bold text-violet-300">IPO Sniper AI</p>
                             <p className="text-[9px] text-zinc-600">AI Research Platform</p>
                         </div>
+                        {qrCodeDataUrl && (
+                            <div className="flex flex-col items-center">
+                                {/* eslint-disable-next-line @next/next/no-img-element -- data URL, off-screen capture */}
+                                <img src={qrCodeDataUrl} alt="Scan to view full report" className="h-16 w-16" />
+                                <p className="mt-0.5 text-[7px] text-zinc-600">Scan for full report</p>
+                            </div>
+                        )}
                     </div>
                     <p className="mb-1 text-[9px] font-medium uppercase tracking-wide text-zinc-500">Sources</p>
                     <p className="text-[10px] text-zinc-500">✓ SEC EDGAR &nbsp; ✓ Exchange Data &nbsp; ✓ Financial Statements &nbsp; ✓ AI Reasoning Engine</p>
