@@ -120,7 +120,8 @@ export class RiskEngine {
 
         const orderValue = estimatedPrice * order.qty * contractMultiplier;
 
-        const alreadyHoldsTicker = positions.some(p => p.ticker === order.ticker);
+        const held = positions.find(p => p.ticker === order.ticker);
+        const alreadyHoldsTicker = held !== undefined;
         if (!alreadyHoldsTicker && positions.length >= this.limits.maxConcurrentPositions) {
             return {
                 allowed: false,
@@ -129,11 +130,33 @@ export class RiskEngine {
             };
         }
 
-        const positionSizePercent = account.equity > 0 ? orderValue / account.equity : 1;
+        // Real fix, found via direct user testing: previously checked
+        // ONLY this single order's value against the cap. Submitting
+        // several smaller orders for the same ticker back-to-back
+        // each passed independently, while collectively building the
+        // exact oversized position (~33% of equity via 3x 100-share
+        // orders) this limit exists to prevent -- since RiskEngine had
+        // no memory of the position an order was about to add to.
+        // Now checks the REAL existing position's market value (from
+        // the real positions already passed into this method) plus
+        // this order's value together -- the actual post-trade
+        // exposure, not just the incremental piece.
+        const existingPositionValue = held?.marketValue ?? 0;
+        const projectedTotalValue = existingPositionValue + orderValue;
+
+        const positionSizePercent = account.equity > 0 ? projectedTotalValue / account.equity : 1;
         if (positionSizePercent > this.limits.maxPositionSizePercent) {
+            const maxTotalValue = account.equity * this.limits.maxPositionSizePercent;
+            const remainingBudgetValue = Math.max(0, maxTotalValue - existingPositionValue);
+            const maxAdditionalQty = remainingBudgetValue > 0 && estimatedPrice > 0
+                ? Math.floor(remainingBudgetValue / (estimatedPrice * contractMultiplier))
+                : 0;
+
             return {
                 allowed: false,
-                reason: `Order value $${orderValue.toFixed(2)} is ${(positionSizePercent * 100).toFixed(1)}% of equity, exceeding the ${(this.limits.maxPositionSizePercent * 100).toFixed(0)}% max position size limit.`,
+                reason: existingPositionValue > 0
+                    ? `This order would bring total ${order.ticker} exposure to $${projectedTotalValue.toFixed(2)} (${(positionSizePercent * 100).toFixed(1)}% of equity) -- existing position is already $${existingPositionValue.toFixed(2)}. Max is ${(this.limits.maxPositionSizePercent * 100).toFixed(0)}% of equity. Remaining budget for ${order.ticker}: ~${maxAdditionalQty} more ${order.assetType === "option" ? "contracts" : "shares"} at the current price.`
+                    : `Order value $${orderValue.toFixed(2)} is ${(positionSizePercent * 100).toFixed(1)}% of equity, exceeding the ${(this.limits.maxPositionSizePercent * 100).toFixed(0)}% max position size limit.`,
                 estimatedOrderValue: orderValue,
             };
         }
