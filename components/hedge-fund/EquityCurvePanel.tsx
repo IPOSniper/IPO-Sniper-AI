@@ -48,15 +48,18 @@ export default function EquityCurvePanel() {
 
     const firstEquity = data && data.length > 0 ? data[0].equity : null;
     const lastEquity = data && data.length > 0 ? data[data.length - 1].equity : null;
-    const totalReturn = firstEquity && lastEquity && firstEquity !== 0
+    // Explicit typeof/!== checks, not truthy coercion -- a real
+    // equity value of exactly 0 is falsy in JS, which would
+    // incorrectly be treated as "no data" by a `firstEquity &&` check.
+    const totalReturn = typeof firstEquity === "number" && typeof lastEquity === "number" && firstEquity !== 0
         ? ((lastEquity - firstEquity) / firstEquity) * 100
         : null;
 
     const maxEquity = data && data.length > 0 ? Math.max(...data.map(p => p.equity)) : null;
-    const minAfterMax = data && maxEquity !== null
+    const minAfterMax = data && typeof maxEquity === "number"
         ? Math.min(...data.slice(data.findIndex(p => p.equity === maxEquity)).map(p => p.equity))
         : null;
-    const maxDrawdown = maxEquity && minAfterMax && maxEquity !== 0
+    const maxDrawdown = typeof maxEquity === "number" && typeof minAfterMax === "number" && maxEquity !== 0
         ? ((minAfterMax - maxEquity) / maxEquity) * 100
         : null;
 
