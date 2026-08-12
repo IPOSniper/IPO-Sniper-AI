@@ -87,3 +87,13 @@ Extended Phase 1 (trade plan) with real contract matching: `QuantStrategist.sele
 Also fixed in this round: `PortfolioRiskPanel` was analyzing only the manual "Research-Based Positions" list — real Alpaca positions (with real P/L) never had portfolio risk calculated against them. Now combines both real sources.
 
 Still not built: Phase 3 (Risk Committee approval shown before execution, distinct from RiskEngine's order-time check), Phase 4 (fully automated execution pipeline), Phase 5 (live position monitoring — Greeks, thesis-still-valid checks), Phase 6 (trade outcome storage / Learning Engine), and a real deployed scheduler.
+
+## Quant Memory — real decision logging, no learning logic yet (added this session)
+
+Per direct instruction: "build IPO Sniper Quant Memory before Quant Intelligence" and "learning = collecting evidence... early on, do a lot of the first and very little of the second." New `quant_trade_decisions` Supabase table (migration `20260812000000_quant_trade_decisions.sql`) logs every real trade-plan decision — direction, committee confidence/agreement/evidence quality, the real decision checks, standard params used, and the selected contract snapshot, when one was found. **"No Trade" decisions are logged too**, not just executed trades — capturing why Quant declined is exactly the point.
+
+Links to the resulting order via `broker_order_id` (not an internal foreign key, to avoid touching the existing `paper_trade_orders` insert path) when the user clicks Execute.
+
+**Deliberately does NOT include**: outcome data (P&L, exit reason, win/loss) — that needs a real way to detect position closure (a scheduler, or a manual "record outcome" action), neither of which exists yet. Bolting nullable outcome columns onto this table now would blur "decision at the time" with "what happened after," which the roadmap explicitly wants kept separate. No code anywhere reads from this table to change behavior — pure data collection only, per the explicit "avoid self-modifying trading logic early on" instruction.
+
+NOT run against a live database — written against documented Supabase/Postgres syntax, needs running via the Supabase SQL editor or CLI and verifying.
