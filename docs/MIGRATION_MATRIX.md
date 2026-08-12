@@ -137,3 +137,11 @@ Two real pieces batched into one round per direct request to reduce deploy-cycle
 **Deliberately excluded from this round**: Position Cards' mini price-chart requirement. Verified directly that `PriceChart.tsx` still shows "Price history unavailable — check FINNHUB_API_KEY / plan access to /stock/candle" — a real, confirmed, unresolved limitation from much earlier this session. Building new charts against the same uncertain data source risked the same failure; not attempted until that's resolved.
 
 Applied the defensive-typing lesson from the equity curve's recharts bugs to the new donut chart's Tooltip formatter proactively (no narrow explicit type annotations, runtime `typeof` checks instead) — still genuinely unverified against a real build, same caveat as everything else this session.
+
+## Visual Dashboard Sprint 3: Position Cards + Quant Activity (added this session)
+
+Two more real pieces batched together. Position Cards: merges two already-fetched real sources by ticker (Alpaca TradingPosition for current/entry price and real P/L, PositionRiskResult for portfolio weight/committee recommendation/top risk) — neither source alone has everything a card needs. Deliberately no mini price chart, since `PriceChart.tsx`'s real candle-data limitation is still unresolved.
+
+Quant Activity: extended `getDailySummary()` with a real `executed` count (rows where `broker_order_id IS NOT NULL` — an actually-accepted order, not just a formed plan) and widened the window from same-day to 7 days, since a freshly-deployed app could show near-zero same-day activity even with real decisions already logged. Given a new, more prominent panel near the top of the page, not just the small summary buried in Batch Scanner (which still shows the same real numbers too).
+
+No new external API calls in this round — both pieces reuse already-fetched real data (positions, quant_trade_decisions), keeping deploy risk low relative to new provider integrations.

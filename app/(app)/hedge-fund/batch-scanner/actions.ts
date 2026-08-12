@@ -187,8 +187,20 @@ export interface DailySummary {
     totalDecisions: number;
     tradesFormed: number;
     noTrade: number;
+    executed: number;
 }
 
+/**
+ * Real counts from quant_trade_decisions -- 7-day window, not just
+ * "today," since this app was deployed for the first time only
+ * recently and a strict same-day window could show near-zero
+ * activity even though real decisions have been logged. "executed"
+ * counts real broker_order_id IS NOT NULL rows -- an actual accepted
+ * order, not just a formed plan. There's no clean separate "approved
+ * vs rejected" column for the single-ticker Quant Strategist flow
+ * (only the batch flow embeds that in free-text reasoning), so this
+ * stays to what's genuinely queryable: direction and broker_order_id.
+ */
 export async function getDailySummary(): Promise<DailySummary | null> {
     if (!isSupabaseConfigured()) return null;
     try {
@@ -196,20 +208,21 @@ export async function getDailySummary(): Promise<DailySummary | null> {
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) return null;
 
-        const startOfToday = new Date();
-        startOfToday.setHours(0, 0, 0, 0);
+        const sevenDaysAgo = new Date();
+        sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
 
         const { data, error } = await supabase
             .from("quant_trade_decisions")
-            .select("direction")
+            .select("direction, broker_order_id")
             .eq("user_id", user.id)
-            .gte("created_at", startOfToday.toISOString());
+            .gte("created_at", sevenDaysAgo.toISOString());
 
         if (error || !data) return null;
 
         return {
             totalDecisions: data.length,
             tradesFormed: data.filter(d => d.direction !== "none").length,
+            executed: data.filter(d => d.broker_order_id !== null).length,
             noTrade: data.filter(d => d.direction === "none").length,
         };
     } catch {

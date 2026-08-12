@@ -9,6 +9,8 @@ import SystemStatusPanel from "@/components/hedge-fund/SystemStatusPanel";
 import QuantStrategistPanel from "@/components/hedge-fund/QuantStrategistPanel";
 import BatchScannerPanel from "@/components/hedge-fund/BatchScannerPanel";
 import EquityCurvePanel from "@/components/hedge-fund/EquityCurvePanel";
+import QuantActivityPanel from "@/components/hedge-fund/QuantActivityPanel";
+import PositionCards from "@/components/hedge-fund/PositionCards";
 
 /**
  * Gated by proxy.ts (hedge_admin/admin roles) via the HEDGE_FUND_PREFIX
@@ -43,6 +45,10 @@ export default async function HedgeFundPage() {
 
             <div className="mb-6">
                 <EquityCurvePanel />
+            </div>
+
+            <div className="mb-6">
+                <QuantActivityPanel />
             </div>
 
             <div className="mb-6">
@@ -86,6 +92,15 @@ export default async function HedgeFundPage() {
                             ? "No positions yet — open a trade above, or add a manually-tracked position, to see portfolio risk."
                             : (risk.error ?? "Portfolio risk analysis is unavailable.")}
                     </p>
+                </div>
+            )}
+
+            {risk.success && risk.report && (
+                <div className="mt-6">
+                    <PositionCards
+                        tradingPositions={tradingPositionsResult.positions ?? []}
+                        riskPositions={risk.report.positions}
+                    />
                 </div>
             )}
 

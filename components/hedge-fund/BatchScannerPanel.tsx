@@ -170,8 +170,8 @@ export default function BatchScannerPanel() {
 
             {summary && (
                 <div className="mt-4 rounded-lg border border-violet-900/40 bg-[#160B3D] p-3">
-                    <p className="mb-2 text-[10px] font-semibold uppercase tracking-wide text-violet-300">Today&apos;s Real Decision Log (from Quant Memory)</p>
-                    <div className="grid grid-cols-3 gap-2 text-xs">
+                    <p className="mb-2 text-[10px] font-semibold uppercase tracking-wide text-violet-300">Real Decision Log, Last 7 Days (from Quant Memory)</p>
+                    <div className="grid grid-cols-4 gap-2 text-xs">
                         <div>
                             <p className="text-zinc-500">Total decisions</p>
                             <p className="text-white">{summary.totalDecisions}</p>
@@ -179,6 +179,10 @@ export default function BatchScannerPanel() {
                         <div>
                             <p className="text-zinc-500">Trade plans formed</p>
                             <p className="text-white">{summary.tradesFormed}</p>
+                        </div>
+                        <div>
+                            <p className="text-zinc-500">Executed</p>
+                            <p className="text-emerald-400">{summary.executed}</p>
                         </div>
                         <div>
                             <p className="text-zinc-500">No trade</p>
