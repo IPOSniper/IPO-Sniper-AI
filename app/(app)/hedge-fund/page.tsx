@@ -2,6 +2,7 @@ import { getPositions, getPortfolioRisk } from "./actions";
 import { getTradingAccount, getTradingPositions, getOrderHistory } from "./paper-trading/actions";
 import PositionManager from "@/components/hedge-fund/PositionManager";
 import PortfolioRiskPanel from "@/components/hedge-fund/PortfolioRiskPanel";
+import IndustryExposurePanel from "@/components/hedge-fund/IndustryExposurePanel";
 import PaperTradingPanel from "@/components/hedge-fund/PaperTradingPanel";
 import SystemStatusPanel from "@/components/hedge-fund/SystemStatusPanel";
 import QuantStrategistPanel from "@/components/hedge-fund/QuantStrategistPanel";
@@ -81,6 +82,10 @@ export default async function HedgeFundPage() {
                     </p>
                 </div>
             )}
+
+            <div className="mt-6">
+                <IndustryExposurePanel />
+            </div>
         </div>
     );
 }
