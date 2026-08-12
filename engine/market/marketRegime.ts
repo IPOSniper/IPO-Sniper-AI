@@ -20,6 +20,13 @@ import type { Quote } from "../evidence/providers/FinnhubQuoteProvider";
 export interface MarketRegime {
     label: "Risk-off" | "Risk-on" | "Cautious" | "Mixed";
     color: string;
+    /** Real average % change across DIA/SPY/QQQ/IWM -- the same real number the label is derived from, not a separate calculation. */
+    avgEquityChange: number;
+    goldChange: number | null;
+    bondsChange: number | null;
+    /** Real count of the tracked equity instruments (DIA/SPY/QQQ/IWM) that are up today, out of how many had real data. */
+    breadthUp: number;
+    breadthTotal: number;
 }
 
 export function classifyMarketRegime(quotes: Record<string, Quote>): MarketRegime | null {
@@ -34,8 +41,16 @@ export function classifyMarketRegime(quotes: Record<string, Quote>): MarketRegim
     const goldUp = gold ? gold.changePercent > 0.5 : false;
     const bondsUp = bonds ? bonds.changePercent > 0.1 : false;
 
-    if (equitiesDown && (goldUp || bondsUp)) return { label: "Risk-off", color: "#F04452" };
-    if (equitiesUp && !goldUp) return { label: "Risk-on", color: "#16D47B" };
-    if (equitiesDown) return { label: "Cautious", color: "#F5A524" };
-    return { label: "Mixed", color: "#F5A524" };
+    const shared = {
+        avgEquityChange: avgEquity,
+        goldChange: gold ? gold.changePercent : null,
+        bondsChange: bonds ? bonds.changePercent : null,
+        breadthUp: equities.filter(q => q.changePercent > 0).length,
+        breadthTotal: equities.length,
+    };
+
+    if (equitiesDown && (goldUp || bondsUp)) return { label: "Risk-off", color: "#F04452", ...shared };
+    if (equitiesUp && !goldUp) return { label: "Risk-on", color: "#16D47B", ...shared };
+    if (equitiesDown) return { label: "Cautious", color: "#F5A524", ...shared };
+    return { label: "Mixed", color: "#F5A524", ...shared };
 }

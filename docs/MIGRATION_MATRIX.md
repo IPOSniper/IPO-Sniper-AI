@@ -145,3 +145,7 @@ Two more real pieces batched together. Position Cards: merges two already-fetche
 Quant Activity: extended `getDailySummary()` with a real `executed` count (rows where `broker_order_id IS NOT NULL` — an actually-accepted order, not just a formed plan) and widened the window from same-day to 7 days, since a freshly-deployed app could show near-zero same-day activity even with real decisions already logged. Given a new, more prominent panel near the top of the page, not just the small summary buried in Batch Scanner (which still shows the same real numbers too).
 
 No new external API calls in this round — both pieces reuse already-fetched real data (positions, quant_trade_decisions), keeping deploy risk low relative to new provider integrations.
+
+## Visual Dashboard Sprint 4: Conviction on cards, Trade Timeline, richer Market Regime (added this session)
+
+Three real pieces batched together, all reusing already-fetched real data — no new external calls. Added real `conviction` score (already computed, wasn't shown yet) to Position Cards. New `TradeTimeline.tsx` — real visual execution history from the same real order data `PaperTradingPanel`'s flat list already shows, just a different (vertical timeline) treatment. Extended `classifyMarketRegime()` with real underlying metrics (avg equity change, gold/bonds change, real breadth — count of DIA/SPY/QQQ/IWM currently up) — backward compatible, verified both existing consumers (Market Pulse, Batch Scanner) still compile against the extended type.

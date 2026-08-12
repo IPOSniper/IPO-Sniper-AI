@@ -93,9 +93,19 @@ export default function BatchScannerPanel() {
             </p>
 
             {regime && (
-                <div className="mb-3 flex items-center gap-2 rounded-md border border-zinc-800 bg-zinc-950 px-3 py-1.5 text-xs">
+                <div className="mb-3 flex flex-wrap items-center gap-2 rounded-md border border-zinc-800 bg-zinc-950 px-3 py-1.5 text-xs">
                     <span className="text-zinc-500">Market Regime</span>
                     <span className="font-semibold" style={{ color: regime.color }}>{regime.label}</span>
+                    <span className="text-zinc-700">·</span>
+                    <span className="text-zinc-500">Breadth {regime.breadthUp}/{regime.breadthTotal} up</span>
+                    <span className="text-zinc-700">·</span>
+                    <span className="text-zinc-500">Equities {regime.avgEquityChange >= 0 ? "+" : ""}{regime.avgEquityChange.toFixed(2)}%</span>
+                    {regime.goldChange !== null && (
+                        <>
+                            <span className="text-zinc-700">·</span>
+                            <span className="text-zinc-500">Gold {regime.goldChange >= 0 ? "+" : ""}{regime.goldChange.toFixed(2)}%</span>
+                        </>
+                    )}
                     <span className="text-zinc-600">(same real classification as Market Pulse)</span>
                 </div>
             )}
