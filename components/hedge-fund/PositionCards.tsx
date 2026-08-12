@@ -113,7 +113,7 @@ export default function PositionCards({
                                     </p>
                                 </div>
                                 <div>
-                                    <p className="text-zinc-500">Weight</p>
+                                    <p className="text-zinc-500">Weight (of analyzed)</p>
                                     <p className="text-white">{risk ? `${risk.weight.toFixed(1)}%` : "—"}</p>
                                 </div>
                                 <div className="col-span-2">

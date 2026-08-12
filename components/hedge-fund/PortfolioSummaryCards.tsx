@@ -43,7 +43,7 @@ export default function PortfolioSummaryCards({
         { label: "Buying Power", value: `$${account.buyingPower.toLocaleString(undefined, { maximumFractionDigits: 0 })}` },
         { label: "Total Unrealized P/L", value: `${totalUnrealizedPl >= 0 ? "+" : ""}$${totalUnrealizedPl.toLocaleString(undefined, { maximumFractionDigits: 0 })}`, color: totalUnrealizedPl >= 0 ? "text-emerald-400" : "text-red-400" },
         { label: "Open Positions", value: String(positions.length) },
-        { label: "Largest Position", value: largest ? `${largest.ticker} (${largestPercent.toFixed(1)}%)` : "—" },
+        { label: "Largest Position (% of account)", value: largest ? `${largest.ticker} (${largestPercent.toFixed(1)}%)` : "—" },
         { label: "Risk Budget Remaining", value: `${riskBudgetRemaining.toFixed(1)}%` },
         { label: "Win Rate", value: "—", note: "Needs real closed-trade tracking (not built)" },
     ];
