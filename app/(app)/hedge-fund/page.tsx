@@ -3,6 +3,7 @@ import { getTradingAccount, getTradingPositions, getOrderHistory } from "./paper
 import PositionManager from "@/components/hedge-fund/PositionManager";
 import PortfolioRiskPanel from "@/components/hedge-fund/PortfolioRiskPanel";
 import IndustryExposurePanel from "@/components/hedge-fund/IndustryExposurePanel";
+import PortfolioAllocationDonut from "@/components/hedge-fund/PortfolioAllocationDonut";
 import PaperTradingPanel from "@/components/hedge-fund/PaperTradingPanel";
 import SystemStatusPanel from "@/components/hedge-fund/SystemStatusPanel";
 import QuantStrategistPanel from "@/components/hedge-fund/QuantStrategistPanel";
@@ -85,6 +86,12 @@ export default async function HedgeFundPage() {
                             ? "No positions yet — open a trade above, or add a manually-tracked position, to see portfolio risk."
                             : (risk.error ?? "Portfolio risk analysis is unavailable.")}
                     </p>
+                </div>
+            )}
+
+            {risk.success && risk.report && (
+                <div className="mt-6">
+                    <PortfolioAllocationDonut positions={risk.report.positions} />
                 </div>
             )}
 

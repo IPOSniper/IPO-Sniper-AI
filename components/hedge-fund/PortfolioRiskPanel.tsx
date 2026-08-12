@@ -117,13 +117,24 @@ export default function PortfolioRiskPanel({ report }: PortfolioRiskPanelProps) 
                 {topRisks.length === 0 ? (
                     <p className="text-sm text-zinc-600">No committee-flagged risks.</p>
                 ) : (
-                    <div className="space-y-1">
+                    <div className="space-y-2.5">
                         {topRisks.map((r, i) => (
-                            <div key={`${r.ticker}-${i}`} className="flex items-center justify-between text-sm">
-                                <span className="text-zinc-300">
-                                    <span className="text-zinc-500">{r.ticker}</span> — {r.title}
-                                </span>
-                                <span className="text-zinc-500">{r.severity}/100</span>
+                            <div key={`${r.ticker}-${i}`}>
+                                <div className="mb-1 flex items-center justify-between text-sm">
+                                    <span className="text-zinc-300">
+                                        <span className="text-zinc-500">{r.ticker}</span> — {r.title}
+                                    </span>
+                                    <span className="text-zinc-500">{r.severity}/100</span>
+                                </div>
+                                <div className="h-1.5 w-full overflow-hidden rounded-full bg-zinc-800">
+                                    <div
+                                        className="h-full rounded-full"
+                                        style={{
+                                            width: `${r.severity}%`,
+                                            backgroundColor: r.severity >= 75 ? "#F04452" : r.severity >= 50 ? "#F5A524" : "#16D47B",
+                                        }}
+                                    />
+                                </div>
                             </div>
                         ))}
                     </div>

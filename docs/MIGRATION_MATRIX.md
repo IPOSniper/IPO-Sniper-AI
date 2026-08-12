@@ -129,3 +129,11 @@ Real summary metrics shown alongside the chart: current equity, period return, m
 Placed at the top of the Hedge Fund page, above System Status — the confirmed "heartbeat of the dashboard" priority from the Visual Dashboard proposal. Uses `recharts` since this renders on-screen (not off-screen-captured like the Share Card), so the earlier DOM-measurement risk that caused a real bug there doesn't apply here.
 
 NOT yet live-tested — same caveat as every new Alpaca endpoint integration this session.
+
+## Visual Dashboard Sprint 2: Risk Gauges + Portfolio Allocation Donut (added this session)
+
+Two real pieces batched into one round per direct request to reduce deploy-cycle overhead. Risk Gauges: converted "Top Risks" in PortfolioRiskPanel from raw numeric text to real visual bars, colored by real severity (red ≥75, amber ≥50, green below) — same real data, just visual. Portfolio Allocation Donut: new `PortfolioAllocationDonut.tsx`, genuinely different visual language from the existing "Concentration" horizontal bars (kept, not replaced — not redundant), same real `report.positions` market-value data.
+
+**Deliberately excluded from this round**: Position Cards' mini price-chart requirement. Verified directly that `PriceChart.tsx` still shows "Price history unavailable — check FINNHUB_API_KEY / plan access to /stock/candle" — a real, confirmed, unresolved limitation from much earlier this session. Building new charts against the same uncertain data source risked the same failure; not attempted until that's resolved.
+
+Applied the defensive-typing lesson from the equity curve's recharts bugs to the new donut chart's Tooltip formatter proactively (no narrow explicit type annotations, runtime `typeof` checks instead) — still genuinely unverified against a real build, same caveat as everything else this session.
