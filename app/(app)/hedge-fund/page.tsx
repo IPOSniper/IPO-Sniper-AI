@@ -7,6 +7,7 @@ import PaperTradingPanel from "@/components/hedge-fund/PaperTradingPanel";
 import SystemStatusPanel from "@/components/hedge-fund/SystemStatusPanel";
 import QuantStrategistPanel from "@/components/hedge-fund/QuantStrategistPanel";
 import BatchScannerPanel from "@/components/hedge-fund/BatchScannerPanel";
+import EquityCurvePanel from "@/components/hedge-fund/EquityCurvePanel";
 
 /**
  * Gated by proxy.ts (hedge_admin/admin roles) via the HEDGE_FUND_PREFIX
@@ -38,6 +39,10 @@ export default async function HedgeFundPage() {
                 Real research-based position tracking, a live Alpaca paper-trading connection, and an honest
                 status of what&apos;s actually automated versus not yet built.
             </p>
+
+            <div className="mb-6">
+                <EquityCurvePanel />
+            </div>
 
             <div className="mb-6">
                 <SystemStatusPanel />

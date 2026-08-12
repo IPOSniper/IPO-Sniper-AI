@@ -58,3 +58,11 @@ export interface TradeOrderResult {
     status: string;
     submittedAt: string;
 }
+
+/** One real point in Alpaca's portfolio history timeseries. */
+export interface PortfolioHistoryPoint {
+    timestamp: string; // ISO 8601
+    equity: number;
+    profitLoss: number | null;
+    profitLossPercent: number | null;
+}

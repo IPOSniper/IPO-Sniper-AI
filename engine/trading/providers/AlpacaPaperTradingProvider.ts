@@ -20,6 +20,7 @@ import type {
     TradingPosition,
     TradeOrderRequest,
     TradeOrderResult,
+    PortfolioHistoryPoint,
 } from "../contracts/TradeOrder";
 
 const DEFAULT_BASE_URL = "https://paper-api.alpaca.markets";
@@ -185,6 +186,58 @@ export class AlpacaPaperTradingProvider {
         if (!response.ok && response.status !== 207) {
             throw new Error(`Alpaca cancel-all request failed: ${response.status} ${await this.safeText(response)}`);
         }
+    }
+
+    /**
+     * Real historical equity/P&L timeseries -- Alpaca's documented
+     * /v2/account/portfolio/history endpoint, confirmed via direct
+     * search of Alpaca's own docs and GitHub source before building
+     * this (not guessed). Real response shape: parallel arrays
+     * (timestamp, equity, profit_loss, profit_loss_pct), not an
+     * array of objects -- easy to get wrong if assumed instead of
+     * checked.
+     *
+     * One real ambiguity found while researching this: sources
+     * disagree on whether `timestamp` values are Unix seconds or
+     * milliseconds. Handled defensively below (detects magnitude)
+     * rather than assuming either -- correct either way instead of
+     * silently mis-parsing dates by a factor of 1000.
+     *
+     * NOT yet live-tested -- same caveat as every new endpoint this
+     * session. Verify the real response shape matches on first use.
+     */
+    async getPortfolioHistory(period = "1M", timeframe = "1D"): Promise<PortfolioHistoryPoint[]> {
+
+        const params = new URLSearchParams({ period, timeframe });
+        const response = await fetch(`${this.baseUrl}/v2/account/portfolio/history?${params}`, {
+            headers: this.headers(),
+            cache: "no-store",
+        });
+
+        if (!response.ok) {
+            throw new Error(`Alpaca portfolio history request failed: ${response.status} ${await this.safeText(response)}`);
+        }
+
+        const data = await response.json();
+        const timestamps: number[] = data.timestamp ?? [];
+        const equity: number[] = data.equity ?? [];
+        const profitLoss: number[] = data.profit_loss ?? [];
+        const profitLossPct: number[] = data.profit_loss_pct ?? [];
+
+        return timestamps.map((rawTs, i) => {
+            // Defensive: treat as milliseconds if it's already
+            // millisecond-scale (>= 10^12), otherwise treat as
+            // seconds and convert. Real Unix seconds for any date
+            // after 2001 are 10 digits (~10^9-10^10); milliseconds
+            // would be 13 digits (~10^12-10^13).
+            const ms = rawTs >= 1e12 ? rawTs : rawTs * 1000;
+            return {
+                timestamp: new Date(ms).toISOString(),
+                equity: equity[i] ?? null,
+                profitLoss: profitLoss[i] ?? null,
+                profitLossPercent: profitLossPct[i] ?? null,
+            };
+        }).filter(p => p.equity !== null);
     }
 
     private async safeText(response: Response): Promise<string> {

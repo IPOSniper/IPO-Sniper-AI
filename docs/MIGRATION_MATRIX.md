@@ -119,3 +119,13 @@ Real portfolio-level industry concentration, computed from real Alpaca positions
 New `engine/portfolio/IndustryExposure.ts` (fetch + aggregate) and `IndustryExposurePanel.tsx`, wired onto the Hedge Fund page right after Portfolio Risk. Real percentage bars, real dollar values, real ticker lists per industry.
 
 **Explicitly NOT done this round**: connecting this to RiskEngine as a real gate (e.g. "reject if industry exposure would exceed X% after this trade"). RiskEngine.check() is currently a pure, synchronous function with no network calls — wiring in a real industry check means either making it async (affects every order) or fetching industry data upstream in the caller. That's a real, separate architectural decision, not bundled into this round.
+
+## Portfolio Equity Curve — Visual Dashboard Sprint 1 (added this session)
+
+Real chart, using Alpaca's own real, documented portfolio history endpoint (`/v2/account/portfolio/history`) — confirmed via direct research before building, not guessed. Real parallel-array response format (`timestamp`/`equity`/`profit_loss`/`profit_loss_pct`), with defensive timestamp-unit handling (sources disagreed on seconds vs. milliseconds; detects magnitude rather than assuming either).
+
+Real summary metrics shown alongside the chart: current equity, period return, max drawdown — all computed directly from the real series. **Deliberately does NOT show win rate** — that needs real per-trade outcome data (entry vs. exit), which doesn't exist yet (see the Quant Memory section above). An equity curve answers "is the account growing," which is a different real question from "how good are individual trades."
+
+Placed at the top of the Hedge Fund page, above System Status — the confirmed "heartbeat of the dashboard" priority from the Visual Dashboard proposal. Uses `recharts` since this renders on-screen (not off-screen-captured like the Share Card), so the earlier DOM-measurement risk that caused a real bug there doesn't apply here.
+
+NOT yet live-tested — same caveat as every new Alpaca endpoint integration this session.
