@@ -79,7 +79,7 @@ const MIN_AGREEMENT = 50;
 const MIN_EVIDENCE_QUALITY = 45;
 
 // Standard heuristic parameters -- see docstring above. Not tuned per-ticker.
-const STANDARD_PARAMS = {
+export const STANDARD_PARAMS = {
     targetDteRange: [35, 45] as [number, number],
     targetDeltaRange: [0.30, 0.40] as [number, number],
     suggestedMaxRiskPercent: 1,
@@ -96,6 +96,58 @@ function buildCheck(label: string, value: number, threshold: number): DecisionCh
         passed: value >= threshold,
         gap: Math.round((threshold - value) * 10) / 10,
     };
+}
+
+/**
+ * The actual real, shared contract-matching logic -- promoted out of
+ * QuantStrategist.selectContract() so it's usable WITHOUT requiring
+ * a full committee-gated TradePlan first. This is what makes it
+ * genuinely reusable by both the Quant Strategist flow (which HAS a
+ * real trade plan and its real gates) and manual/assisted trading
+ * (which doesn't need to pass those gates -- a human choosing to
+ * trade on their own judgment shouldn't be blocked by the committee
+ * disagreeing).
+ *
+ * Same real algorithm as before: filters the real chain to contracts
+ * matching the given direction + falling within both target ranges,
+ * then picks the closest match to the midpoint of both ranges. No
+ * fabrication -- returns null if nothing in the real chain qualifies,
+ * never loosens the criteria to force a result.
+ */
+export function findMatchingContract(
+    direction: "call" | "put",
+    targetDteRange: [number, number],
+    targetDeltaRange: [number, number],
+    chain: OptionContract[],
+    now: Date = new Date()
+): OptionContract | null {
+    const [minDte, maxDte] = targetDteRange;
+    const [minDelta, maxDelta] = targetDeltaRange;
+    const midDte = (minDte + maxDte) / 2;
+    const midDelta = (minDelta + maxDelta) / 2;
+
+    const candidates = chain.filter(c => {
+        if (c.type !== direction) return false;
+        if (c.delta === null) return false;
+
+        const dte = Math.round((new Date(c.expirationDate).getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+        if (dte < minDte || dte > maxDte) return false;
+
+        const absDelta = Math.abs(c.delta);
+        if (absDelta < minDelta || absDelta > maxDelta) return false;
+
+        return true;
+    });
+
+    if (candidates.length === 0) return null;
+
+    return candidates.reduce((best, c) => {
+        const dte = (new Date(c.expirationDate).getTime() - now.getTime()) / (1000 * 60 * 60 * 24);
+        const bestDte = (new Date(best.expirationDate).getTime() - now.getTime()) / (1000 * 60 * 60 * 24);
+        const score = Math.abs(dte - midDte) + Math.abs(Math.abs(c.delta!) - midDelta) * 100; // weight delta distance more, it's a 0-1 scale vs. DTE's day scale
+        const bestScore = Math.abs(bestDte - midDte) + Math.abs(Math.abs(best.delta!) - midDelta) * 100;
+        return score < bestScore ? c : best;
+    });
 }
 
 export class QuantStrategist {
@@ -172,47 +224,17 @@ export class QuantStrategist {
     }
 
     /**
-     * Real contract matching -- takes a real option chain (already
-     * fetched from Alpaca) and the plan's real target DTE/delta
-     * ranges, picks the best real match. No fabrication: if nothing
-     * in the real chain falls inside the target ranges, this returns
-     * null rather than picking something outside the plan's own
-     * stated criteria and pretending it matches.
-     *
-     * "Best" = closest to the CENTER of both target ranges
-     * (midpoint DTE, midpoint |delta|) among contracts that fall
-     * within both ranges -- not just the first match found.
+     * Real contract matching -- thin wrapper around
+     * findMatchingContract() (the actual shared logic, promoted out
+     * so it's usable without a full committee-gated TradePlan -- see
+     * that function's docstring). Kept for the two existing callers
+     * (single-ticker Quant Strategist, Batch Scanner), unchanged
+     * behavior, just delegates now instead of containing the logic
+     * directly.
      */
     selectContract(plan: TradePlan, chain: OptionContract[], now: Date = new Date()): OptionContract | null {
         if (plan.direction === "none" || !plan.targetDteRange || !plan.targetDeltaRange) return null;
-
-        const [minDte, maxDte] = plan.targetDteRange;
-        const [minDelta, maxDelta] = plan.targetDeltaRange;
-        const midDte = (minDte + maxDte) / 2;
-        const midDelta = (minDelta + maxDelta) / 2;
-
-        const candidates = chain.filter(c => {
-            if (c.type !== plan.direction) return false;
-            if (c.delta === null) return false;
-
-            const dte = Math.round((new Date(c.expirationDate).getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
-            if (dte < minDte || dte > maxDte) return false;
-
-            const absDelta = Math.abs(c.delta);
-            if (absDelta < minDelta || absDelta > maxDelta) return false;
-
-            return true;
-        });
-
-        if (candidates.length === 0) return null;
-
-        return candidates.reduce((best, c) => {
-            const dte = (new Date(c.expirationDate).getTime() - now.getTime()) / (1000 * 60 * 60 * 24);
-            const bestDte = (new Date(best.expirationDate).getTime() - now.getTime()) / (1000 * 60 * 60 * 24);
-            const score = Math.abs(dte - midDte) + Math.abs(Math.abs(c.delta!) - midDelta) * 100; // weight delta distance more, it's a 0-1 scale vs. DTE's day scale
-            const bestScore = Math.abs(bestDte - midDte) + Math.abs(Math.abs(best.delta!) - midDelta) * 100;
-            return score < bestScore ? c : best;
-        });
+        return findMatchingContract(plan.direction, plan.targetDteRange, plan.targetDeltaRange, chain, now);
     }
 
     /**

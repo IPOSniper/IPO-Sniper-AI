@@ -3,6 +3,7 @@
 import { useState, useTransition, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { placeOrder, killSwitch } from "@/app/(app)/hedge-fund/paper-trading/actions";
+import { findBestContract, type ContractRecommendation } from "@/app/(app)/hedge-fund/contract-finder/actions";
 import type { TradingAccount, TradingPosition, TradeOrderResult, OrderSide } from "@/engine/trading/contracts/TradeOrder";
 
 interface PaperTradingPanelProps {
@@ -41,6 +42,10 @@ export default function PaperTradingPanel({
     const [isPending, startTransition] = useTransition();
     const [ticker, setTicker] = useState("");
     const [assetType, setAssetType] = useState<"equity" | "option">("equity");
+    const [findTicker, setFindTicker] = useState("");
+    const [findDirection, setFindDirection] = useState<"call" | "put">("call");
+    const [finderStatus, setFinderStatus] = useState<"idle" | "finding" | "error" | "not-found">("idle");
+    const [recommendation, setRecommendation] = useState<ContractRecommendation | null>(null);
     const [side, setSide] = useState<OrderSide>("buy");
     const [qty, setQty] = useState("");
     const [reasoning, setReasoning] = useState("");
@@ -59,6 +64,31 @@ export default function PaperTradingPanel({
         }, REFRESH_INTERVAL_MS);
         return () => clearInterval(interval);
     }, [autoRefresh, router]);
+
+    async function handleFindContract() {
+        setFinderStatus("finding");
+        setRecommendation(null);
+
+        const response = await findBestContract(findTicker, findDirection);
+        if (!response.success) {
+            setFinderStatus("error");
+            return;
+        }
+        if (!response.recommendation) {
+            setFinderStatus("not-found");
+            return;
+        }
+        setRecommendation(response.recommendation);
+        setFinderStatus("idle");
+    }
+
+    function handleUseContract() {
+        if (!recommendation) return;
+        setAssetType("option");
+        setTicker(recommendation.contract.symbol);
+        setQty(String(recommendation.estimatedQty));
+        setSide("buy");
+    }
 
     function handleSubmit(e: React.FormEvent) {
         e.preventDefault();
@@ -148,6 +178,83 @@ export default function PaperTradingPanel({
                     </div>
                 ) : (
                     <p className="text-sm text-zinc-600">Loading…</p>
+                )}
+            </div>
+
+            <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-4">
+                <h3 className="mb-1 text-sm font-medium text-zinc-300">Find Best Contract</h3>
+                <p className="mb-3 text-[10px] text-zinc-600">
+                    Real, shared logic — the same findMatchingContract() the Quant Strategist flow uses, with the same real standard DTE/Delta conventions, but without requiring the committee to agree first. Your own judgment, not blocked by the committee.
+                </p>
+                <div className="flex flex-wrap items-end gap-2">
+                    <div>
+                        <label className="mb-1 block text-xs text-zinc-500">Ticker</label>
+                        <input
+                            value={findTicker}
+                            onChange={e => setFindTicker(e.target.value)}
+                            placeholder="CSCO"
+                            className="w-28 rounded-md border border-zinc-700 bg-zinc-950 px-2 py-1 text-sm text-white"
+                        />
+                    </div>
+                    <div>
+                        <label className="mb-1 block text-xs text-zinc-500">Strategy</label>
+                        <select
+                            value={findDirection}
+                            onChange={e => setFindDirection(e.target.value as "call" | "put")}
+                            className="rounded-md border border-zinc-700 bg-zinc-950 px-2 py-1 text-sm text-white"
+                        >
+                            <option value="call">Buy Call</option>
+                            <option value="put">Buy Put</option>
+                        </select>
+                    </div>
+                    <button
+                        type="button"
+                        onClick={handleFindContract}
+                        disabled={finderStatus === "finding" || !findTicker.trim()}
+                        className="rounded-md bg-violet-600 px-4 py-1.5 text-sm font-medium text-white hover:bg-violet-500 disabled:opacity-50"
+                    >
+                        {finderStatus === "finding" ? "Searching…" : "Find Best Contract"}
+                    </button>
+                </div>
+
+                {finderStatus === "error" && <p className="mt-2 text-xs text-red-400">Could not search the real options chain — check the ticker.</p>}
+                {finderStatus === "not-found" && <p className="mt-2 text-xs text-zinc-500">No real contract in the live chain falls within the standard target ranges — honest, not an error.</p>}
+
+                {recommendation && (
+                    <div className="mt-3 rounded-lg border border-violet-900/40 bg-[#160B3D] p-3">
+                        <p className="mb-2 text-[10px] font-semibold uppercase tracking-wide text-violet-300">Recommended Contract</p>
+                        <p className="mb-2 select-all rounded bg-zinc-900 px-1.5 py-1 font-mono text-[10px] text-zinc-300">
+                            {recommendation.contract.symbol}
+                        </p>
+                        <div className="mb-2 grid grid-cols-3 gap-2 text-xs">
+                            <div>
+                                <p className="text-zinc-500">Strike / Exp.</p>
+                                <p className="text-white">${recommendation.contract.strikePrice.toFixed(2)} · {recommendation.contract.expirationDate}</p>
+                            </div>
+                            <div>
+                                <p className="text-zinc-500">Delta / IV</p>
+                                <p className="text-white">
+                                    {recommendation.contract.delta?.toFixed(3) ?? "—"} / {recommendation.contract.impliedVolatility !== null ? `${(recommendation.contract.impliedVolatility * 100).toFixed(1)}%` : "—"}
+                                </p>
+                            </div>
+                            <div>
+                                <p className="text-zinc-500">Bid / Ask</p>
+                                <p className="text-white">
+                                    {recommendation.contract.bidPrice !== null ? `$${recommendation.contract.bidPrice.toFixed(2)}` : "—"} / {recommendation.contract.askPrice !== null ? `$${recommendation.contract.askPrice.toFixed(2)}` : "—"}
+                                </p>
+                            </div>
+                        </div>
+                        <p className="mb-3 text-[10px] text-zinc-500">
+                            Est. cost: {recommendation.estimatedQty} contract{recommendation.estimatedQty !== 1 ? "s" : ""} × real ask = ${recommendation.estimatedCost.toFixed(0)}. Real reason: closest real match to the standard 35–45 DTE / 0.30–0.40 delta target — not an arbitrary pick.
+                        </p>
+                        <button
+                            type="button"
+                            onClick={handleUseContract}
+                            className="w-full rounded-md bg-emerald-700 px-4 py-1.5 text-sm font-medium text-white hover:bg-emerald-600"
+                        >
+                            Use This Contract
+                        </button>
+                    </div>
                 )}
             </div>
 

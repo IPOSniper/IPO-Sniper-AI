@@ -169,3 +169,11 @@ Of the 4 requested Sprint 2 pieces, 2 built real, 1 explicitly declined, 1 skipp
 **Scheduler Status was explicitly NOT built** — no real scheduler exists (System Status already correctly states this), and showing a fake "Next Market Scan: 13 min" countdown would fabricate progress toward a job that will never fire. This is the same category of thing this app has avoided since round 1 (no fake "engines running" animations, no fake live timers).
 
 **Trade Lifecycle Timeline was skipped** — largely redundant with the existing Trade Timeline, since "Approved / Monitoring / Exit Suggested" aren't real distinct tracked states (no position monitoring service exists yet).
+
+## Shared Contract Selection Engine (added this session)
+
+Promoted `QuantStrategist.selectContract()`'s real matching logic into a standalone, module-level `findMatchingContract()` — genuinely reusable without requiring a full committee-gated `TradePlan` first. `selectContract()` kept as a thin wrapper for the two existing callers (Quant Strategist, Batch Scanner) — verified both still work unchanged, same real behavior, just delegating now.
+
+New "Find Best Contract" tool in the manual Place Order form: real ticker + strategy (Call/Put) in, real matching contract out — same real `STANDARD_PARAMS` (35-45 DTE, 0.30-0.40 delta) already used elsewhere, same real quantity-suggestion formula. Shows a real Contract Recommendation Card (symbol, strike/expiration, delta/IV, bid/ask, real estimated cost) with a "Use This Contract" button that fills the OCC symbol in automatically — the user never has to type or construct it manually, even in the manual trading flow.
+
+Deliberately does NOT require committee agreement — a human choosing to trade on their own judgment isn't blocked by the committee, which is the actual point of a separate manual flow existing. Broker-agnostic translation (the Broker Gateway vision) remains explicitly out of scope — that's tied to the still-deferred Multi-Broker vision document, not bundled into this.
