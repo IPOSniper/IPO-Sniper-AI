@@ -51,8 +51,19 @@ export default function EquityCurvePanel() {
     // Explicit typeof/!== checks, not truthy coercion -- a real
     // equity value of exactly 0 is falsy in JS, which would
     // incorrectly be treated as "no data" by a `firstEquity &&` check.
-    const totalReturn = typeof firstEquity === "number" && typeof lastEquity === "number" && firstEquity !== 0
-        ? ((lastEquity - firstEquity) / firstEquity) * 100
+    // Real fix: this previously computed its own return from
+    // data[0].equity to data[last].equity -- which breaks (correctly
+    // returns null, not a bug) whenever the earliest tracked point in
+    // the period happens to be $0 (e.g. a data point from before the
+    // account was ever funded). Alpaca's own response already
+    // provides profit_loss_pct per point, computed against the
+    // correct base_value reference, not naive first-to-last math.
+    // Using the real, already-fetched field instead of a flawed
+    // homemade one -- confirmed via a real production screenshot
+    // that this was actually the issue, not a hypothesis.
+    const lastPoint = data && data.length > 0 ? data[data.length - 1] : null;
+    const totalReturn = lastPoint && typeof lastPoint.profitLossPercent === "number"
+        ? lastPoint.profitLossPercent * 100
         : null;
 
     const maxEquity = data && data.length > 0 ? Math.max(...data.map(p => p.equity)) : null;
