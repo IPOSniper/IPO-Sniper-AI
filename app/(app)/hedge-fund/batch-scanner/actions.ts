@@ -8,6 +8,31 @@ import { BatchScanner, DEFAULT_AUTO_EXECUTION_GATES, type AutoExecutionGates, ty
 import { AlpacaOptionsProvider } from "@/engine/trading/providers/AlpacaOptionsProvider";
 import { AlpacaPaperTradingProvider } from "@/engine/trading/providers/AlpacaPaperTradingProvider";
 import { placeOrder } from "@/app/(app)/hedge-fund/paper-trading/actions";
+import { FinnhubQuoteProvider, type Quote } from "@/engine/evidence/providers/FinnhubQuoteProvider";
+import { classifyMarketRegime, type MarketRegime } from "@/engine/market/marketRegime";
+
+/**
+ * Real market regime for the Hedge Fund page -- same real instruments
+ * and same shared classifyMarketRegime() as Market Pulse, so both
+ * pages report the identical real number rather than two independent
+ * (and potentially disagreeing) copies of this calculation.
+ */
+export async function getMarketRegime(): Promise<MarketRegime | null> {
+    if (!process.env.FINNHUB_API_KEY) return null;
+    try {
+        const provider = new FinnhubQuoteProvider();
+        const symbols = ["DIA", "SPY", "QQQ", "IWM", "GLD", "TLT"];
+        const results = await Promise.allSettled(symbols.map(s => provider.getQuote(s)));
+        const quotes: Record<string, Quote> = {};
+        symbols.forEach((symbol, i) => {
+            const r = results[i];
+            if (r.status === "fulfilled") quotes[symbol] = r.value;
+        });
+        return classifyMarketRegime(quotes);
+    } catch {
+        return null;
+    }
+}
 
 export interface BatchRunResult extends BatchResult {
     executed: boolean;

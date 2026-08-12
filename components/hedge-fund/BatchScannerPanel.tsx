@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
-import { runBatchScan, getDailySummary, type BatchRunResult, type DailySummary } from "@/app/(app)/hedge-fund/batch-scanner/actions";
+import { useState, useEffect } from "react";
+import { runBatchScan, getDailySummary, getMarketRegime, type BatchRunResult, type DailySummary } from "@/app/(app)/hedge-fund/batch-scanner/actions";
 import { DEFAULT_AUTO_EXECUTION_GATES } from "@/engine/quant/BatchScanner";
+import type { MarketRegime } from "@/engine/market/marketRegime";
 
 const OUTCOME_STYLE: Record<string, { label: string; color: string }> = {
     execute: { label: "✅ Execute", color: "text-emerald-400" },
@@ -21,6 +22,26 @@ const DEFAULT_WATCHLIST = "RIOT, IREN, RKLB, KTOS, CLSK";
  * two real, honest limitations (no open-interest/volume data; this
  * is a manual single-click run, not a persistent background
  * process) -- both stated here too, not just in code comments.
+ *
+ * Renamed "Batch Scanner" -> "Daily AI Trading Session" per direct
+ * feedback -- same underlying real logic, just named for what it
+ * actually is.
+ *
+ * Results are now ranked by the real, already-computed
+ * tradeQualityScore (no new scoring model -- this number already
+ * existed, just wasn't used for ordering before). Real Market
+ * Regime shown above the run, using the SAME shared classifier
+ * Market Pulse uses -- NOT the Bull/Bear/High-Vol/Low-Vol categories
+ * from the roadmap sketch, since volatility-regime detection would
+ * need real VIX data, which has been unavailable all session (see
+ * marketRegime.ts's docstring).
+ *
+ * Deliberately still watchlist-based, not "scan the entire market" --
+ * that would need a real stock-universe list and would blow through
+ * free-tier API rate limits almost immediately running full research
+ * per ticker. A real market-wide screener is a separate, future
+ * infrastructure decision, not something to fake with a hardcoded
+ * ticker list dressed up as "the market."
  */
 export default function BatchScannerPanel() {
     const [watchlist, setWatchlist] = useState(DEFAULT_WATCHLIST);
@@ -29,6 +50,11 @@ export default function BatchScannerPanel() {
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
     const [results, setResults] = useState<BatchRunResult[] | null>(null);
     const [summary, setSummary] = useState<DailySummary | null>(null);
+    const [regime, setRegime] = useState<MarketRegime | null>(null);
+
+    useEffect(() => {
+        getMarketRegime().then(setRegime);
+    }, []);
 
     async function handleRun() {
         setStatus("running");
@@ -39,7 +65,10 @@ export default function BatchScannerPanel() {
             const tickers = watchlist.split(",").map(t => t.trim()).filter(Boolean);
             const gates = { ...DEFAULT_AUTO_EXECUTION_GATES, maxAutoExecutionsThisRun: maxTrades };
             const runResults = await runBatchScan(tickers, gates);
-            setResults(runResults);
+            // Real ranking: sort by the plan's own real tradeQualityScore,
+            // descending. "None" plans (no score context) sort last.
+            const ranked = [...runResults].sort((a, b) => (b.plan?.tradeQualityScore ?? -1) - (a.plan?.tradeQualityScore ?? -1));
+            setResults(ranked);
             setSummary(await getDailySummary());
             setStatus("idle");
         } catch (err) {
@@ -53,15 +82,23 @@ export default function BatchScannerPanel() {
     return (
         <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-4">
             <div className="mb-1 flex items-center justify-between">
-                <h2 className="text-lg font-semibold text-white">Batch Scanner</h2>
+                <h2 className="text-lg font-semibold text-white">Daily AI Trading Session</h2>
                 <span className="text-xs text-violet-400">Phase 2A — Autonomous Batch Paper Trading</span>
             </div>
             <p className="mb-3 text-xs text-zinc-500">
                 Real trade plans built for every ticker below, evaluated against stricter auto-execution gates (real committee/evidence thresholds, real open-position count, real bid/ask spread, real portfolio-risk %). Only what clears every gate gets a real paper order — up to the run limit. This is a manual run, triggered by this click — not a background process (no scheduler is deployed; see System Status).
             </p>
             <p className="mb-3 text-[10px] text-amber-500">
-                Real gap, not hidden: no open interest or trading volume data exists anywhere in this app yet — those real liquidity checks are NOT part of this gate, only bid/ask spread is.
+                Real gaps, not hidden: no open interest or trading volume data exists anywhere in this app yet — only bid/ask spread is checked. And this scans a fixed watchlist, not "the entire market" — real market-wide screening would need real infrastructure this app doesn&apos;t have yet.
             </p>
+
+            {regime && (
+                <div className="mb-3 flex items-center gap-2 rounded-md border border-zinc-800 bg-zinc-950 px-3 py-1.5 text-xs">
+                    <span className="text-zinc-500">Market Regime</span>
+                    <span className="font-semibold" style={{ color: regime.color }}>{regime.label}</span>
+                    <span className="text-zinc-600">(same real classification as Market Pulse)</span>
+                </div>
+            )}
 
             <div className="mb-4 space-y-2">
                 <div>
@@ -89,7 +126,7 @@ export default function BatchScannerPanel() {
                     disabled={status === "running"}
                     className="rounded-md bg-violet-600 px-4 py-1.5 text-sm font-medium text-white hover:bg-violet-500 disabled:opacity-50"
                 >
-                    {status === "running" ? "Scanning…" : "Run Batch Scan"}
+                    {status === "running" ? "Scanning…" : "Run Trading Session"}
                 </button>
             </div>
 
@@ -107,15 +144,19 @@ export default function BatchScannerPanel() {
                     <table className="w-full text-xs">
                         <thead>
                             <tr className="border-b border-zinc-800 text-left text-zinc-500">
+                                <th className="pb-2">Rank</th>
                                 <th className="pb-2">Ticker</th>
+                                <th className="pb-2">Trade Quality</th>
                                 <th className="pb-2">Decision</th>
                                 <th className="pb-2">Reason</th>
                             </tr>
                         </thead>
                         <tbody>
-                            {results.map(r => (
+                            {results.map((r, i) => (
                                 <tr key={r.ticker} className="border-b border-zinc-900">
+                                    <td className="py-2 text-zinc-500">{i + 1}</td>
                                     <td className="py-2 font-medium text-white">{r.ticker}</td>
+                                    <td className="py-2 text-zinc-400">{r.plan ? `${r.plan.tradeQualityScore}/100` : "—"}</td>
                                     <td className={`py-2 font-medium ${OUTCOME_STYLE[r.outcome].color}`}>
                                         {r.executed ? "✅ Executed" : OUTCOME_STYLE[r.outcome].label}
                                     </td>

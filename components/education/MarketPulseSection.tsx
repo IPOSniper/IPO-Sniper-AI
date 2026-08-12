@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, ResponsiveContainer, Cell, Tooltip, ReferenceLine } from "recharts";
 import { TrendingUp, TrendingDown, Sparkles, Download, AlertTriangle, ExternalLink, HelpCircle, ShieldQuestion } from "lucide-react";
+import { classifyMarketRegime } from "@/engine/market/marketRegime";
 
 interface Quote {
     price: number;
@@ -163,24 +164,6 @@ function marketBreadth(quotes: Record<string, Quote>): { upCount: number; downCo
  * the paragraph can never contradict each other — this is one
  * classification computed once, presented two ways.
  */
-function sentimentGauge(quotes: Record<string, Quote>): { label: string; position: number; color: string } | null {
-    const equities = ["DIA", "SPY", "QQQ", "IWM"].map(s => quotes[s]).filter(Boolean) as Quote[];
-    const gold = quotes.GLD;
-    const bonds = quotes.TLT;
-    if (equities.length === 0) return null;
-
-    const avgEquity = equities.reduce((sum, q) => sum + q.changePercent, 0) / equities.length;
-    const equitiesDown = avgEquity < -0.05;
-    const equitiesUp = avgEquity > 0.05;
-    const goldUp = gold ? gold.changePercent > 0.5 : false;
-    const bondsUp = bonds ? bonds.changePercent > 0.1 : false;
-
-    if (equitiesDown && (goldUp || bondsUp)) return { label: "Risk-off", position: 15, color: "#F04452" };
-    if (equitiesUp && !goldUp) return { label: "Risk-on", position: 85, color: "#16D47B" };
-    if (equitiesDown) return { label: "Cautious", position: 35, color: "#F5A524" };
-    return { label: "Mixed", position: 50, color: "#F5A524" };
-}
-
 const CONCEPT_LIBRARY: Array<{ term: string; definition: string }> = [
     { term: "Risk-on / Risk-off", definition: "Shorthand for whether investors are broadly seeking riskier assets (stocks, small-caps) or rotating into safer ones (gold, long bonds, cash)." },
     { term: "Basis point (bp)", definition: "1/100th of a percentage point. A move from 4.00% to 4.25% is \"25 basis points\" — more precise than percentages for small rate changes." },
@@ -250,11 +233,11 @@ export default function MarketPulseSection() {
                 mockup's decorative arc — a plain bar and a percentage. */}
             {!loading && data && Object.keys(data.quotes).length > 0 && (
                 <div className="grid gap-3 sm:grid-cols-2">
-                    {sentimentGauge(data.quotes) && (
+                    {classifyMarketRegime(data.quotes) && (
                         <div className="flex items-center justify-between rounded-xl border border-zinc-800 bg-zinc-900 p-4">
                             <span className="text-sm text-zinc-400">Market sentiment</span>
-                            <span className="text-lg font-semibold" style={{ color: sentimentGauge(data.quotes)!.color }}>
-                                {sentimentGauge(data.quotes)!.label}
+                            <span className="text-lg font-semibold" style={{ color: classifyMarketRegime(data.quotes)!.color }}>
+                                {classifyMarketRegime(data.quotes)!.label}
                             </span>
                         </div>
                     )}
