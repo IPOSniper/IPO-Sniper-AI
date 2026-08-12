@@ -97,3 +97,11 @@ Links to the resulting order via `broker_order_id` (not an internal foreign key,
 **Deliberately does NOT include**: outcome data (P&L, exit reason, win/loss) — that needs a real way to detect position closure (a scheduler, or a manual "record outcome" action), neither of which exists yet. Bolting nullable outcome columns onto this table now would blur "decision at the time" with "what happened after," which the roadmap explicitly wants kept separate. No code anywhere reads from this table to change behavior — pure data collection only, per the explicit "avoid self-modifying trading logic early on" instruction.
 
 NOT run against a live database — written against documented Supabase/Postgres syntax, needs running via the Supabase SQL editor or CLI and verifying.
+
+## Quant Phase 2A: batch autonomous paper trading (added this session)
+
+Real batch scan across a real watchlist: builds a real trade plan per ticker (same QuantStrategist as the single-ticker panel), then evaluates against STRICTER auto-execution gates via `BatchScanner.ts` — real committee confidence ≥70%/agreement ≥60%/evidence ≥60% (stricter than the plan-formation thresholds of 60/50/45), real open-position count ≤5, real bid/ask spread ≤15%, real per-trade cost ≤2% of real account equity. Only tickers clearing every gate get a real paper order, capped at a real, enforced `maxAutoExecutionsThisRun` (the "kill switch" — a per-run parameter, since no scheduler exists to make it a persistent toggle).
+
+**Two real, honest gaps, not hidden**: no open interest or trading volume data exists anywhere in this app (Alpaca serves OI via a separate endpoint not yet wired in) — those real liquidity gates from the original proposal are NOT implemented, only bid/ask spread is. And this is a manual, single-click batch run, not a persistent background process — "autonomous" here means "no per-ticker approval click within one run," not "runs while you're away."
+
+Every outcome (execute/skip/reject/wait) logs to `quant_trade_decisions`, same table as the single-ticker flow. Real Daily Summary added, querying that same table for today's real counts.
