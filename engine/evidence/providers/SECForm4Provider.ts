@@ -82,7 +82,15 @@ function parseForm4Xml(xml: string, filingUrl: string): InsiderTransaction[] {
             officerTitle,
             transactionDate,
             transactionCode,
-            acquiredOrDisposed: acquiredDisposed === "A" || acquiredDisposed === "D" ? acquiredDisposed : null,
+            // Written as nested literal returns (not
+            // "condition ? acquiredDisposed : null") so TypeScript
+            // infers the literal union "A" | "D" | null directly --
+            // returning the original string|null-typed variable
+            // failed to narrow correctly under Next.js 16's build-time
+            // type checker (a real, confirmed production build
+            // failure, not a hypothetical), even though this file's
+            // own tsc --noEmit passed throughout development.
+            acquiredOrDisposed: acquiredDisposed === "A" ? "A" : acquiredDisposed === "D" ? "D" : null,
             shares: sharesStr ? Number(sharesStr) : null,
             pricePerShare: priceStr ? Number(priceStr) : null,
             filingUrl,
