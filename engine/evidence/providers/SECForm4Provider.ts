@@ -82,15 +82,22 @@ function parseForm4Xml(xml: string, filingUrl: string): InsiderTransaction[] {
             officerTitle,
             transactionDate,
             transactionCode,
-            // Written as nested literal returns (not
-            // "condition ? acquiredDisposed : null") so TypeScript
-            // infers the literal union "A" | "D" | null directly --
-            // returning the original string|null-typed variable
-            // failed to narrow correctly under Next.js 16's build-time
-            // type checker (a real, confirmed production build
-            // failure, not a hypothetical), even though this file's
-            // own tsc --noEmit passed throughout development.
-            acquiredOrDisposed: acquiredDisposed === "A" ? "A" : acquiredDisposed === "D" ? "D" : null,
+            // Original code (returning the narrowed original
+            // variable) failed a real Vercel production build --
+            // confirmed via an actual build log, not hypothetical.
+            // A first fix attempt (literal ternary values with no
+            // assertion) did NOT actually resolve it either --
+            // confirmed via three separate real deploy attempts,
+            // including one with caching explicitly disabled, all
+            // showing the identical error. Real, corrected
+            // understanding: TypeScript widens string literals back
+            // to `string` in expression positions like this .map()
+            // callback's returned object literal, since there's no
+            // contextual type flowing in from outside to keep them
+            // narrow. An explicit type assertion overrides inference
+            // entirely instead of depending on literal-narrowing
+            // behavior that turned out not to apply here.
+            acquiredOrDisposed: (acquiredDisposed === "A" ? "A" : acquiredDisposed === "D" ? "D" : null) as "A" | "D" | null,
             shares: sharesStr ? Number(sharesStr) : null,
             pricePerShare: priceStr ? Number(priceStr) : null,
             filingUrl,
