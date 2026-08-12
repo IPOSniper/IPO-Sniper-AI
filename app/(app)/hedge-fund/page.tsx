@@ -11,6 +11,7 @@ import BatchScannerPanel from "@/components/hedge-fund/BatchScannerPanel";
 import EquityCurvePanel from "@/components/hedge-fund/EquityCurvePanel";
 import QuantActivityPanel from "@/components/hedge-fund/QuantActivityPanel";
 import PortfolioSummaryCards from "@/components/hedge-fund/PortfolioSummaryCards";
+import ActivityFeedPanel from "@/components/hedge-fund/ActivityFeedPanel";
 import PositionCards from "@/components/hedge-fund/PositionCards";
 import TradeTimeline from "@/components/hedge-fund/TradeTimeline";
 
@@ -58,6 +59,10 @@ export default async function HedgeFundPage() {
                     account={accountResult.account ?? null}
                     positions={tradingPositionsResult.positions ?? []}
                 />
+            </div>
+
+            <div className="mb-6">
+                <ActivityFeedPanel />
             </div>
 
             <div className="mb-6">

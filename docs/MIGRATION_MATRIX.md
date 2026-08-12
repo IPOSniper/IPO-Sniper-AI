@@ -157,3 +157,15 @@ Real, one-glance summary of 7 metrics: Portfolio Value, Cash, Buying Power, Tota
 **Win Rate deliberately omitted** — shown as an honest "—" with a note explaining why (needs real closed-trade entry/exit tracking, which doesn't exist since no closure-detection is built). "Today's P/L" relabeled to "Total Unrealized P/L" — `TradingPosition` only has cumulative unrealized P/L since entry, not an isolated daily change; showing it under the more accurate label rather than mislabeling it.
 
 This completes the originally-scoped "Sprint 1 – Visual Trading Workstation" from the Visual Dashboard proposal, except the TradingView chart, which remains blocked by the same unresolved `PriceChart.tsx` candle-data limitation.
+
+## Sprint 2 (partial, honestly scoped): AI Activity Feed + Position Health Score (added this session)
+
+Of the 4 requested Sprint 2 pieces, 2 built real, 1 explicitly declined, 1 skipped as redundant:
+
+**AI Activity Feed** — new `getActivityFeed()`, merges real `quant_trade_decisions` + `paper_trade_orders` (both real, already-existing tables) into one chronological feed. Verified every column name against the real migration files before writing the query, not assumed. Real event types only (trade plan formed/no-trade, order submitted/filled) — no fabricated events like "Committee upgraded X" or "SEC filing detected," which aren't real logged events anywhere in this system.
+
+**Position Health Score** — added to Position Cards, honestly composed of exactly 3 real components (recommendation-derived score, real conviction, inverse average risk severity) — NOT the originally-proposed 6 (Trend/Volatility/Liquidity excluded, since all three depend on the same broken candle-data source flagged repeatedly this session; a genuine 6th field, "Evidence Quality," doesn't exist separately at this data layer either — `PositionRiskResult` only carries recommendation/conviction/risks).
+
+**Scheduler Status was explicitly NOT built** — no real scheduler exists (System Status already correctly states this), and showing a fake "Next Market Scan: 13 min" countdown would fabricate progress toward a job that will never fire. This is the same category of thing this app has avoided since round 1 (no fake "engines running" animations, no fake live timers).
+
+**Trade Lifecycle Timeline was skipped** — largely redundant with the existing Trade Timeline, since "Approved / Monitoring / Exit Suggested" aren't real distinct tracked states (no position monitoring service exists yet).

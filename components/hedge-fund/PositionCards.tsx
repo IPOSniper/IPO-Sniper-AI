@@ -9,6 +9,40 @@ const RECOMMENDATION_COLOR: Record<string, string> = {
     SELL: "text-red-400 border-red-900/50",
 };
 
+const RECOMMENDATION_SCORE: Record<string, number> = {
+    STRONG_BUY: 100,
+    BUY: 75,
+    HOLD: 50,
+    REDUCE: 25,
+    SELL: 0,
+};
+
+/**
+ * Real Position Health Score -- honestly composed of exactly 3 real
+ * components (recommendation, conviction, risk severity), NOT the
+ * originally-proposed 6 (Committee/Trend/Volatility/Evidence/Risk/
+ * Liquidity). PositionRiskResult genuinely only carries
+ * recommendation/conviction/risks -- no separate "evidence quality"
+ * field exists at this level, and Trend/Volatility/Liquidity all
+ * depend on the same broken candle-data source flagged repeatedly
+ * this session. Building a 6-dimension score by inventing the other
+ * 3 would misrepresent what this number actually measures.
+ */
+function healthScore(risk: PositionRiskResult): number {
+    const recScore = RECOMMENDATION_SCORE[risk.recommendation] ?? 50;
+    const avgSeverity = risk.risks.length > 0
+        ? risk.risks.reduce((sum, r) => sum + r.severity, 0) / risk.risks.length
+        : 0;
+    const safetyScore = 100 - avgSeverity;
+    return Math.round((recScore + risk.conviction + safetyScore) / 3);
+}
+
+function healthLabel(score: number): { label: string; color: string } {
+    if (score >= 70) return { label: "Healthy", color: "text-emerald-400" };
+    if (score >= 40) return { label: "Watch", color: "text-amber-400" };
+    return { label: "At Risk", color: "text-red-400" };
+}
+
 /**
  * Real position cards -- no mini price chart, per direct decision:
  * PriceChart.tsx has a real, confirmed, still-unresolved limitation
@@ -43,7 +77,8 @@ export default function PositionCards({
 
     return (
         <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-4">
-            <h3 className="mb-3 text-sm font-medium text-zinc-300">Position Cards</h3>
+            <h3 className="mb-1 text-sm font-medium text-zinc-300">Position Cards</h3>
+            <p className="mb-3 text-[10px] text-zinc-600">Health score = recommendation + conviction + inverse risk severity (real). Excludes trend/volatility/liquidity — blocked by the same unresolved price-history limitation as PriceChart.tsx.</p>
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
                 {tickers.map(ticker => {
                     const trading = tradingPositions.find(p => p.ticker === ticker);
@@ -85,6 +120,16 @@ export default function PositionCards({
                                     <p className="text-zinc-500">Committee Conviction</p>
                                     <p className="text-white">{risk ? `${risk.conviction}/100` : "—"}</p>
                                 </div>
+                                {risk && (() => {
+                                    const score = healthScore(risk);
+                                    const { label, color } = healthLabel(score);
+                                    return (
+                                        <div className="col-span-2 flex items-center justify-between border-t border-zinc-800 pt-1.5">
+                                            <span className="text-zinc-500">Health</span>
+                                            <span className={`font-medium ${color}`}>{score}/100 — {label}</span>
+                                        </div>
+                                    );
+                                })()}
                             </div>
 
                             {topRisk && (
