@@ -4,10 +4,10 @@ import type { OptionContract } from "../trading/providers/AlpacaOptionsProvider"
 
 /**
  * Phase 1 of the Quant roadmap: converts real committee output into
- * a structured trade plan -- WITHOUT picking a contract. Deliberately
- * scoped this way per direct instruction: "no OCC symbol, no strike,
- * no expiration, just the strategy." Contract selection is a
- * separate, later phase that consumes this plan's real output.
+ * a structured trade plan -- WITHOUT picking a contract (that's
+ * selectContract(), below). No trade plan is produced when any real
+ * gate fails -- see DecisionCheck below for exactly which three,
+ * and why each exists.
  *
  * IMPORTANT, read before trusting any number this produces:
  *
@@ -15,35 +15,54 @@ import type { OptionContract } from "../trading/providers/AlpacaOptionsProvider"
  * "AI-predicted" strategy. Two genuinely different kinds of numbers
  * appear in its output, and conflating them would be dishonest:
  *
- * 1. REAL, derived from actual committee data: direction (call/put/
- *    none), confidence (directly committee.confidence -- excluding
- *    News Analyst, same conservative default used everywhere else
- *    in this app for consistency, since this could inform real
- *    capital decisions), and the plain-language reasoning (built
- *    from real analyst theses, not invented).
+ * 1. REAL, derived from actual committee data: direction, confidence,
+ *    agreement, evidence quality, the three real gate checks, and
+ *    the plain-language reasoning (built from real analyst theses).
  *
  * 2. STANDARD, WELL-ESTABLISHED options-trading conventions, NOT
  *    computed or "AI-optimized" for this specific situation: the
  *    35-45 DTE window, 0.30-0.40 delta target, 25% profit target,
- *    40% stop loss. These are widely-cited retail/prop trading
- *    heuristics (balancing theta decay against acceptable premium
- *    cost) -- real, defensible defaults, but NOT derived from this
- *    ticker's specific situation. A genuinely AI-optimized version
- *    of these parameters (backtested per-sector, per-volatility-
- *    regime, etc.) does not exist and is not what this returns.
+ *    40% stop loss.
  *
- * No trade plan is produced (direction: "none") when: committee
- * confidence is below a real minimum threshold, or agreement is too
- * low -- weak/split committee output shouldn't produce a confident-
- * sounding trade plan.
+ * WHAT THIS DOES NOT CHECK, on purpose: portfolio-level risk
+ * (concentration, cash reserve, daily loss, correlation) is NOT part
+ * of this decision -- that's RiskEngine's job, and it only runs with
+ * real, current account/position data at the moment an order is
+ * actually submitted (see executeTradePlan in
+ * app/(app)/hedge-fund/quant-strategist/actions.ts). Showing a
+ * "Portfolio Exposure: Pass" checkmark here, before RiskEngine has
+ * even run, would be asserting something this class has no way to
+ * know yet.
  */
 
 export type StrategyDirection = "call" | "put" | "none";
+
+export interface DecisionCheck {
+    label: string;
+    value: number;
+    threshold: number;
+    unit: "%" | "";
+    passed: boolean;
+    /** Real distance from the real threshold — used for "what would make this tradable." */
+    gap: number;
+}
 
 export interface TradePlan {
     direction: StrategyDirection;
     /** Directly committee.confidence (News-excluded) -- not a separately invented "strategy confidence." */
     confidence: number;
+    agreement: number;
+    evidenceQuality: number | null;
+    /** The three real gate checks, always populated (even when direction is "none") so the UI can show exactly what passed/failed. */
+    checks: DecisionCheck[];
+    /**
+     * Simple, transparent, documented formula -- NOT a trained/ML
+     * score. tradeQualityScore = average of how far each real check
+     * clears its own real threshold, each capped to [0,100] so one
+     * check maxing out can't hide another failing badly. This is
+     * disclosed math, not a black box.
+     */
+    tradeQualityScore: number;
     reasoning: string[];
     /** Standard heuristic, not computed for this specific situation -- see file docstring. */
     targetDteRange: [number, number] | null;
@@ -55,8 +74,9 @@ export interface TradePlan {
     stopLossPercent: number | null;
 }
 
-const MIN_CONFIDENCE_FOR_A_PLAN = 60;
-const MIN_AGREEMENT_FOR_A_PLAN = 50;
+const MIN_CONFIDENCE = 60;
+const MIN_AGREEMENT = 50;
+const MIN_EVIDENCE_QUALITY = 45;
 
 // Standard heuristic parameters -- see docstring above. Not tuned per-ticker.
 const STANDARD_PARAMS = {
@@ -67,6 +87,17 @@ const STANDARD_PARAMS = {
     stopLossPercent: 40,
 };
 
+function buildCheck(label: string, value: number, threshold: number): DecisionCheck {
+    return {
+        label,
+        value,
+        threshold,
+        unit: "%",
+        passed: value >= threshold,
+        gap: Math.round((threshold - value) * 10) / 10,
+    };
+}
+
 export class QuantStrategist {
 
     buildTradePlan(committee: CommitteeReport): TradePlan {
@@ -75,9 +106,31 @@ export class QuantStrategist {
         // config/shareCardDisclosure.ts and scorePresentation.ts.
         const safe = excludeAnalysts(committee, ["News Analyst"]);
 
+        const votingAnalysts = committee.reports.filter(r => r.confidence > 0 && r.analyst !== "News Analyst");
+        const evidenceQuality = votingAnalysts.length > 0
+            ? Math.round(votingAnalysts.reduce((s, r) => s + r.evidenceStrength, 0) / votingAnalysts.length)
+            : null;
+
+        const checks: DecisionCheck[] = [
+            buildCheck("Committee Confidence", safe.confidence, MIN_CONFIDENCE),
+            buildCheck("Committee Agreement", safe.agreement, MIN_AGREEMENT),
+            buildCheck("Evidence Quality", evidenceQuality ?? 0, MIN_EVIDENCE_QUALITY),
+        ];
+
+        // Transparent, documented formula -- see TradePlan.tradeQualityScore docstring.
+        const tradeQualityScore = Math.round(
+            checks.reduce((sum, c) => sum + Math.min(100, Math.max(0, (c.value / c.threshold) * 100)), 0) / checks.length
+        );
+
+        const failedChecks = checks.filter(c => !c.passed);
+
         const noplan: TradePlan = {
             direction: "none",
             confidence: safe.confidence,
+            agreement: safe.agreement,
+            evidenceQuality,
+            checks,
+            tradeQualityScore,
             reasoning: [],
             targetDteRange: null,
             targetDeltaRange: null,
@@ -86,11 +139,11 @@ export class QuantStrategist {
             stopLossPercent: null,
         };
 
-        if (safe.confidence < MIN_CONFIDENCE_FOR_A_PLAN) {
-            return { ...noplan, reasoning: [`Committee confidence (${safe.confidence}%) is below the ${MIN_CONFIDENCE_FOR_A_PLAN}% minimum for a trade plan.`] };
-        }
-        if (safe.agreement < MIN_AGREEMENT_FOR_A_PLAN) {
-            return { ...noplan, reasoning: [`Committee agreement (${safe.agreement}%) is too low/split for a confident trade plan.`] };
+        if (failedChecks.length > 0) {
+            return {
+                ...noplan,
+                reasoning: failedChecks.map(c => `${c.label} (${c.value}%) is below the ${c.threshold}% minimum — needs +${c.gap}% to pass.`),
+            };
         }
 
         const bullish = safe.recommendation === "STRONG_BUY" || safe.recommendation === "BUY";
@@ -111,8 +164,8 @@ export class QuantStrategist {
         const reasoning = supportingAnalysts.slice(0, 3).map(r => `${r.analyst}: ${r.thesis}`);
 
         return {
+            ...noplan,
             direction: bullish ? "call" : "put",
-            confidence: safe.confidence,
             reasoning,
             ...STANDARD_PARAMS,
         };

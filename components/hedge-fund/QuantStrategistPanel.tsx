@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { getTradePlan, executeTradePlan, type TradePlanResult } from "@/app/(app)/hedge-fund/quant-strategist/actions";
+import type { DecisionCheck } from "@/engine/quant/QuantStrategist";
 
 const DIRECTION_LABEL: Record<string, string> = {
     call: "Long Call",
@@ -12,18 +13,42 @@ const DIRECTION_LABEL: Record<string, string> = {
 const DIRECTION_COLOR: Record<string, string> = {
     call: "text-emerald-400",
     put: "text-red-400",
-    none: "text-zinc-400",
+    none: "text-amber-400",
 };
 
 /**
- * Phase 1 (trade plan) + Phase 2 (real contract selection) of the
- * Quant roadmap. Private (role-gated Hedge Fund page only).
+ * Phase 1 (trade plan + real decision checks) + Phase 2 (real
+ * contract selection) of the Quant roadmap. Private (role-gated
+ * Hedge Fund page only).
+ *
+ * Direct feedback incorporated: the plan's real internal gate
+ * checks (confidence/agreement/evidence quality) are now shown
+ * transparently, not just a one-line reason. A real, documented
+ * Trade Quality score is shown alongside them -- never in place of
+ * them, since a decent average score can still coexist with one
+ * failed gate, and hiding that would be misleading.
  *
  * Execute is a real, explicit action -- reuses the exact same
- * placeOrder/RiskEngine path the manual order form uses (see
- * executeTradePlan in actions.ts). This is not an autonomous
- * execution loop; nothing submits without this click.
+ * placeOrder/RiskEngine path the manual order form uses. This is
+ * not an autonomous execution loop; nothing submits without this
+ * click.
  */
+function DecisionChecklist({ checks }: { checks: DecisionCheck[] }) {
+    return (
+        <div className="mb-3 space-y-1.5">
+            {checks.map(c => (
+                <div key={c.label} className="flex items-center justify-between text-xs">
+                    <span className="text-zinc-400">{c.label}</span>
+                    <span className="flex items-center gap-2">
+                        <span className="text-zinc-500">{c.value}{c.unit} (min {c.threshold}{c.unit})</span>
+                        <span className={c.passed ? "text-emerald-400" : "text-red-400"}>{c.passed ? "✓ Pass" : "✗ Failed"}</span>
+                    </span>
+                </div>
+            ))}
+        </div>
+    );
+}
+
 export default function QuantStrategistPanel() {
     const [ticker, setTicker] = useState("");
     const [status, setStatus] = useState<"idle" | "loading" | "error">("idle");
@@ -74,7 +99,7 @@ export default function QuantStrategistPanel() {
                 <span className="text-xs text-violet-400">Phase 1+2 — Decision + Contract Selection</span>
             </div>
             <p className="mb-3 text-xs text-zinc-500">
-                Converts the real AI Committee&apos;s output into a trade plan, then selects a real matching contract from the live Alpaca options chain. Standard DTE/Delta/risk parameters are real conventions, not AI-optimized for this ticker — see the panel below for what&apos;s derived vs. standard.
+                Real committee data checked against three real gates before any trade plan forms. A &quot;No Trade&quot; result — the committee refusing to act on weak/split evidence — is treated as a real, valid outcome here, not an error.
             </p>
 
             <form onSubmit={handleSubmit} className="mb-4 flex gap-2">
@@ -97,26 +122,35 @@ export default function QuantStrategistPanel() {
             {status === "error" && <p className="text-sm text-red-400">{errorMessage}</p>}
 
             {result && (
-                <div className="rounded-lg border border-zinc-800 bg-zinc-950 p-4">
-                    <div className="mb-3 flex items-center justify-between">
+                <div className={`rounded-lg border p-4 ${result.plan.direction === "none" ? "border-amber-900/50 bg-amber-950/10" : "border-zinc-800 bg-zinc-950"}`}>
+                    <div className="mb-3 flex items-center justify-between border-b border-zinc-800 pb-3">
                         <span className="text-sm text-zinc-400">{result.ticker}</span>
-                        <span className={`text-lg font-bold ${DIRECTION_COLOR[result.plan.direction]}`}>
-                            {DIRECTION_LABEL[result.plan.direction]}
-                        </span>
+                        <div className="text-right">
+                            <p className={`text-lg font-bold ${DIRECTION_COLOR[result.plan.direction]}`}>
+                                {result.plan.direction === "none" ? "🟡 NO TRADE" : DIRECTION_LABEL[result.plan.direction]}
+                            </p>
+                            <p className="text-xs text-zinc-500">Trade Quality {result.plan.tradeQualityScore}/100</p>
+                        </div>
                     </div>
 
-                    <div className="mb-3 flex items-center gap-2 text-xs">
-                        <span className="text-zinc-500">Committee confidence</span>
-                        <span className="font-semibold text-white">{result.plan.confidence}%</span>
-                        <span className="text-zinc-600">(News Analyst excluded)</span>
-                    </div>
+                    <p className="mb-2 text-[10px] uppercase tracking-wide text-zinc-500">Decision Checklist</p>
+                    <DecisionChecklist checks={result.plan.checks} />
 
                     {result.plan.reasoning.length > 0 && (
-                        <div className="mb-3 space-y-1">
+                        <div className="mb-3 space-y-1 border-t border-zinc-800 pt-3">
+                            <p className="text-[10px] uppercase tracking-wide text-zinc-500">
+                                {result.plan.direction === "none" ? "Why no trade" : "Supporting evidence"}
+                            </p>
                             {result.plan.reasoning.map((r, i) => (
-                                <p key={i} className="text-xs leading-snug text-zinc-300">• {r}</p>
+                                <p key={i} className={`text-xs leading-snug ${result.plan.direction === "none" ? "text-amber-300" : "text-zinc-300"}`}>• {r}</p>
                             ))}
                         </div>
+                    )}
+
+                    {result.plan.direction === "none" && (
+                        <p className="mt-2 text-[10px] text-zinc-600">
+                            No real scheduler exists to re-check this automatically (see System Status) — re-run Build Trade Plan later, once new research/evidence is available, to check again.
+                        </p>
                     )}
 
                     {result.plan.direction !== "none" && (
@@ -168,7 +202,7 @@ export default function QuantStrategistPanel() {
                                     </div>
                                     {result.suggestedQty && (
                                         <p className="mb-3 text-[10px] text-zinc-500">
-                                            Suggested qty ({result.suggestedQty}) derived from real account equity (${result.accountEquity?.toLocaleString()}) × the standard {result.plan.suggestedMaxRiskPercent}% risk parameter above — RiskEngine still performs the real, final sizing check on Execute.
+                                            Suggested qty ({result.suggestedQty}) derived from real account equity (${result.accountEquity?.toLocaleString()}) × the standard {result.plan.suggestedMaxRiskPercent}% risk parameter above — RiskEngine still performs the real, final sizing check on Execute (portfolio concentration, cash reserve, daily loss — none of that is checked here yet).
                                         </p>
                                     )}
 
