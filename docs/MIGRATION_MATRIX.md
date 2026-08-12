@@ -149,3 +149,11 @@ No new external API calls in this round — both pieces reuse already-fetched re
 ## Visual Dashboard Sprint 4: Conviction on cards, Trade Timeline, richer Market Regime (added this session)
 
 Three real pieces batched together, all reusing already-fetched real data — no new external calls. Added real `conviction` score (already computed, wasn't shown yet) to Position Cards. New `TradeTimeline.tsx` — real visual execution history from the same real order data `PaperTradingPanel`'s flat list already shows, just a different (vertical timeline) treatment. Extended `classifyMarketRegime()` with real underlying metrics (avg equity change, gold/bonds change, real breadth — count of DIA/SPY/QQQ/IWM currently up) — backward compatible, verified both existing consumers (Market Pulse, Batch Scanner) still compile against the extended type.
+
+## Portfolio Summary Cards — completes Sprint 1 (added this session)
+
+Real, one-glance summary of 7 metrics: Portfolio Value, Cash, Buying Power, Total Unrealized P/L, Open Positions, Largest Position, Risk Budget Remaining (all computed from real account/position data already fetched, no new API calls). Risk Budget Remaining reuses the exact same `DEFAULT_RISK_LIMITS.maxPositionSizePercent` (10%) the real cumulative-exposure RiskEngine fix uses — same real number, not a second calculation.
+
+**Win Rate deliberately omitted** — shown as an honest "—" with a note explaining why (needs real closed-trade entry/exit tracking, which doesn't exist since no closure-detection is built). "Today's P/L" relabeled to "Total Unrealized P/L" — `TradingPosition` only has cumulative unrealized P/L since entry, not an isolated daily change; showing it under the more accurate label rather than mislabeling it.
+
+This completes the originally-scoped "Sprint 1 – Visual Trading Workstation" from the Visual Dashboard proposal, except the TradingView chart, which remains blocked by the same unresolved `PriceChart.tsx` candle-data limitation.
