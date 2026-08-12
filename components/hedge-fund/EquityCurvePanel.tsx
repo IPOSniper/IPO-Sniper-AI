@@ -114,11 +114,11 @@ export default function EquityCurvePanel() {
                         <ResponsiveContainer width="100%" height="100%">
                             <LineChart data={chartData}>
                                 <XAxis dataKey="date" stroke="#71717A" fontSize={10} tickLine={false} axisLine={false} />
-                                <YAxis stroke="#71717A" fontSize={10} tickLine={false} axisLine={false} domain={["auto", "auto"]} tickFormatter={v => `$${(v / 1000).toFixed(0)}k`} />
+                                <YAxis stroke="#71717A" fontSize={10} tickLine={false} axisLine={false} domain={["auto", "auto"]} tickFormatter={v => typeof v === "number" ? `$${(v / 1000).toFixed(0)}k` : String(v)} />
                                 {firstEquity !== null && <ReferenceLine y={firstEquity} stroke="#3F3F46" strokeDasharray="3 3" />}
                                 <Tooltip
                                     contentStyle={{ backgroundColor: "#18181B", border: "1px solid #3F3F46", fontSize: 12 }}
-                                    formatter={(value: number) => [`$${value.toLocaleString()}`, "Equity"]}
+                                    formatter={(value) => [typeof value === "number" ? `$${value.toLocaleString()}` : String(value ?? "—"), "Equity"]}
                                 />
                                 <Line type="monotone" dataKey="equity" stroke="#8B5CF6" strokeWidth={2} dot={false} />
                             </LineChart>
