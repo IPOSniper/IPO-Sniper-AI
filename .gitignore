@@ -32,6 +32,13 @@ yarn-error.log*
 
 # env files (can opt-in for committing if needed)
 .env*
+# .env.example has no real secrets -- it's a template meant to be
+# committed, not a real secrets file. The broad .env* above was
+# silently catching it too, meaning it was never actually version-
+# controlled despite looking like it was in every packaged zip
+# (those zip the working directory directly, not `git archive` --
+# real gap, found while investigating a missing env var).
+!.env.example
 
 # vercel
 .vercel
