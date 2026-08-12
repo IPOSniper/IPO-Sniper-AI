@@ -1,4 +1,5 @@
 import type { Company } from "../../../models/Company";
+import { fetchWithRetry } from "../../../api/fetchWithRetry";
 
 /**
  * Real Finnhub /stock/profile2 client, following the same pattern as
@@ -27,7 +28,7 @@ export class CompanyBuilder {
             throw new Error("FINNHUB_API_KEY is missing.");
         }
 
-        const response = await fetch(
+        const response = await fetchWithRetry(
             `https://finnhub.io/api/v1/stock/profile2?symbol=${ticker}&token=${apiKey}`,
             { cache: "no-store" }
         );

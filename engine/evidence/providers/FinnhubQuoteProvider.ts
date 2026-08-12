@@ -7,6 +7,8 @@
  * Written against documented response shape, not run live.
  */
 
+import { fetchWithRetry } from "../../api/fetchWithRetry";
+
 export interface Quote {
     price: number;
     change: number;
@@ -24,7 +26,7 @@ export class FinnhubQuoteProvider {
             throw new Error("FINNHUB_API_KEY is missing.");
         }
 
-        const response = await fetch(
+        const response = await fetchWithRetry(
             `https://finnhub.io/api/v1/quote?symbol=${symbol}&token=${apiKey}`,
             { cache: "no-store" }
         );
@@ -58,7 +60,7 @@ export class FinnhubQuoteProvider {
             throw new Error("FINNHUB_API_KEY is missing.");
         }
 
-        const response = await fetch(
+        const response = await fetchWithRetry(
             `https://finnhub.io/api/v1/stock/profile2?symbol=${symbol}&token=${apiKey}`,
             { cache: "no-store" }
         );

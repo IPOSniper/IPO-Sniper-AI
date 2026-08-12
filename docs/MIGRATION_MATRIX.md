@@ -177,3 +177,15 @@ Promoted `QuantStrategist.selectContract()`'s real matching logic into a standal
 New "Find Best Contract" tool in the manual Place Order form: real ticker + strategy (Call/Put) in, real matching contract out — same real `STANDARD_PARAMS` (35-45 DTE, 0.30-0.40 delta) already used elsewhere, same real quantity-suggestion formula. Shows a real Contract Recommendation Card (symbol, strike/expiration, delta/IV, bid/ask, real estimated cost) with a "Use This Contract" button that fills the OCC symbol in automatically — the user never has to type or construct it manually, even in the manual trading flow.
 
 Deliberately does NOT require committee agreement — a human choosing to trade on their own judgment isn't blocked by the committee, which is the actual point of a separate manual flow existing. Broker-agnostic translation (the Broker Gateway vision) remains explicitly out of scope — that's tied to the still-deferred Multi-Broker vision document, not bundled into this.
+
+## Finnhub rate-limit fix (added this session)
+
+Real, confirmed production issue: running the Daily AI Trading Session repeatedly in quick succession triggered real Finnhub 429s across every ticker in the watchlist. Found while investigating that `engine/api/FinnhubClient.ts` was already built but genuinely never imported anywhere — meaning none of the 10 real files calling Finnhub directly had any retry/backoff or shared request handling at all.
+
+New `engine/api/fetchWithRetry.ts` — real exponential backoff (1s/2s/4s) on 429s specifically, up to 3 retries, returns the last real response rather than throwing so existing `if (!response.ok)` error handling in every caller stays unchanged. Migrated the 5 core files hit during a real research run: `CompanyBuilder.ts`, `FinnhubQuoteProvider.ts` (both real call sites — quote and market cap), `FinnhubFinancialStatementsProvider.ts`, `FinnhubEstimatesProvider.ts`, `FinnhubCandleProvider.ts`.
+
+**Honest limitation, not glossed over**: this does NOT include a cross-request cache. An in-memory cache would be unreliable on Vercel's serverless functions — each invocation can be a fresh, stateless instance, so a cache "hit" provides no guarantee across a real batch scan. A genuinely reliable cache would need a shared store (Supabase table with a TTL check, or Vercel KV/Redis) — separate, larger infrastructure, not bundled into this fix.
+
+Also added a real 30-second cooldown on the "Run Trading Session" button after each run (success or failure), with a visible countdown — directly prevents the rapid-re-click pattern that caused the original issue, rather than only relying on retry/backoff to absorb it after the fact.
+
+Remaining 5 Finnhub-calling files not yet migrated (`FinnhubFinancialProvider.ts`, `FinnhubIPOProvider.ts`, `fetchMarketHeadlines.ts`, `IndustryExposure.ts`, and `FinnhubClient.ts` itself, still unused) — lower priority since they're not part of the core per-ticker research path a batch scan triggers repeatedly.

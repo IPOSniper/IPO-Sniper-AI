@@ -1,6 +1,7 @@
 import { FinnhubFinancialStatementMapper } from "../mappers/FinnhubFinancialStatementMapper";
 import { FinancialStatement } from "../../types/FinancialStatement";
 import { FinancialStatementsProvider } from "./FinancialStatementsProvider";
+import { fetchWithRetry } from "../../api/fetchWithRetry";
 
 /**
  * Real Finnhub /stock/financials-reported client — actual SEC XBRL
@@ -34,7 +35,7 @@ export class FinnhubFinancialStatementsProvider
     const url =
       `https://finnhub.io/api/v1/stock/financials-reported?symbol=${ticker}&freq=annual&token=${apiKey}`;
 
-    const response = await fetch(url, { cache: "no-store" });
+    const response = await fetchWithRetry(url, { cache: "no-store" });
 
     if (!response.ok) {
       throw new Error(`Finnhub financials-reported request failed: ${response.status}`);

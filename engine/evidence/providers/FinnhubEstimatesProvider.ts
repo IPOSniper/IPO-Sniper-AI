@@ -14,6 +14,8 @@
  * silently wrong number.
  */
 
+import { fetchWithRetry } from "../../api/fetchWithRetry";
+
 export interface RevenueEstimate {
     period: string;
     revenueAvg: number;
@@ -31,7 +33,7 @@ export class FinnhubEstimatesProvider {
 
         const url = `https://finnhub.io/api/v1/stock/revenue-estimate?symbol=${ticker}&freq=annual&token=${apiKey}`;
 
-        const response = await fetch(url, { cache: "no-store" });
+        const response = await fetchWithRetry(url, { cache: "no-store" });
 
         if (!response.ok) {
             throw new Error(`Finnhub revenue estimate request failed: ${response.status}`);

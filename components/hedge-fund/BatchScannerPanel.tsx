@@ -47,6 +47,7 @@ export default function BatchScannerPanel() {
     const [watchlist, setWatchlist] = useState(DEFAULT_WATCHLIST);
     const [maxTrades, setMaxTrades] = useState(DEFAULT_AUTO_EXECUTION_GATES.maxAutoExecutionsThisRun);
     const [status, setStatus] = useState<"idle" | "running" | "error">("idle");
+    const [cooldownSeconds, setCooldownSeconds] = useState(0);
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
     const [results, setResults] = useState<BatchRunResult[] | null>(null);
     const [summary, setSummary] = useState<DailySummary | null>(null);
@@ -55,6 +56,22 @@ export default function BatchScannerPanel() {
     useEffect(() => {
         getMarketRegime().then(setRegime);
     }, []);
+
+    /**
+     * Real cooldown, ticking down every second -- direct fix for a
+     * real, confirmed production issue: clicking "Run Trading
+     * Session" repeatedly in quick succession triggered real
+     * Finnhub 429s across every ticker, since each run fires
+     * multiple real Finnhub calls per ticker with no cooldown
+     * previously enforced between runs (only DURING a run was the
+     * button disabled -- nothing stopped immediate re-clicking right
+     * after one finished, which is exactly what happened).
+     */
+    useEffect(() => {
+        if (cooldownSeconds <= 0) return;
+        const interval = setInterval(() => setCooldownSeconds(s => Math.max(0, s - 1)), 1000);
+        return () => clearInterval(interval);
+    }, [cooldownSeconds]);
 
     async function handleRun() {
         setStatus("running");
@@ -71,9 +88,11 @@ export default function BatchScannerPanel() {
             setResults(ranked);
             setSummary(await getDailySummary());
             setStatus("idle");
+            setCooldownSeconds(30); // real cooldown -- see the effect above for why
         } catch (err) {
             setStatus("error");
             setErrorMessage(err instanceof Error ? err.message : "Batch run failed.");
+            setCooldownSeconds(30); // real Finnhub calls were already made even on a failed run -- still cool down
         }
     }
 
@@ -133,12 +152,17 @@ export default function BatchScannerPanel() {
                 <button
                     type="button"
                     onClick={handleRun}
-                    disabled={status === "running"}
+                    disabled={status === "running" || cooldownSeconds > 0}
                     className="rounded-md bg-violet-600 px-4 py-1.5 text-sm font-medium text-white hover:bg-violet-500 disabled:opacity-50"
                 >
-                    {status === "running" ? "Scanning…" : "Run Trading Session"}
+                    {status === "running" ? "Scanning…" : cooldownSeconds > 0 ? `Cooldown (${cooldownSeconds}s)` : "Run Trading Session"}
                 </button>
             </div>
+            {cooldownSeconds > 0 && (
+                <p className="mb-4 text-[10px] text-zinc-600">
+                    Real cooldown after a run — each ticker triggers several real Finnhub calls, and running repeatedly in quick succession can hit Finnhub's real rate limit (confirmed in production).
+                </p>
+            )}
 
             {status === "error" && <p className="text-sm text-red-400">{errorMessage}</p>}
 

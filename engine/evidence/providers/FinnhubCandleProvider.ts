@@ -13,6 +13,8 @@
  * this fails closed to unverified, same as everything else.
  */
 
+import { fetchWithRetry } from "../../api/fetchWithRetry";
+
 export class FinnhubCandleProvider {
 
     /**
@@ -32,7 +34,7 @@ export class FinnhubCandleProvider {
 
         const url = `https://finnhub.io/api/v1/stock/candle?symbol=${ticker}&resolution=D&from=${from}&to=${to}&token=${apiKey}`;
 
-        const response = await fetch(url, { cache: "no-store" });
+        const response = await fetchWithRetry(url, { cache: "no-store" });
 
         if (!response.ok) {
             throw new Error(`Finnhub candle request failed: ${response.status}`);
