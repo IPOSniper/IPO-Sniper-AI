@@ -189,3 +189,15 @@ New `engine/api/fetchWithRetry.ts` — real exponential backoff (1s/2s/4s) on 42
 Also added a real 30-second cooldown on the "Run Trading Session" button after each run (success or failure), with a visible countdown — directly prevents the rapid-re-click pattern that caused the original issue, rather than only relying on retry/backoff to absorb it after the fact.
 
 Remaining 5 Finnhub-calling files not yet migrated (`FinnhubFinancialProvider.ts`, `FinnhubIPOProvider.ts`, `fetchMarketHeadlines.ts`, `IndustryExposure.ts`, and `FinnhubClient.ts` itself, still unused) — lower priority since they're not part of the core per-ticker research path a batch scan triggers repeatedly.
+
+## Real compliance fix: /r/[slug] News exclusion + QR code connected to the real publish flow (added this session)
+
+Found during the QR-code loose-end check: `/r/[slug]` (a pre-existing, already-public, unauthenticated page — confirmed via proxy.ts's whitelisted `/r/` prefix) showed the RAW committee recommendation/score/confidence/agreement plus four free-text AI-generated sections (executiveSummary, catalysts, risks, committee.summary) with zero News Analyst exclusion — unlike the Share Card, which was specifically built with this exclusion for real NewsAPI/Currents ToS reasons.
+
+**Fix**: recommendation/score/confidence/agreement now recomputed via the same real `excludeAnalysts()` function the Share Card already uses — not a second, parallel implementation. The four free-text sections are REMOVED entirely (not filtered) — there's no reliable way to verify free-text AI synthesis is clean of News-derived content after the fact, so the safe choice is not displaying it, replaced with the same structured, already-vetted Facts + per-analyst-score presentation the Share Card uses. Added a visible "Public Research Snapshot" label and disclosure line, matching the Share Card's own disclosure pattern.
+
+**Real, already-existing infrastructure discovered and reused, not duplicated**: a full "Publish Report" flow (`publishResearchAction`, `PublishReportButton.tsx`, already wired into `CommandBar.tsx`) already existed and already generates the correct `${siteUrl}/r/${slug}` URL. The Share Card's QR code was pointing at `/research/${ticker}` (auth-gated) instead of reusing this real, working flow — fixed to call the same `publishResearchAction()` and encode its real `shareUrl`.
+
+**Real, stated side effect**: generating a Share Card now also publishes the research (`is_public: true`) if not already published, since a QR code that dead-ends at a private page isn't useful. Shown explicitly in the UI, not done silently.
+
+Confirmed via direct code inspection (not assumed): `/r/[slug]` has zero navigation paths into any authenticated route (only links to `/` and `/#disclosures`, both public), and the slug query is scoped to exactly one research snapshot with no broader access.

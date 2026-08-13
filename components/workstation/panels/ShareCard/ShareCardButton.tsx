@@ -4,6 +4,7 @@ import { useRef, useState } from "react";
 import { toPng } from "html-to-image";
 import QRCode from "qrcode";
 import { WorkstationPanelProps } from "../../contracts/WorkstationPanelProps";
+import { publishResearchAction } from "@/app/(app)/research/[ticker]/actions";
 import ShareCard from "./ShareCard";
 import ShareCardCompact from "./ShareCardCompact";
 import { Button } from "@/components/ui/button";
@@ -11,21 +12,29 @@ import { Button } from "@/components/ui/button";
 type CardFormat = "full" | "compact";
 
 /**
- * Generates a real QR code, using a real, battle-tested npm library
- * (not a hand-rolled encoder -- see ShareCard.tsx's docstring on the
- * qrCodeDataUrl prop for why). Only generated when
- * NEXT_PUBLIC_SITE_URL is actually configured -- pointing a QR code
- * at localhost or an empty string would be genuinely useless to
- * anyone scanning it from a phone, so it's better to omit the QR
- * entirely than ship one that can't resolve to anything real.
+ * Real QR code -- FIXED to point at the real, News-excluded public
+ * page (/r/[slug]), not /research/[ticker], which requires
+ * authentication (verified directly against proxy.ts -- everything
+ * under app/(app)/ is auth-gated, confirmed via a real QR scan
+ * landing on the login page, not a hypothetical). Reuses the same
+ * real publishResearchAction() the existing "Publish Report" button
+ * already uses -- not a second, parallel publishing path.
+ *
+ * Real, important side effect, stated plainly rather than done
+ * silently: generating a Share Card now also PUBLISHES the research
+ * (sets is_public: true in research_history) if it isn't published
+ * already, since a QR code that dead-ends at a private page isn't
+ * actually useful. The UI shows this explicitly -- see the notice
+ * rendered below.
  */
-async function generateQRCode(ticker: string): Promise<string | null> {
+async function generateQRCode(research: WorkstationPanelProps["research"]): Promise<string | null> {
     const siteUrl = process.env.NEXT_PUBLIC_SITE_URL;
     if (!siteUrl) return null;
 
     try {
-        const targetUrl = `${siteUrl.replace(/\/$/, "")}/research/${ticker}`;
-        return await QRCode.toDataURL(targetUrl, { margin: 1, width: 200 });
+        const result = await publishResearchAction(research);
+        if (!result.success || !result.shareUrl) return null;
+        return await QRCode.toDataURL(result.shareUrl, { margin: 1, width: 200 });
     } catch {
         return null;
     }
@@ -52,8 +61,10 @@ export default function ShareCardButton({ research }: WorkstationPanelProps) {
             // Real QR, generated fresh each time in case
             // NEXT_PUBLIC_SITE_URL wasn't set at initial page load
             // for some reason -- cheap to regenerate, avoids a stale
-            // undefined sticking around.
-            const qr = await generateQRCode(research.company.ticker);
+            // undefined sticking around. Also (re)publishes the
+            // research via the real, shared publishResearchAction --
+            // see generateQRCode's docstring.
+            const qr = await generateQRCode(research);
             setQrCodeDataUrl(qr ?? undefined);
 
             // Give React a tick to actually paint the QR image into
@@ -96,6 +107,10 @@ export default function ShareCardButton({ research }: WorkstationPanelProps) {
             <div className="pointer-events-none fixed -left-[9999px] top-0">
                 <ShareCardCompact ref={compactCardRef} research={research} qrCodeDataUrl={qrCodeDataUrl} />
             </div>
+
+            <p className="mb-2 text-[10px] text-zinc-600">
+                Generating a card also publishes this research publicly (same as the Publish Report button) so the QR code has somewhere real to go — the public page excludes News Analyst content, same as this card.
+            </p>
 
             {!previewUrl ? (
                 <div className="space-y-2">
