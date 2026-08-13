@@ -86,7 +86,7 @@ export default async function HedgeFundPage() {
             </div>
 
             <div className="mb-6">
-                <TradeTimeline orders={ordersResult.orders ?? []} />
+                <TradeTimeline />
             </div>
 
             <div className="mb-6 max-w-xl">
@@ -120,7 +120,7 @@ export default async function HedgeFundPage() {
 
             {risk.success && risk.report && (
                 <div className="mt-6">
-                    <PortfolioAllocationDonut positions={risk.report.positions} />
+                    <PortfolioAllocationDonut positions={risk.report.positions} account={accountResult.account ?? null} />
                 </div>
             )}
 
