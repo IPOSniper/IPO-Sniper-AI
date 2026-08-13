@@ -233,3 +233,13 @@ Two real gaps confirmed by direct code review, both fixed. **News-Analyst exclus
 Real, confirmed contradiction found via direct user report: "Upcoming Events" claimed "no earnings calendar... data source is wired in yet" while the separate Earnings Preview panel on the SAME research page showed real Finnhub earnings data for the same ticker. UpcomingEvents.tsx's own docstring was accurate when originally written, just stale once FinnhubEarningsCalendarProvider was later built for Earnings Preview.
 
 Made UpcomingEvents async, reuses the same real provider (not a second implementation) to show the real next earnings date alongside the existing real lock-up calculation. Product launches/investor days remain honestly omitted — genuinely still no real data source for those.
+
+## Market Pulse made genuinely public + real QR code added (added this session)
+
+Real fix, same category as the research Share Card's earlier QR problem: added `/education` and `/api/education/` to `proxy.ts`'s `PUBLIC_PREFIXES`, after verifying (not assuming) zero auth dependency anywhere in the real chain (page, `MarketPulseSection.tsx`, `market-pulse/route.ts` all checked directly, all clean).
+
+New real QR code on the Market Pulse share image, pointing at `/education` — genuinely public now. Deliberately switched `share-image/route.tsx` OFF Edge Runtime (was `export const runtime = "edge"`) to standard Node.js runtime first, since `qrcode`'s real Edge Runtime compatibility is genuinely uncertain (researched directly — Buffer support was added to Edge Runtime in 2023, but that's not a guarantee for this specific library) and this app already got burned once this session by a QR code that looked fine but silently failed at runtime. Standard Node.js runtime guarantees identical, already-proven behavior instead of gambling on partial Edge compatibility. `next/og`'s `ImageResponse` works fine on either runtime, so this wasn't a functional tradeoff.
+
+Also fixed a small, real pre-existing inaccuracy while in this file — the CTA text said "See the full AI committee," which doesn't apply to a market-wide card (that's a per-company research concept).
+
+**Real, honest note not swept under the rug**: `/education` lives inside `app/(app)/`, wrapped by the same authenticated `AppShell` (full sidebar/nav) as the rest of the app. An unauthenticated visitor now sees that chrome too, even though every other nav link still correctly redirects to login. Not a security issue — verified the security boundary itself is intact, no protected data is exposed — just a real UX inconsistency worth a genuinely separate public layout (mirroring what `/r/[slug]` has) as a future, bigger follow-up if it matters enough to fix.

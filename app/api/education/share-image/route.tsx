@@ -1,8 +1,18 @@
 import { ImageResponse } from "next/og";
+import QRCode from "qrcode";
 import { FinnhubQuoteProvider, type Quote } from "@/engine/evidence/providers/FinnhubQuoteProvider";
 import { fetchMarketHeadlines } from "@/engine/education/fetchMarketHeadlines";
 
-export const runtime = "edge";
+// Deliberately NOT edge runtime. next/og's ImageResponse works fine
+// on the standard Node.js runtime too -- switched off edge
+// specifically because qrcode's real Edge Runtime compatibility is
+// genuinely uncertain (Buffer support was added to Edge Runtime in
+// 2023, but that doesn't guarantee this specific library/version
+// works flawlessly there), and this app already got burned once this
+// session by a QR code that looked fine but silently failed at
+// runtime. Standard Node.js runtime guarantees identical,
+// already-proven behavior to the working research Share Card's QR
+// generation, rather than gambling on partial Edge compatibility.
 
 /**
  * Same 7 instruments as the full /education page (see
@@ -103,6 +113,22 @@ export async function GET() {
 
     const dateStr = new Date().toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric", year: "numeric" });
     const timeStr = new Date().toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", timeZone: "America/New_York" });
+
+    // Real QR code, same real library/pattern as the working research
+    // Share Card -- points at /education, which is now genuinely
+    // public (verified via proxy.ts's PUBLIC_PREFIXES, not assumed).
+    // Omitted entirely if NEXT_PUBLIC_SITE_URL isn't set, same
+    // reasoning as the research Share Card: a QR pointing at
+    // localhost or nothing is worse than no QR at all.
+    let qrCodeDataUrl: string | null = null;
+    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL;
+    if (siteUrl) {
+        try {
+            qrCodeDataUrl = await QRCode.toDataURL(`${siteUrl.replace(/\/$/, "")}/education`, { margin: 1, width: 160 });
+        } catch {
+            qrCodeDataUrl = null;
+        }
+    }
 
     return new ImageResponse(
         (
@@ -252,8 +278,13 @@ export async function GET() {
                         padding: "12px 18px",
                     }}
                 >
-                    <span style={{ fontSize: 14, fontWeight: 700, color: "#E7E9F0" }}>See the full AI committee inside IPO Sniper AI</span>
-                    <span style={{ fontSize: 18, color: "#C3AEFF" }}>&rarr;</span>
+                    <span style={{ fontSize: 14, fontWeight: 700, color: "#E7E9F0" }}>See full Market Pulse — free, no signup — at IPO Sniper AI</span>
+                    {qrCodeDataUrl ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img src={qrCodeDataUrl} width={64} height={64} alt="QR code to Market Pulse" style={{ borderRadius: 6 }} />
+                    ) : (
+                        <span style={{ fontSize: 18, color: "#C3AEFF" }}>&rarr;</span>
+                    )}
                 </div>
 
                 <div style={{ display: "flex", marginTop: 16, color: "#5A5E70", fontSize: 12 }}>

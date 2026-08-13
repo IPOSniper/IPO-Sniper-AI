@@ -25,7 +25,17 @@ const PUBLIC_PATHS = [
 // different way (/api/cron/* checks CRON_SECRET internally; a user
 // session was never the right check for a scheduler hitting this
 // with a bearer token instead of a browser cookie).
-const PUBLIC_PREFIXES = ["/r/", "/api/cron/"];
+//
+// /education and /api/education/ added here after verifying (not
+// assumed) there's zero auth dependency anywhere in the real chain --
+// checked app/(app)/education/page.tsx, MarketPulseSection.tsx, and
+// api/education/market-pulse/route.ts directly, all clean. Market
+// Pulse is real index/instrument data with no user-specific content,
+// genuinely safe to make public -- and its share-image route
+// specifically NEEDS to be public, since a QR code or Twitter card
+// image has to be fetchable by an unauthenticated crawler/browser,
+// same reason /r/[slug] is public for research Share Cards.
+const PUBLIC_PREFIXES = ["/r/", "/api/cron/", "/education", "/api/education/"];
 
 // Route prefixes that require role 'hedge_admin' or 'admin'.
 // The Hedge Fund workspace lives under app/(app)/hedge-fund/ (same
