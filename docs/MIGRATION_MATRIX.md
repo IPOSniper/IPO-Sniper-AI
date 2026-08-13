@@ -207,3 +207,9 @@ Confirmed via direct code inspection (not assumed): `/r/[slug]` has zero navigat
 Real fix for a real, honest "no match" case (e.g. IREN's live chain not having anything in the standard 35-45 DTE / 0.30-0.40 delta window). Instead of just stating no match, now shows real diagnostics computed from the actual fetched chain: real count of contracts of that direction, real delta range that DOES exist, real available expirations — so the user understands why and can go pick a specific real contract manually via the Options Chain panel instead.
 
 **Not addressed this round**: company-name input (e.g. "Iris Energy" instead of "IREN"). That needs a real ticker-lookup/resolution step, a separate capability not bundled into this fix — ticker-only for now.
+
+## Fix real silent QR failure (added this session)
+
+Real regression found via direct user report: after round56 wired the QR code to the real publish flow, the QR section started disappearing from the Share Card entirely with zero indication why. Root cause: `generateQRCode()`'s bare `catch { return null; }` silently swallowed any real failure, and even `publishResearchAction`'s own structured `{success: false, error: string}` result was being discarded rather than surfaced — same silent-failure anti-pattern already fixed once this session for `AnthropicClient.ts`.
+
+Fixed: `generateQRCode()` now returns `{dataUrl, reason}` instead of a bare nullable string, surfacing the real failure reason (from `publishResearchAction`'s own error message, or the real caught exception) in the UI as an amber notice when the card generates successfully but the QR specifically doesn't. Next real failure will show an actual reason instead of the QR section just silently vanishing.

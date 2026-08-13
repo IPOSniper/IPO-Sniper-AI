@@ -27,16 +27,25 @@ type CardFormat = "full" | "compact";
  * actually useful. The UI shows this explicitly -- see the notice
  * rendered below.
  */
-async function generateQRCode(research: WorkstationPanelProps["research"]): Promise<string | null> {
+async function generateQRCode(research: WorkstationPanelProps["research"]): Promise<{ dataUrl: string | null; reason: string | null }> {
     const siteUrl = process.env.NEXT_PUBLIC_SITE_URL;
-    if (!siteUrl) return null;
+    if (!siteUrl) return { dataUrl: null, reason: "NEXT_PUBLIC_SITE_URL is not configured." };
 
     try {
         const result = await publishResearchAction(research);
-        if (!result.success || !result.shareUrl) return null;
-        return await QRCode.toDataURL(result.shareUrl, { margin: 1, width: 200 });
-    } catch {
-        return null;
+        // Real fix: publishResearchAction already returns a real,
+        // specific error message on failure (e.g. "You must be
+        // signed in to publish.") -- previously discarded here,
+        // meaning the QR code could silently vanish from the card
+        // with zero indication why. Same silent-failure pattern
+        // already fixed once this session for AnthropicClient.ts.
+        if (!result.success) return { dataUrl: null, reason: result.error ?? "Publishing failed." };
+        if (!result.shareUrl) return { dataUrl: null, reason: "Publish succeeded but returned no shareable URL." };
+
+        const dataUrl = await QRCode.toDataURL(result.shareUrl, { margin: 1, width: 200 });
+        return { dataUrl, reason: null };
+    } catch (err) {
+        return { dataUrl: null, reason: err instanceof Error ? err.message : "QR generation failed." };
     }
 }
 
@@ -48,6 +57,7 @@ export default function ShareCardButton({ research }: WorkstationPanelProps) {
     const [previewUrl, setPreviewUrl] = useState<string | null>(null);
     const [activeFormat, setActiveFormat] = useState<CardFormat>("full");
     const [qrCodeDataUrl, setQrCodeDataUrl] = useState<string | undefined>(undefined);
+    const [qrFailureReason, setQrFailureReason] = useState<string | null>(null);
 
     async function handleGenerate(format: CardFormat) {
         const ref = format === "full" ? fullCardRef : compactCardRef;
@@ -65,7 +75,8 @@ export default function ShareCardButton({ research }: WorkstationPanelProps) {
             // research via the real, shared publishResearchAction --
             // see generateQRCode's docstring.
             const qr = await generateQRCode(research);
-            setQrCodeDataUrl(qr ?? undefined);
+            setQrCodeDataUrl(qr.dataUrl ?? undefined);
+            setQrFailureReason(qr.reason);
 
             // Give React a tick to actually paint the QR image into
             // the off-screen DOM before capturing it -- same reason
@@ -148,6 +159,12 @@ export default function ShareCardButton({ research }: WorkstationPanelProps) {
 
             {status === "error" && (
                 <p className="mt-2 text-sm text-red-400">{errorMessage}</p>
+            )}
+
+            {status === "idle" && previewUrl && qrFailureReason && (
+                <p className="mt-2 text-xs text-amber-400">
+                    Card generated, but the QR code couldn&apos;t be created: {qrFailureReason}
+                </p>
             )}
         </div>
     );
