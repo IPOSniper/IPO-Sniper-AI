@@ -33,8 +33,15 @@ export default function PublishReportButton({ research }: WorkstationPanelProps)
     }
 
     if (status === "done" && shareUrl) {
+        // Deliberately doesn't explain the QR code -- the card
+        // itself already says "Scan for full report," which is a
+        // clearer CTA than a caption trying to describe it. Also
+        // deliberately says "public evidence," not just "research" --
+        // the card's own footer discloses that proprietary/licensed
+        // inputs are omitted, so the caption shouldn't imply
+        // completeness the card itself doesn't claim.
         const xIntent = `https://twitter.com/intent/tweet?text=${encodeURIComponent(
-            `${research.company.ticker} research from IPO Sniper AI — every claim sourced, nothing faked:`
+            `${research.company.ticker} — public evidence from IPO Sniper AI's AI Committee, every claim sourced:`
         )}&url=${encodeURIComponent(shareUrl)}`;
 
         return (
