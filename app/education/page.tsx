@@ -1,9 +1,19 @@
 import MarketPulseSection from "@/components/education/MarketPulseSection";
 import { GraduationCap } from "lucide-react";
 
+/**
+ * Moved from app/(app)/education/page.tsx to app/education/page.tsx
+ * (same URL either way -- Next.js route groups like (app) don't
+ * affect the URL path, only which layout wraps the page). This is
+ * the real fix for a real UX issue: unauthenticated visitors were
+ * seeing the full authenticated app shell (sidebar, ticker search,
+ * login prompt) on a page meant to be genuinely public. Content
+ * itself is unchanged -- only the layout/access shell changed, per
+ * direct instruction.
+ */
 export default function EducationPage() {
     return (
-        <div className="text-white">
+        <div>
             <div className="flex items-center gap-3 mb-1">
                 <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-violet-600/20 text-violet-400">
                     <GraduationCap size={18} />

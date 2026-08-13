@@ -243,3 +243,13 @@ New real QR code on the Market Pulse share image, pointing at `/education` — g
 Also fixed a small, real pre-existing inaccuracy while in this file — the CTA text said "See the full AI committee," which doesn't apply to a market-wide card (that's a per-company research concept).
 
 **Real, honest note not swept under the rug**: `/education` lives inside `app/(app)/`, wrapped by the same authenticated `AppShell` (full sidebar/nav) as the rest of the app. An unauthenticated visitor now sees that chrome too, even though every other nav link still correctly redirects to login. Not a security issue — verified the security boundary itself is intact, no protected data is exposed — just a real UX inconsistency worth a genuinely separate public layout (mirroring what `/r/[slug]` has) as a future, bigger follow-up if it matters enough to fix.
+
+## Genuinely public /education layout (added this session)
+
+Real fix for the real UX gap found last round: `/education` moved from `app/(app)/education/page.tsx` to `app/education/page.tsx` (same URL — Next.js route groups don't affect the URL path, only which layout wraps it). Old file removed to avoid a routing conflict. Content itself unchanged, only the layout/access shell.
+
+New `app/education/layout.tsx` — genuinely separate from `AppShell` (confirmed no Context dependency before detaching, not assumed). Lean public header (`IPO Sniper AI | Education | Sign In`) — **deliberately left out "Research" and "About"** from the originally suggested nav, since neither has a real destination yet (no general `/research` index page exists; public research snapshots only exist per-slug at `/r/[slug]`, not as a browsable list). Linking to something that doesn't exist would be a real UX bug, not a shortcut worth taking.
+
+Real detail handled correctly: an already-signed-in user can still reach this page via the authenticated sidebar, so the header checks real Supabase auth state server-side and shows "Back to App" (→ `/workstation`, verified as the real home destination) instead of a confusing "Sign In" button when a session exists.
+
+No `proxy.ts` changes needed for the move itself — middleware matches on URL path, not file location, and `/education` was already in `PUBLIC_PREFIXES` from the prior round.
