@@ -257,3 +257,7 @@ No `proxy.ts` changes needed for the move itself — middleware matches on URL p
 ## System Status collapsed + moved to bottom of Hedge Fund page (added this session)
 
 Real, explicitly-flagged top-priority UI change: "Move System Status much lower... probably the biggest UI change I'd make." SystemStatusPanel now client-side, collapsed by default to a compact one-line badge (real per-stage dot indicators, real "5/7 live" count), expandable on click to the original full detail view. Moved from the top of the Hedge Fund page to the very bottom, after Industry Exposure — preserves full transparency (nothing hidden or removed, same real stage data) without letting operational documentation dominate the page's primary visual space.
+
+## Quant Activity visual upgrade (added this session)
+
+Real visual upgrade to Quant Activity's 4 numbers — larger (3xl), color-coded cards for an "instant system read" per direct feedback. Kept the existing real labels (Decisions/Trade Plans/Executed/No Trade) rather than the originally-suggested Approved/Rejected/Pending — confirmed there's no clean, structured way to query that specific breakdown from `quant_trade_decisions` (only the batch flow embeds outcome type in free-text reasoning, not a real column). Deliberately did NOT add a Risk Used/Available row here even though requested — that real number already lives in Portfolio Summary Cards ("Risk Budget Remaining"), and duplicating it risked the exact "two numbers for the same thing in different places" issue an earlier audit this session found and fixed.
