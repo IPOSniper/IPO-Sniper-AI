@@ -40,6 +40,9 @@ export default async function DecisionFunnelPanel() {
                 <h3 className="text-sm font-medium text-zinc-300">Decision Funnel</h3>
                 <span className="text-[10px] text-zinc-600">Real — last 7 days, from Quant Memory</span>
             </div>
+            <p className="mb-3 text-[10px] text-zinc-600">
+                "Trade Plans Formed" → "Executed" isn&apos;t an automatic gate — for single-ticker plans, execution requires an explicit human click by design (Assisted mode). Low or 0% here means plans are awaiting review, not that a filter is rejecting them.
+            </p>
             <div className="space-y-3">
                 {stages.map((stage, i) => {
                     const widthPct = maxValue > 0 ? (stage.value / maxValue) * 100 : 0;

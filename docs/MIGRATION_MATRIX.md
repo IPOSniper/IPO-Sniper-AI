@@ -285,3 +285,7 @@ Two real pieces from a much larger proposed dashboard, both genuinely buildable 
 ## Fix real build failure: exported sync helper in a "use server" file (added this session)
 
 Real, confirmed build error: `"use server"` files treat every exported function as a Server Action, and Server Actions must be async — even a pure, synchronous helper with no `await` calls. `classifyExecutionSource()` (added for Execution Breakdown) was exported unnecessarily; it's only ever used internally within the same file. Removed the `export` keyword rather than forcing it `async` for no real reason. Proactively checked every other `"use server"` file in the codebase for the same mistake — found none.
+
+## Decision Funnel honesty clarification (added this session)
+
+Real, important clarification added directly to Decision Funnel: "Trade Plans Formed → Executed" isn't an automatic gate for the single-ticker Quant Strategist flow — execution requires an explicit human click by design (Assisted mode). A 0% conversion here means plans are awaiting review, not that a hidden filter is rejecting them. Added after a proposal suggested this gap represented an automatic rejection process, which isn't accurate for this specific flow — Batch Scanner's autonomous path is the one with real, automatic gates. Also confirmed directly (not assumed) that "No Trade" and "Trade Plans Formed" are already correctly mutually-exclusive real categories in `getDailySummary()` — a proposal suggested this distinction didn't exist yet; it already did, just wasn't labeled clearly enough to be obvious.
