@@ -133,6 +133,29 @@ export default function QuantStrategistPanel() {
                         </div>
                     </div>
 
+                    {result.earningsWithinHoldingPeriod && (
+                        <div className="mb-3 rounded-lg border border-amber-900/50 bg-amber-950/20 p-2.5 text-xs text-amber-300">
+                            ⚠ Real earnings report on {result.earningsWithinHoldingPeriod.reportDate} ({result.earningsWithinHoldingPeriod.daysUntil} days away) falls within this plan&apos;s holding period — a real gap-risk source the standard DTE/Delta parameters don&apos;t otherwise account for.
+                        </div>
+                    )}
+
+                    {result.scenarios && (
+                        <div className="mb-3 grid grid-cols-3 gap-2 border-b border-zinc-800 pb-3 text-center text-xs">
+                            <div className="rounded-md bg-emerald-950/30 p-2">
+                                <p className="text-sm font-bold text-emerald-400">{result.scenarios.bull.probability}%</p>
+                                <p className="text-[9px] text-zinc-500">🐂 Bull</p>
+                            </div>
+                            <div className="rounded-md bg-zinc-800/40 p-2">
+                                <p className="text-sm font-bold text-zinc-300">{result.scenarios.base.probability}%</p>
+                                <p className="text-[9px] text-zinc-500">Base</p>
+                            </div>
+                            <div className="rounded-md bg-red-950/30 p-2">
+                                <p className="text-sm font-bold text-red-400">{result.scenarios.bear.probability}%</p>
+                                <p className="text-[9px] text-zinc-500">🐻 Bear</p>
+                            </div>
+                        </div>
+                    )}
+
                     <p className="mb-2 text-[10px] uppercase tracking-wide text-zinc-500">Decision Checklist</p>
                     <DecisionChecklist checks={result.plan.checks} />
 

@@ -219,3 +219,11 @@ Fixed: `generateQRCode()` now returns `{dataUrl, reason}` instead of a bare null
 Round60's error-surfacing fix worked exactly as intended — the real cause was a genuine Postgres RLS violation: `research_history`'s original migration deliberately had no UPDATE policy (append-only snapshots by design), but `publishResearchAction`'s real `.upsert()` needs to UPDATE an existing row whenever the same ticker is re-published. Two features built with genuinely incompatible assumptions about the same table.
 
 **New migration** `20260813000000_research_history_update_policy.sql` — adds a real UPDATE policy scoped identically to the existing insert/select policies (`auth.uid() = user_id`), not a broad re-opening of the table. **Requires running this migration against the live Supabase database** (via SQL editor or CLI) — code alone can't fix an RLS policy; the database itself needs the new policy applied.
+
+## Real earnings-date awareness + bull/base/bear scenario display on Quant Strategist (added this session)
+
+Two real gaps confirmed by direct code review, both fixed. **News-Analyst exclusion confirmed deliberate, not accidental** — checked QuantStrategist.ts directly, found this was explicitly scoped ("Same News-Analyst exclusion used throughout this app for anything that could inform a real capital decision") for the same real NewsAPI production-use restriction as the public Share Card, not an oversight. NOT reopened.
+
+**Earnings-date awareness (new, real)**: reuses `FinnhubEarningsCalendarProvider` (already built and used elsewhere) — a completely separate, safe data source from the News exclusion (scheduling facts, not restricted content). Checks the actual selected contract's real expiration date when available (most precise), falling back to the plan's target DTE range otherwise. Flags with a real warning when an upcoming earnings report falls within the plan's holding period — a real gap-risk source the standard DTE/Delta parameters don't otherwise account for.
+
+**Bull/base/bear probability display (new, real)**: exposes `investmentDecision.scenarios`, already computed elsewhere in the research pipeline (same real data the Share Card's probability chips use) but never surfaced on the Quant Strategist panel — shown regardless of which single direction the plan picked, giving real visibility into both sides.

@@ -7,6 +7,8 @@ import { QuantStrategist, type TradePlan } from "@/engine/quant/QuantStrategist"
 import { AlpacaOptionsProvider, type OptionContract } from "@/engine/trading/providers/AlpacaOptionsProvider";
 import { AlpacaPaperTradingProvider } from "@/engine/trading/providers/AlpacaPaperTradingProvider";
 import { placeOrder } from "@/app/(app)/hedge-fund/paper-trading/actions";
+import type { ScenarioAnalysis } from "@/engine/models/InvestmentDecisionReport";
+import { FinnhubEarningsCalendarProvider } from "@/engine/earnings/providers/FinnhubEarningsCalendarProvider";
 
 export interface TradePlanResult {
     /** Row id in quant_trade_decisions, when logging succeeded — passed to executeTradePlan to link the eventual order back to this decision. Null when Supabase isn't configured or the insert failed; execution still works either way, just without the link. */
@@ -16,6 +18,26 @@ export interface TradePlanResult {
     selectedContract: OptionContract | null;
     suggestedQty: number | null;
     accountEquity: number | null;
+    /**
+     * Real bull/base/bear probabilities, already computed elsewhere
+     * in the research pipeline (investmentDecision.scenarios) --
+     * shown regardless of which single direction the plan picked, so
+     * the user can see the real read on BOTH sides, not just the one
+     * Quant is proposing. Null when the research didn't produce a
+     * real investmentDecision (e.g. very thin evidence).
+     */
+    scenarios: ScenarioAnalysis | null;
+    /**
+     * Real earnings-date check via Finnhub's calendar (a completely
+     * separate, safe data source from the News-Analyst exclusion
+     * concern above -- earnings dates are scheduling facts, not
+     * NewsAPI-restricted content). Flags when the plan's own target
+     * holding period would span an upcoming earnings report, a real
+     * gap risk the plan's standard DTE/delta parameters don't
+     * otherwise account for. Null when no confirmed upcoming report
+     * exists or the calendar lookup failed.
+     */
+    earningsWithinHoldingPeriod: { reportDate: string; daysUntil: number } | null;
 }
 
 /**
@@ -109,6 +131,11 @@ export async function getTradePlan(ticker: string): Promise<
         const strategist = new QuantStrategist();
         const plan = strategist.buildTradePlan(research.committee);
 
+        // Real bull/base/bear probabilities, already computed
+        // elsewhere in the research pipeline -- shown regardless of
+        // which single direction the plan picked.
+        const scenarios: ScenarioAnalysis | null = research.investmentDecision?.scenarios ?? null;
+
         let selectedContract: OptionContract | null = null;
         let suggestedQty: number | null = null;
         let accountEquity: number | null = null;
@@ -130,9 +157,38 @@ export async function getTradePlan(ticker: string): Promise<
             }
         }
 
+        // Real earnings-date check via Finnhub's calendar -- a
+        // separate, safe data source from the News-Analyst exclusion
+        // above (scheduling facts, not NewsAPI-restricted content).
+        // Checked against the actual selected contract's real
+        // expiration when one exists (most precise); falls back to
+        // the plan's target DTE range's upper bound otherwise (e.g.
+        // when no contract could be selected, still worth knowing if
+        // earnings falls inside the window being targeted).
+        let earningsWithinHoldingPeriod: TradePlanResult["earningsWithinHoldingPeriod"] = null;
+        if (plan.direction !== "none") {
+            try {
+                const entry = await new FinnhubEarningsCalendarProvider().getNext(normalizedTicker);
+                if (entry) {
+                    const daysUntil = Math.round((new Date(entry.reportDate).getTime() - Date.now()) / (1000 * 60 * 60 * 24));
+                    const horizonDays = selectedContract
+                        ? Math.round((new Date(selectedContract.expirationDate).getTime() - Date.now()) / (1000 * 60 * 60 * 24))
+                        : plan.targetDteRange?.[1] ?? null;
+
+                    if (horizonDays !== null && daysUntil >= 0 && daysUntil <= horizonDays) {
+                        earningsWithinHoldingPeriod = { reportDate: entry.reportDate, daysUntil };
+                    }
+                }
+            } catch {
+                // Real calendar lookup can fail independently --
+                // earningsWithinHoldingPeriod just stays null, doesn't
+                // block the rest of the real plan.
+            }
+        }
+
         const decisionId = await logDecision(normalizedTicker, plan, selectedContract);
 
-        return { success: true, result: { decisionId, ticker: normalizedTicker, plan, selectedContract, suggestedQty, accountEquity } };
+        return { success: true, result: { decisionId, ticker: normalizedTicker, plan, selectedContract, suggestedQty, accountEquity, scenarios, earningsWithinHoldingPeriod } };
     } catch (err) {
         return { success: false, error: err instanceof Error ? err.message : "Failed to load research." };
     }
