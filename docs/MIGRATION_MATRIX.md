@@ -227,3 +227,9 @@ Two real gaps confirmed by direct code review, both fixed. **News-Analyst exclus
 **Earnings-date awareness (new, real)**: reuses `FinnhubEarningsCalendarProvider` (already built and used elsewhere) — a completely separate, safe data source from the News exclusion (scheduling facts, not restricted content). Checks the actual selected contract's real expiration date when available (most precise), falling back to the plan's target DTE range otherwise. Flags with a real warning when an upcoming earnings report falls within the plan's holding period — a real gap-risk source the standard DTE/Delta parameters don't otherwise account for.
 
 **Bull/base/bear probability display (new, real)**: exposes `investmentDecision.scenarios`, already computed elsewhere in the research pipeline (same real data the Share Card's probability chips use) but never surfaced on the Quant Strategist panel — shown regardless of which single direction the plan picked, giving real visibility into both sides.
+
+## Fix real inconsistency: UpcomingEvents now shows real earnings dates (added this session)
+
+Real, confirmed contradiction found via direct user report: "Upcoming Events" claimed "no earnings calendar... data source is wired in yet" while the separate Earnings Preview panel on the SAME research page showed real Finnhub earnings data for the same ticker. UpcomingEvents.tsx's own docstring was accurate when originally written, just stale once FinnhubEarningsCalendarProvider was later built for Earnings Preview.
+
+Made UpcomingEvents async, reuses the same real provider (not a second implementation) to show the real next earnings date alongside the existing real lock-up calculation. Product launches/investor days remain honestly omitted — genuinely still no real data source for those.
