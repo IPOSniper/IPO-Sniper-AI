@@ -37,7 +37,22 @@ export class AnthropicClient {
         });
 
         if (!response.ok) {
-            throw new Error(`Anthropic API request failed: ${response.status}`);
+            // Real fix: previously only captured response.status,
+            // discarding the actual error body Anthropic sends back
+            // (e.g. which field is invalid, or an auth/model issue) --
+            // meaning neither the user nor anyone debugging this could
+            // ever see WHY a request failed, only that it did. Every
+            // "AI analysis unavailable" message in the UI has been
+            // showing just a bare status code because of this.
+            const errorBody = await response.text().catch(() => "");
+            let errorDetail = errorBody;
+            try {
+                const parsed = JSON.parse(errorBody);
+                errorDetail = parsed?.error?.message ?? errorBody;
+            } catch {
+                // errorBody wasn't JSON -- use it raw, already assigned above.
+            }
+            throw new Error(`Anthropic API request failed: ${response.status}${errorDetail ? ` — ${errorDetail}` : ""}`);
         }
 
         const data = await response.json();
