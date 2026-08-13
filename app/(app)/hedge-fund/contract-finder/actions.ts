@@ -10,6 +10,25 @@ export interface ContractRecommendation {
     estimatedCost: number;
 }
 
+/** Real diagnostic info from the actual chain, shown when nothing matches the standard params — so "no match" is explained, not just stated. */
+export interface ChainDiagnostics {
+    availableExpirations: string[];
+    deltaRange: [number, number] | null;
+    contractsOfDirection: number;
+}
+
+function buildDiagnostics(chain: OptionContract[], direction: "call" | "put"): ChainDiagnostics {
+    const relevant = chain.filter(c => c.type === direction);
+    const deltas = relevant.map(c => c.delta).filter((d): d is number => d !== null).map(Math.abs);
+    const expirations = [...new Set(relevant.map(c => c.expirationDate))].sort();
+
+    return {
+        availableExpirations: expirations,
+        deltaRange: deltas.length > 0 ? [Math.min(...deltas), Math.max(...deltas)] : null,
+        contractsOfDirection: relevant.length,
+    };
+}
+
 /**
  * Real contract finder for MANUAL trading -- uses the exact same
  * shared findMatchingContract() the Quant Strategist flow uses, with
@@ -25,9 +44,16 @@ export interface ContractRecommendation {
  * same standard risk %. RiskEngine still performs the real, final
  * sizing check at order submission; this is a starting suggestion,
  * not an override.
+ *
+ * When nothing in the real chain falls within the standard target
+ * ranges (a real, honest outcome -- e.g. a ticker that only has
+ * weeklies or LEAPS, not standard-window monthlies), this now also
+ * returns real diagnostics from the actual chain (real available
+ * expirations, real delta range that DOES exist) instead of just
+ * "no match" with no way to understand why or what to try instead.
  */
 export async function findBestContract(ticker: string, direction: "call" | "put"): Promise<
-    { success: true; recommendation: ContractRecommendation | null } | { success: false; error: string }
+    { success: true; recommendation: ContractRecommendation | null; diagnostics?: ChainDiagnostics } | { success: false; error: string }
 > {
     const normalizedTicker = ticker.trim().toUpperCase();
     if (!normalizedTicker) {
@@ -39,7 +65,7 @@ export async function findBestContract(ticker: string, direction: "call" | "put"
         const contract = findMatchingContract(direction, STANDARD_PARAMS.targetDteRange, STANDARD_PARAMS.targetDeltaRange, chain);
 
         if (!contract) {
-            return { success: true, recommendation: null };
+            return { success: true, recommendation: null, diagnostics: buildDiagnostics(chain, direction) };
         }
 
         const account = await new AlpacaPaperTradingProvider().getAccount();

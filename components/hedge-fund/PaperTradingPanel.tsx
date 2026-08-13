@@ -3,7 +3,7 @@
 import { useState, useTransition, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { placeOrder, killSwitch } from "@/app/(app)/hedge-fund/paper-trading/actions";
-import { findBestContract, type ContractRecommendation } from "@/app/(app)/hedge-fund/contract-finder/actions";
+import { findBestContract, type ContractRecommendation, type ChainDiagnostics } from "@/app/(app)/hedge-fund/contract-finder/actions";
 import type { TradingAccount, TradingPosition, TradeOrderResult, OrderSide } from "@/engine/trading/contracts/TradeOrder";
 
 interface PaperTradingPanelProps {
@@ -46,6 +46,7 @@ export default function PaperTradingPanel({
     const [findDirection, setFindDirection] = useState<"call" | "put">("call");
     const [finderStatus, setFinderStatus] = useState<"idle" | "finding" | "error" | "not-found">("idle");
     const [recommendation, setRecommendation] = useState<ContractRecommendation | null>(null);
+    const [diagnostics, setDiagnostics] = useState<ChainDiagnostics | null>(null);
     const [side, setSide] = useState<OrderSide>("buy");
     const [qty, setQty] = useState("");
     const [reasoning, setReasoning] = useState("");
@@ -68,6 +69,7 @@ export default function PaperTradingPanel({
     async function handleFindContract() {
         setFinderStatus("finding");
         setRecommendation(null);
+        setDiagnostics(null);
 
         const response = await findBestContract(findTicker, findDirection);
         if (!response.success) {
@@ -76,6 +78,7 @@ export default function PaperTradingPanel({
         }
         if (!response.recommendation) {
             setFinderStatus("not-found");
+            setDiagnostics(response.diagnostics ?? null);
             return;
         }
         setRecommendation(response.recommendation);
@@ -218,7 +221,25 @@ export default function PaperTradingPanel({
                 </div>
 
                 {finderStatus === "error" && <p className="mt-2 text-xs text-red-400">Could not search the real options chain — check the ticker.</p>}
-                {finderStatus === "not-found" && <p className="mt-2 text-xs text-zinc-500">No real contract in the live chain falls within the standard target ranges — honest, not an error.</p>}
+                {finderStatus === "not-found" && (
+                    <div className="mt-2 rounded-lg border border-zinc-800 bg-zinc-950 p-3 text-xs">
+                        <p className="mb-2 text-zinc-500">No real contract in the live chain falls within the standard 35–45 DTE / 0.30–0.40 delta target — honest, not an error. Here's what the real chain actually has:</p>
+                        {diagnostics && diagnostics.contractsOfDirection > 0 ? (
+                            <div className="space-y-1 text-zinc-400">
+                                <p>Real {findDirection}s available: {diagnostics.contractsOfDirection}</p>
+                                {diagnostics.deltaRange && (
+                                    <p>Real delta range in the chain: {diagnostics.deltaRange[0].toFixed(2)} – {diagnostics.deltaRange[1].toFixed(2)} (target was 0.30–0.40)</p>
+                                )}
+                                {diagnostics.availableExpirations.length > 0 && (
+                                    <p>Real expirations available: {diagnostics.availableExpirations.slice(0, 6).join(", ")}{diagnostics.availableExpirations.length > 6 ? ` (+${diagnostics.availableExpirations.length - 6} more)` : ""}</p>
+                                )}
+                                <p className="mt-1 text-zinc-600">Use the Options Chain panel on the research page for this ticker to pick a specific real contract manually.</p>
+                            </div>
+                        ) : (
+                            <p className="text-zinc-600">The real chain has no {findDirection} contracts at all for this ticker right now.</p>
+                        )}
+                    </div>
+                )}
 
                 {recommendation && (
                     <div className="mt-3 rounded-lg border border-violet-900/40 bg-[#160B3D] p-3">

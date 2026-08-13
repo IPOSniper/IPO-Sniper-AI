@@ -201,3 +201,9 @@ Found during the QR-code loose-end check: `/r/[slug]` (a pre-existing, already-p
 **Real, stated side effect**: generating a Share Card now also publishes the research (`is_public: true`) if not already published, since a QR code that dead-ends at a private page isn't useful. Shown explicitly in the UI, not done silently.
 
 Confirmed via direct code inspection (not assumed): `/r/[slug]` has zero navigation paths into any authenticated route (only links to `/` and `/#disclosures`, both public), and the slug query is scoped to exactly one research snapshot with no broader access.
+
+## Real chain diagnostics on Find Best Contract "no match" (added this session)
+
+Real fix for a real, honest "no match" case (e.g. IREN's live chain not having anything in the standard 35-45 DTE / 0.30-0.40 delta window). Instead of just stating no match, now shows real diagnostics computed from the actual fetched chain: real count of contracts of that direction, real delta range that DOES exist, real available expirations — so the user understands why and can go pick a specific real contract manually via the Options Chain panel instead.
+
+**Not addressed this round**: company-name input (e.g. "Iris Energy" instead of "IREN"). That needs a real ticker-lookup/resolution step, a separate capability not bundled into this fix — ticker-only for now.
