@@ -17,6 +17,10 @@
  * component is where "Running" would become true instead of asserted.
  */
 
+"use client";
+
+import { useState } from "react";
+
 type StageStatus = "live" | "not-built";
 
 interface Stage {
@@ -36,14 +40,46 @@ const STAGES: Stage[] = [
 ];
 
 export default function SystemStatusPanel() {
+    const [expanded, setExpanded] = useState(false);
     const liveCount = STAGES.filter(s => s.status === "live").length;
+
+    if (!expanded) {
+        return (
+            <button
+                type="button"
+                onClick={() => setExpanded(true)}
+                className="flex w-full items-center justify-between rounded-lg border border-zinc-800 bg-zinc-900 p-3 text-left hover:border-zinc-700"
+            >
+                <div className="flex items-center gap-2">
+                    <span className="h-2 w-2 rounded-full bg-emerald-500" />
+                    <span className="text-sm font-medium text-white">System Status</span>
+                    <span className="text-xs text-zinc-500">{liveCount}/{STAGES.length} live</span>
+                </div>
+                <div className="flex items-center gap-2">
+                    {STAGES.map(stage => (
+                        <span
+                            key={stage.name}
+                            title={stage.name}
+                            className={`h-1.5 w-1.5 rounded-full ${stage.status === "live" ? "bg-emerald-500" : "bg-zinc-700"}`}
+                        />
+                    ))}
+                    <span className="ml-2 text-xs text-zinc-600">Click for details</span>
+                </div>
+            </button>
+        );
+    }
 
     return (
         <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-4">
-            <div className="mb-3 flex items-center justify-between">
+            <button
+                type="button"
+                onClick={() => setExpanded(false)}
+                className="mb-3 flex w-full items-center justify-between text-left"
+            >
                 <h2 className="text-lg font-semibold text-white">System Status</h2>
-                <span className="text-xs text-zinc-500">{liveCount} of {STAGES.length} stages live</span>
-            </div>
+                <span className="text-xs text-zinc-500">{liveCount} of {STAGES.length} stages live — click to collapse</span>
+            </button>
+
             <p className="mb-4 text-xs text-zinc-500">
                 What&apos;s actually running right now, not a simulated pipeline. Stages marked &ldquo;not built&rdquo; are real, honest gaps — not hidden.
             </p>

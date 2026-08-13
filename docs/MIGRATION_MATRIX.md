@@ -253,3 +253,7 @@ New `app/education/layout.tsx` — genuinely separate from `AppShell` (confirmed
 Real detail handled correctly: an already-signed-in user can still reach this page via the authenticated sidebar, so the header checks real Supabase auth state server-side and shows "Back to App" (→ `/workstation`, verified as the real home destination) instead of a confusing "Sign In" button when a session exists.
 
 No `proxy.ts` changes needed for the move itself — middleware matches on URL path, not file location, and `/education` was already in `PUBLIC_PREFIXES` from the prior round.
+
+## System Status collapsed + moved to bottom of Hedge Fund page (added this session)
+
+Real, explicitly-flagged top-priority UI change: "Move System Status much lower... probably the biggest UI change I'd make." SystemStatusPanel now client-side, collapsed by default to a compact one-line badge (real per-stage dot indicators, real "5/7 live" count), expandable on click to the original full detail view. Moved from the top of the Hedge Fund page to the very bottom, after Industry Exposure — preserves full transparency (nothing hidden or removed, same real stage data) without letting operational documentation dominate the page's primary visual space.

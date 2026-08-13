@@ -66,10 +66,6 @@ export default async function HedgeFundPage() {
             </div>
 
             <div className="mb-6">
-                <SystemStatusPanel />
-            </div>
-
-            <div className="mb-6">
                 <QuantStrategistPanel />
             </div>
 
@@ -130,6 +126,10 @@ export default async function HedgeFundPage() {
 
             <div className="mt-6">
                 <IndustryExposurePanel />
+            </div>
+
+            <div className="mt-6">
+                <SystemStatusPanel />
             </div>
         </div>
     );
