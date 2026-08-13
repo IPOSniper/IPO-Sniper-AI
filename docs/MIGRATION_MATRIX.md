@@ -213,3 +213,9 @@ Real fix for a real, honest "no match" case (e.g. IREN's live chain not having a
 Real regression found via direct user report: after round56 wired the QR code to the real publish flow, the QR section started disappearing from the Share Card entirely with zero indication why. Root cause: `generateQRCode()`'s bare `catch { return null; }` silently swallowed any real failure, and even `publishResearchAction`'s own structured `{success: false, error: string}` result was being discarded rather than surfaced — same silent-failure anti-pattern already fixed once this session for `AnthropicClient.ts`.
 
 Fixed: `generateQRCode()` now returns `{dataUrl, reason}` instead of a bare nullable string, surfacing the real failure reason (from `publishResearchAction`'s own error message, or the real caught exception) in the UI as an amber notice when the card generates successfully but the QR specifically doesn't. Next real failure will show an actual reason instead of the QR section just silently vanishing.
+
+## Real root cause found for the QR failure: missing RLS UPDATE policy (added this session)
+
+Round60's error-surfacing fix worked exactly as intended — the real cause was a genuine Postgres RLS violation: `research_history`'s original migration deliberately had no UPDATE policy (append-only snapshots by design), but `publishResearchAction`'s real `.upsert()` needs to UPDATE an existing row whenever the same ticker is re-published. Two features built with genuinely incompatible assumptions about the same table.
+
+**New migration** `20260813000000_research_history_update_policy.sql` — adds a real UPDATE policy scoped identically to the existing insert/select policies (`auth.uid() = user_id`), not a broad re-opening of the table. **Requires running this migration against the live Supabase database** (via SQL editor or CLI) — code alone can't fix an RLS policy; the database itself needs the new policy applied.
