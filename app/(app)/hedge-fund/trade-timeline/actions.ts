@@ -30,6 +30,25 @@ export interface TimelineEvent {
  * (reasoning text prefix), not a separately tracked boolean column.
  * See that function's docstring for the two real prefixes checked.
  */
+export type ExecutionSource = "manual" | "assisted" | "autonomous";
+
+/**
+ * Real, honest 3-way categorization -- not just AI vs. manual.
+ * "assisted" (Quant Strategist prefix) means a human reviewed a
+ * real AI-suggested trade plan and explicitly clicked Execute --
+ * still a real human action in the loop, distinct from "autonomous"
+ * (Batch Scanner prefix), where zero human click occurred. Both
+ * prefixes verified directly against their real call sites
+ * (quant-strategist/actions.ts, batch-scanner/actions.ts) before
+ * building this, not assumed.
+ */
+export function classifyExecutionSource(reasoning: string | null): ExecutionSource {
+    if (!reasoning) return "manual";
+    if (reasoning.startsWith("Batch Scanner (autonomous):")) return "autonomous";
+    if (reasoning.startsWith("Quant Strategist:")) return "assisted";
+    return "manual";
+}
+
 /**
  * Real, honest heuristic for AI-driven vs. manual -- checks for
  * either real reasoning prefix this app actually writes:
@@ -42,8 +61,7 @@ export interface TimelineEvent {
  * manual.
  */
 function isAiDriven(reasoning: string | null): boolean {
-    if (!reasoning) return false;
-    return reasoning.startsWith("Quant Strategist:") || reasoning.startsWith("Batch Scanner (autonomous):");
+    return classifyExecutionSource(reasoning) !== "manual";
 }
 
 export async function getTradeTimeline(limit = 20): Promise<TimelineEvent[]> {
@@ -81,5 +99,46 @@ export async function getTradeTimeline(limit = 20): Promise<TimelineEvent[]> {
         });
     } catch {
         return [];
+    }
+}
+
+export interface ExecutionBreakdown {
+    manual: number;
+    assisted: number;
+    autonomous: number;
+    total: number;
+}
+
+/**
+ * Real execution-source breakdown -- only counts orders that
+ * actually reached Alpaca (real broker_order_id set), not
+ * risk-blocked attempts. Answers "of what Quant actually executed,
+ * how much required a human click vs. zero human involvement" --
+ * the real "Automation" question, distinct from "Capability"
+ * (System Status) and "Effectiveness" (blocked on real trade-outcome
+ * tracking, not built).
+ */
+export async function getExecutionBreakdown(): Promise<ExecutionBreakdown | null> {
+    if (!isSupabaseConfigured()) return null;
+    try {
+        const supabase = await createClient();
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return null;
+
+        const { data, error } = await supabase
+            .from("paper_trade_orders")
+            .select("reasoning, broker_order_id")
+            .eq("user_id", user.id)
+            .not("broker_order_id", "is", null);
+
+        if (error || !data) return null;
+
+        const breakdown = { manual: 0, assisted: 0, autonomous: 0, total: data.length };
+        for (const row of data) {
+            breakdown[classifyExecutionSource(row.reasoning)]++;
+        }
+        return breakdown;
+    } catch {
+        return null;
     }
 }
