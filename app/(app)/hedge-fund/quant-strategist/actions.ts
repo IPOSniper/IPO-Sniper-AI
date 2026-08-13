@@ -8,6 +8,7 @@ import { AlpacaOptionsProvider, type OptionContract } from "@/engine/trading/pro
 import { AlpacaPaperTradingProvider } from "@/engine/trading/providers/AlpacaPaperTradingProvider";
 import { placeOrder } from "@/app/(app)/hedge-fund/paper-trading/actions";
 import type { ScenarioAnalysis } from "@/engine/models/InvestmentDecisionReport";
+import { checkAutonomousExecutionAllowed } from "@/app/(app)/hedge-fund/quant-control/actions";
 import { FinnhubEarningsCalendarProvider } from "@/engine/earnings/providers/FinnhubEarningsCalendarProvider";
 
 export interface TradePlanResult {
@@ -203,6 +204,14 @@ export async function getTradePlan(ticker: string): Promise<
  * and the order succeeds, links the two records together.
  */
 export async function executeTradePlan(contractSymbol: string, qty: number, planSummary: string, decisionId?: string | null) {
+    // Real, server-side enforcement -- see checkAutonomousExecutionAllowed's
+    // docstring. Checked here, not just in the UI, so this can't be
+    // bypassed by calling the server action directly.
+    const control = await checkAutonomousExecutionAllowed("assisted");
+    if (!control.allowed) {
+        return { success: false as const, error: control.reason };
+    }
+
     const result = await placeOrder(contractSymbol, "buy", qty, `Quant Strategist: ${planSummary}`, undefined, "option");
 
     if (result.success && result.order && decisionId) {

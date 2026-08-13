@@ -9,6 +9,7 @@ import SystemStatusPanel from "@/components/hedge-fund/SystemStatusPanel";
 import QuantStrategistPanel from "@/components/hedge-fund/QuantStrategistPanel";
 import BatchScannerPanel from "@/components/hedge-fund/BatchScannerPanel";
 import EquityCurvePanel from "@/components/hedge-fund/EquityCurvePanel";
+import QuantControlPanel from "@/components/hedge-fund/QuantControlPanel";
 import QuantActivityPanel from "@/components/hedge-fund/QuantActivityPanel";
 import DecisionFunnelPanel from "@/components/hedge-fund/DecisionFunnelPanel";
 import ExecutionBreakdownPanel from "@/components/hedge-fund/ExecutionBreakdownPanel";
@@ -47,6 +48,10 @@ export default async function HedgeFundPage() {
                 Real research-based position tracking, a live Alpaca paper-trading connection, and an honest
                 status of what&apos;s actually automated versus not yet built.
             </p>
+
+            <div className="mb-6">
+                <QuantControlPanel />
+            </div>
 
             <div className="mb-6">
                 <EquityCurvePanel />

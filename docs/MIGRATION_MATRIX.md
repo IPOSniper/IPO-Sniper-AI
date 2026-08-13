@@ -289,3 +289,17 @@ Real, confirmed build error: `"use server"` files treat every exported function 
 ## Decision Funnel honesty clarification (added this session)
 
 Real, important clarification added directly to Decision Funnel: "Trade Plans Formed → Executed" isn't an automatic gate for the single-ticker Quant Strategist flow — execution requires an explicit human click by design (Assisted mode). A 0% conversion here means plans are awaiting review, not that a hidden filter is rejecting them. Added after a proposal suggested this gap represented an automatic rejection process, which isn't accurate for this specific flow — Batch Scanner's autonomous path is the one with real, automatic gates. Also confirmed directly (not assumed) that "No Trade" and "Trade Plans Formed" are already correctly mutually-exclusive real categories in `getDailySummary()` — a proposal suggested this distinction didn't exist yet; it already did, just wasn't labeled clearly enough to be obvious.
+
+## Quant Control: real, server-enforced Kill Switch + Autonomous Mode state (added this session)
+
+Phase 1D + 1E of the Autonomous Operations roadmap, built independent of the Vercel Pro decision. New `quant_control_state` table (append-only log, same real pattern as `quant_trade_decisions`/`paper_trade_orders` — current state is the most recent row) with 5 real states: `OFF`, `ASSISTED`, `AUTONOMOUS`, `SAFE_MODE`, `EMERGENCY_STOP`.
+
+**Real, server-side enforcement, not just a UI toggle**: `checkAutonomousExecutionAllowed()` is called directly inside `executeTradePlan()` (Quant Strategist) and inside Batch Scanner's real per-attempt execution loop — both check the real current state before placing any order, and reject with a real, specific reason if not allowed. This can't be bypassed by calling either server action directly, since the check lives inside the action itself, not the UI.
+
+**Real, deliberate design decision, stated explicitly in code**: this does NOT gate the fully-manual order form. Only AI-driven execution paths are checked. A human explicitly submitting their own order (including to close a position during an emergency) isn't "autonomous trading" and isn't blocked by a control meant to govern autonomous behavior.
+
+**Real semantics connected to the existing `ExecutionSource` categorization**: `AUTONOMOUS` state allows both assisted (human-click-Execute) and autonomous (Batch Scanner, zero human click) execution. `ASSISTED` state allows only assisted — Batch Scanner's autonomous execution is blocked even in this state. `OFF`/`SAFE_MODE`/`EMERGENCY_STOP` block both.
+
+**Important, real behavioral consequence of the safe default**: defaults to `OFF` for any user with no state row yet. This means Quant Strategist's Execute button and Batch Scanner's autonomous execution will both be blocked immediately after this deploys, until the state is explicitly set to `ASSISTED` or `AUTONOMOUS` via the new Quant Control panel (now at the very top of the Hedge Fund page, above the Equity Curve, given its safety-critical nature).
+
+**Requires the real migration to run against the live database** before any of this works — code alone can't create the table.

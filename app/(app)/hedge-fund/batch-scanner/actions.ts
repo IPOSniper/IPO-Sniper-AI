@@ -10,6 +10,7 @@ import { AlpacaPaperTradingProvider } from "@/engine/trading/providers/AlpacaPap
 import { placeOrder } from "@/app/(app)/hedge-fund/paper-trading/actions";
 import { FinnhubQuoteProvider, type Quote } from "@/engine/evidence/providers/FinnhubQuoteProvider";
 import { classifyMarketRegime, type MarketRegime } from "@/engine/market/marketRegime";
+import { checkAutonomousExecutionAllowed } from "@/app/(app)/hedge-fund/quant-control/actions";
 
 /**
  * Real market regime for the Hedge Fund page -- same real instruments
@@ -97,6 +98,27 @@ export async function runBatchScan(
             let orderStatus: string | null = null;
 
             if (evaluation.outcome === "execute" && executionsThisRun < gates.maxAutoExecutionsThisRun && selectedContract && suggestedQty) {
+                // Real, server-side enforcement -- checked per real
+                // execution attempt (not once at the start of the
+                // run), so a mid-run state change (e.g. someone hits
+                // Emergency Stop while a batch is in progress) takes
+                // effect immediately rather than waiting for the next
+                // run.
+                const control = await checkAutonomousExecutionAllowed("autonomous");
+                if (!control.allowed) {
+                    results.push({
+                        ticker,
+                        outcome: "reject",
+                        reason: control.reason,
+                        plan,
+                        selectedContract,
+                        suggestedQty,
+                        executed: false,
+                        orderStatus: null,
+                    });
+                    continue;
+                }
+
                 const orderResult = await placeOrder(
                     selectedContract.symbol,
                     "buy",
