@@ -265,7 +265,17 @@ async function logOrderAttempt(params: LogOrderAttemptParams): Promise<void> {
             return;
         }
 
-        await supabase.from("paper_trade_orders").insert({
+        // Real fix: Supabase JS's .insert() does NOT throw on
+        // database-level errors (RLS violations, constraint
+        // failures, etc.) -- it returns { data, error }. The
+        // previous code never checked .error, meaning a failed
+        // insert wouldn't even reach the catch block below -- it
+        // would fail completely silently, no exception at all.
+        // Confirmed this was the actual issue via direct user
+        // report: Trade Timeline (which queries this table) showed
+        // "No orders yet" while real orders clearly existed in
+        // Alpaca's own history.
+        const { error } = await supabase.from("paper_trade_orders").insert({
             user_id: user.id,
             ticker: params.ticker,
             side: params.side,
@@ -277,7 +287,18 @@ async function logOrderAttempt(params: LogOrderAttemptParams): Promise<void> {
             risk_blocked_reason: params.riskBlockedReason,
             reasoning: params.reasoning ?? null,
         });
-    } catch {
-        // Swallow — see docstring above.
+
+        if (error) {
+            // This is a fire-and-forget audit log call with no
+            // direct UI feedback path (the real order already
+            // succeeded on Alpaca's side by the time this runs) --
+            // console.error at least makes the real reason visible
+            // in Vercel's function logs instead of vanishing
+            // entirely, so a future investigation isn't starting
+            // from zero again.
+            console.error("paper_trade_orders insert failed:", error.message);
+        }
+    } catch (err) {
+        console.error("logOrderAttempt threw:", err instanceof Error ? err.message : err);
     }
 }
