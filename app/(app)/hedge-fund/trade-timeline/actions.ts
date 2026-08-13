@@ -42,7 +42,7 @@ export type ExecutionSource = "manual" | "assisted" | "autonomous";
  * (quant-strategist/actions.ts, batch-scanner/actions.ts) before
  * building this, not assumed.
  */
-export function classifyExecutionSource(reasoning: string | null): ExecutionSource {
+function classifyExecutionSource(reasoning: string | null): ExecutionSource {
     if (!reasoning) return "manual";
     if (reasoning.startsWith("Batch Scanner (autonomous):")) return "autonomous";
     if (reasoning.startsWith("Quant Strategist:")) return "assisted";
