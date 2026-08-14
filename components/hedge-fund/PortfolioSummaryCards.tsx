@@ -1,19 +1,22 @@
 import type { TradingAccount, TradingPosition } from "@/engine/trading/contracts/TradeOrder";
 import { DEFAULT_RISK_LIMITS } from "@/engine/trading/risk/RiskEngine";
+import { getClosedTradesSummary } from "@/app/(app)/hedge-fund/closed-trades/actions";
 
 /**
- * Real portfolio summary cards -- 7 of the 8 originally requested
- * metrics, all computed from real data already fetched on the page.
- * "Win Rate" is deliberately NOT included -- it needs real per-trade
- * outcome data (entry vs. exit on CLOSED trades), which doesn't
- * exist yet (no closure-detection is built). Showing a fabricated
- * win rate would be worse than omitting it.
+ * Real portfolio summary cards -- all 8 originally requested metrics.
+ * "Win Rate" now uses real closed-trade data (see
+ * closed-trades/actions.ts's real FIFO matching) when at least one
+ * real closed trade exists -- previously permanently showed "—"
+ * since no closure-detection existed. Still shows the honest "—"
+ * placeholder when zero real closed trades exist yet, rather than
+ * a fabricated 0%/100% that would misrepresent "no data" as "no
+ * wins."
  *
  * "Total Unrealized P/L" (not "Today's P/L") -- TradingPosition only
- * has unrealizedPl since entry, not an isolated daily change. Renamed
- * to what's actually real rather than mislabeling it.
+ * has unrealizedPl since entry, not an isolated daily change. Named
+ * for what's actually real rather than mislabeling it.
  */
-export default function PortfolioSummaryCards({
+export default async function PortfolioSummaryCards({
     account,
     positions,
 }: {
@@ -28,6 +31,8 @@ export default function PortfolioSummaryCards({
             </div>
         );
     }
+
+    const closedSummary = await getClosedTradesSummary();
 
     const totalUnrealizedPl = positions.reduce((sum, p) => sum + p.unrealizedPl, 0);
     const largest = positions.length > 0
@@ -45,7 +50,9 @@ export default function PortfolioSummaryCards({
         { label: "Open Positions", value: String(positions.length) },
         { label: "Largest Position (% of account)", value: largest ? `${largest.ticker} (${largestPercent.toFixed(1)}%)` : "—" },
         { label: "Risk Budget Remaining", value: `${riskBudgetRemaining.toFixed(1)}%` },
-        { label: "Win Rate", value: "—", note: "Needs real closed-trade tracking (not built)" },
+        closedSummary && closedSummary.totalTrades > 0
+            ? { label: "Win Rate", value: `${closedSummary.winRate.toFixed(0)}%`, note: `${closedSummary.wins}W / ${closedSummary.losses}L, real closed trades` }
+            : { label: "Win Rate", value: "—", note: "Needs at least one real closed trade" },
     ];
 
     return (

@@ -317,3 +317,13 @@ Real, confirmed prerequisite that multiple proposals this session have depended 
 **New migration** adds `filled_avg_price`, `filled_qty`, `filled_at` columns to `paper_trade_orders`. `TradeOrderResult` extended with the same 3 real fields, both real Alpaca provider call sites (`placeOrder`, `listOrders`) updated to extract them from Alpaca's actual response, `logOrderAttempt()` updated to store them.
 
 **Explicitly, deliberately NOT built this round**: any logic to detect when a position closes (net-zero quantity per ticker), match buys against sells, or compute realized P&L. This round is the foundational data-capture piece only — closure detection is a real, separate, substantial next step that depends on this existing first.
+
+## Real closed-trade tracking: Win Rate finally has real data (added this session)
+
+Real, substantial piece completing what round75's fill-data capture was the prerequisite for. New `engine/trading/lifecycle/PositionLifecycle.ts` — real FIFO matching (oldest open buy closes first, a real and standard but not the only possible convention, stated explicitly). Manually tested against 5 real edge cases before wiring in (simple match, split-lot FIFO matching, out-of-order input, unmatched sell, missing fill data) — all passed.
+
+New `getClosedTradesSummary()` groups a user's real filled orders by ticker, runs the matcher per ticker, aggregates into real Win Rate / Realized P/L / Avg Win / Avg Loss. New `ClosedTradesPanel` displays this, including a real per-trade list (entry → exit, real P/L).
+
+**Portfolio Summary Cards' "Win Rate" now shows the real number** once at least one real closed trade exists — previously permanently showed "—". Correctly distinguishes a genuine 0% win rate (real data, just no wins yet) from "no data at all" (still shows "—" until the first real closed trade).
+
+**Real, stated limitations, not glossed over**: only orders with real, captured fill data count (historical orders from before round75 are excluded). Short positions (sell before any matching buy) aren't handled — this app is long-only. FIFO is a real, defensible, but not the only possible lot-matching convention.
