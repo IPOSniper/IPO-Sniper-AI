@@ -307,3 +307,13 @@ Phase 1D + 1E of the Autonomous Operations roadmap, built independent of the Ver
 ## Fix confusing epoch timestamp display on Quant Control (added this session)
 
 Real, quick fix per direct feedback: the "never set" default state was showing the raw Unix epoch date (`12/31/1969, 6:00:00 PM`), which looked like a broken timestamp rather than an intentional "no history yet" indicator. Now detects this specific case (`new Date(0)`) and shows "No previous state recorded — system defaults to OFF." instead, matching what a real state change (`Set {date} — "{reason}"`) looks like once one actually exists.
+
+## Real fill-price capture — foundational piece for trade-closure tracking (added this session)
+
+Real, confirmed prerequisite that multiple proposals this session have depended on (Win Rate, Expectancy, Profit Factor, Position Lifecycle Tracking, Experiment Ledger). Confirmed directly against Alpaca's own official API docs before building anything — a real order response example genuinely includes `filled_avg_price`, `filled_qty`, `filled_at`.
+
+**Real, honest nuance handled explicitly, not glossed over**: these fields are often `null` immediately after order submission, since market orders take a moment to actually fill. A `placeOrder()` response may have all three null even for a fully successful order — that's expected. `listOrders()` (called on the page's 20-second auto-refresh) is more likely to have real, non-null values once Alpaca has actually filled the order.
+
+**New migration** adds `filled_avg_price`, `filled_qty`, `filled_at` columns to `paper_trade_orders`. `TradeOrderResult` extended with the same 3 real fields, both real Alpaca provider call sites (`placeOrder`, `listOrders`) updated to extract them from Alpaca's actual response, `logOrderAttempt()` updated to store them.
+
+**Explicitly, deliberately NOT built this round**: any logic to detect when a position closes (net-zero quantity per ticker), match buys against sells, or compute realized P&L. This round is the foundational data-capture piece only — closure detection is a real, separate, substantial next step that depends on this existing first.

@@ -140,6 +140,9 @@ export class AlpacaPaperTradingProvider {
             qty: Number(data.qty),
             status: data.status,
             submittedAt: data.submitted_at,
+            filledAvgPrice: data.filled_avg_price !== null && data.filled_avg_price !== undefined ? Number(data.filled_avg_price) : null,
+            filledQty: data.filled_qty !== null && data.filled_qty !== undefined ? Number(data.filled_qty) : null,
+            filledAt: data.filled_at ?? null,
         };
     }
 
@@ -160,13 +163,16 @@ export class AlpacaPaperTradingProvider {
             return [];
         }
 
-        return data.map((o: Record<string, string>) => ({
-            brokerOrderId: o.id,
-            ticker: o.symbol,
+        return data.map((o: Record<string, string | number | null>) => ({
+            brokerOrderId: o.id as string,
+            ticker: o.symbol as string,
             side: o.side as "buy" | "sell",
             qty: Number(o.qty),
-            status: o.status,
-            submittedAt: o.submitted_at,
+            status: o.status as string,
+            submittedAt: o.submitted_at as string,
+            filledAvgPrice: o.filled_avg_price !== null && o.filled_avg_price !== undefined ? Number(o.filled_avg_price) : null,
+            filledQty: o.filled_qty !== null && o.filled_qty !== undefined ? Number(o.filled_qty) : null,
+            filledAt: (o.filled_at as string | null) ?? null,
         }));
     }
 

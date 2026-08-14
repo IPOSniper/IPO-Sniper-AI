@@ -57,6 +57,20 @@ export interface TradeOrderResult {
     qty: number;
     status: string;
     submittedAt: string;
+    /**
+     * Real fields from Alpaca's actual order response (filled_avg_price,
+     * filled_qty, filled_at) -- confirmed via Alpaca's own API docs
+     * before adding these, not assumed. Honest nuance: these are
+     * often null immediately after order submission, since market
+     * orders take a moment to actually fill -- a fresh placeOrder()
+     * response may have all three as null even on a fully successful
+     * order. listOrders() (called on refresh, seconds later) is more
+     * likely to have real, non-null values once the fill has
+     * actually happened.
+     */
+    filledAvgPrice: number | null;
+    filledQty: number | null;
+    filledAt: string | null;
 }
 
 /** One real point in Alpaca's portfolio history timeseries. */

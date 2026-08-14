@@ -188,6 +188,9 @@ export async function placeOrder(
             riskAllowed: true,
             riskBlockedReason: null,
             reasoning,
+            filledAvgPrice: order.filledAvgPrice,
+            filledQty: order.filledQty,
+            filledAt: order.filledAt,
         });
 
         return { success: true, order };
@@ -241,6 +244,10 @@ interface LogOrderAttemptParams {
     riskAllowed: boolean;
     riskBlockedReason: string | null;
     reasoning?: string;
+    /** Real fill data from Alpaca's actual response — often null immediately after submission (fills take a moment); see TradeOrderResult's docstring. */
+    filledAvgPrice?: number | null;
+    filledQty?: number | null;
+    filledAt?: string | null;
 }
 
 /**
@@ -286,6 +293,9 @@ async function logOrderAttempt(params: LogOrderAttemptParams): Promise<void> {
             risk_allowed: params.riskAllowed,
             risk_blocked_reason: params.riskBlockedReason,
             reasoning: params.reasoning ?? null,
+            filled_avg_price: params.filledAvgPrice ?? null,
+            filled_qty: params.filledQty ?? null,
+            filled_at: params.filledAt ?? null,
         });
 
         if (error) {
