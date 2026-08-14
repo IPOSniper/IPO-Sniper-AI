@@ -303,3 +303,7 @@ Phase 1D + 1E of the Autonomous Operations roadmap, built independent of the Ver
 **Important, real behavioral consequence of the safe default**: defaults to `OFF` for any user with no state row yet. This means Quant Strategist's Execute button and Batch Scanner's autonomous execution will both be blocked immediately after this deploys, until the state is explicitly set to `ASSISTED` or `AUTONOMOUS` via the new Quant Control panel (now at the very top of the Hedge Fund page, above the Equity Curve, given its safety-critical nature).
 
 **Requires the real migration to run against the live database** before any of this works — code alone can't create the table.
+
+## Fix confusing epoch timestamp display on Quant Control (added this session)
+
+Real, quick fix per direct feedback: the "never set" default state was showing the raw Unix epoch date (`12/31/1969, 6:00:00 PM`), which looked like a broken timestamp rather than an intentional "no history yet" indicator. Now detects this specific case (`new Date(0)`) and shows "No previous state recorded — system defaults to OFF." instead, matching what a real state change (`Set {date} — "{reason}"`) looks like once one actually exists.

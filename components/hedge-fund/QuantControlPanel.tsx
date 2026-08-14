@@ -75,7 +75,9 @@ export default function QuantControlPanel() {
                 <p className={`text-lg font-bold ${info.color}`}>{info.label}</p>
                 <p className="mt-1 text-xs text-zinc-400">{info.desc}</p>
                 <p className="mt-2 text-[10px] text-zinc-600">
-                    Set {new Date(status.changedAt).toLocaleString()} — &ldquo;{status.reason}&rdquo;
+                    {new Date(status.changedAt).getTime() === 0
+                        ? "No previous state recorded — system defaults to OFF."
+                        : <>Set {new Date(status.changedAt).toLocaleString()} — &ldquo;{status.reason}&rdquo;</>}
                 </p>
             </div>
 
