@@ -363,3 +363,35 @@ export async function getRecentRuns(limit = 10): Promise<QuantRun[]> {
         return [];
     }
 }
+
+/**
+ * Real total count of runBatchScan() invocations -- the "Autonomous
+ * Runs" half of the real, distinct 100-cycle validation metrics
+ * (the other half, "Completed Trade Cycles," is
+ * getClosedTradesSummary().totalTrades). These are deliberately kept
+ * separate, not combined into one number -- "Quant didn't trade
+ * because it correctly found no opportunity" and "Quant didn't trade
+ * because the system failed to run" are genuinely different real
+ * situations this distinguishes.
+ *
+ * Uses count: "exact", head: true -- a real row count without
+ * fetching row data, since only the number is needed here.
+ */
+export async function getTotalRunsCount(): Promise<number> {
+    if (!isSupabaseConfigured()) return 0;
+    try {
+        const supabase = await createClient();
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return 0;
+
+        const { count, error } = await supabase
+            .from("quant_runs")
+            .select("id", { count: "exact", head: true })
+            .eq("user_id", user.id);
+
+        if (error || count === null) return 0;
+        return count;
+    } catch {
+        return 0;
+    }
+}

@@ -353,3 +353,9 @@ Wrapped the existing function body in an outer try/catch (existing per-ticker er
 New `getRecentRuns()` + `RunHistoryPanel` shows the last 10 real runs with real counts, status, and error (when failed).
 
 **Explicitly NOT built this round**: the full per-run drill-down tree (click a run ID to see every ticker's individual decision path), and the separate "Autonomous Runs vs. Completed Trade Cycles" dual-counter distinction for the 100-cycle experiment. This round is the foundational run-level logging only.
+
+## 100-Cycle Validation Progress: real, explicitly separate counters (added this session)
+
+Real completion of the "Autonomous Runs vs. Completed Trade Cycles" distinction flagged as not-yet-built last round. New `getTotalRunsCount()` (efficient row count via `count: "exact", head: true`, no row data fetched) + reuses the already-real `getClosedTradesSummary()`. New `ValidationProgressPanel`, placed prominently right after Quant Control given it answers the central "how close are we to validating autonomy" question this session has repeatedly returned to.
+
+Deliberately kept as two separate progress bars, not combined into one number — a system that ran 50 times and correctly found no opportunity each time is behaving completely differently from a system that only ran 5 times because it kept failing to run at all. The same "5 trades" total would mean opposite things depending on which is true; only tracking them separately distinguishes them.
