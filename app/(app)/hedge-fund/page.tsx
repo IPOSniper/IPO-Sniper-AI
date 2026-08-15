@@ -14,6 +14,7 @@ import QuantActivityPanel from "@/components/hedge-fund/QuantActivityPanel";
 import DecisionFunnelPanel from "@/components/hedge-fund/DecisionFunnelPanel";
 import ExecutionBreakdownPanel from "@/components/hedge-fund/ExecutionBreakdownPanel";
 import ClosedTradesPanel from "@/components/hedge-fund/ClosedTradesPanel";
+import RunHistoryPanel from "@/components/hedge-fund/RunHistoryPanel";
 import PortfolioSummaryCards from "@/components/hedge-fund/PortfolioSummaryCards";
 import ActivityFeedPanel from "@/components/hedge-fund/ActivityFeedPanel";
 import PositionCards from "@/components/hedge-fund/PositionCards";
@@ -69,6 +70,10 @@ export default async function HedgeFundPage() {
 
             <div className="mb-6">
                 <ClosedTradesPanel />
+            </div>
+
+            <div className="mb-6">
+                <RunHistoryPanel />
             </div>
 
             <div className="mb-6">

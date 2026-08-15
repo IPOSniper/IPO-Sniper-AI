@@ -341,3 +341,15 @@ Confirmed via direct code read: the "Contract Symbol" field mismatch reported (`
 Real fix for a real gap: the only way to select a contract outside the standard 35–45 DTE / 0.30–0.40 delta range was to manually copy a raw 21-character OCC symbol from a separate page. New `browseOptionChain()` fetches the real chain, sorted near-the-money first (closest |delta| to 0.5 — a reasonable, stated default, not the only possible sort), capped at 15 results (a form picker, not a full chain browser — that's what the Options Chain panel already is).
 
 New inline UI: "Browse real chain" button appears when the standard match fails, showing a real, clickable list (strike, expiration, real bid/ask, real delta) — clicking one auto-fills the Contract Symbol field and switches Asset Type to Option, same real pattern as the existing "Use This Contract" flow. Deliberately does NOT auto-fill a suggested quantity (unlike the standard-match flow, which has a real risk-sized estimate) — `browseOptionChain()` doesn't do risk-based sizing, so fabricating a qty number here would misrepresent it as a real calculation.
+
+## Real Quant Run Ledger (added this session)
+
+Real, persisted answer to "did the autonomous batch scanner actually run, and what happened" — not just the transient in-page results table, which disappears on navigation. New `quant_runs` table, one real row per `runBatchScan()` invocation.
+
+Counts computed directly from that run's real `BatchRunResult[]` — not a second, independent calculation that could drift from what the UI shows. `riskApprovedCount` specifically uses `outcome === "execute"`, which is only ever set after clearing every real gate including round73's Quant Control check — it genuinely means risk-approved, not just attempted.
+
+Wrapped the existing function body in an outer try/catch (existing per-ticker error handling untouched) so a real, unexpected run-level failure gets logged with `status: 'failed'` and the actual error message before re-throwing — verified the caller (`BatchScannerPanel.tsx`) already handles a rejected promise gracefully, so this doesn't introduce new failure-mode risk.
+
+New `getRecentRuns()` + `RunHistoryPanel` shows the last 10 real runs with real counts, status, and error (when failed).
+
+**Explicitly NOT built this round**: the full per-run drill-down tree (click a run ID to see every ticker's individual decision path), and the separate "Autonomous Runs vs. Completed Trade Cycles" dual-counter distinction for the 100-cycle experiment. This round is the foundational run-level logging only.

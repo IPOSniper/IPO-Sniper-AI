@@ -57,12 +57,14 @@ export async function runBatchScan(
     gates: AutoExecutionGates = DEFAULT_AUTO_EXECUTION_GATES
 ): Promise<BatchRunResult[]> {
 
+    const startedAt = new Date().toISOString();
     const strategist = new QuantStrategist();
     const scanner = new BatchScanner();
     const results: BatchRunResult[] = [];
     let executionsThisRun = 0;
 
-    for (const rawTicker of tickers) {
+    try {
+        for (const rawTicker of tickers) {
         const ticker = rawTicker.trim().toUpperCase();
         if (!ticker) continue;
 
@@ -153,9 +155,64 @@ export async function runBatchScan(
                 orderStatus: null,
             });
         }
-    }
+        }
 
-    return results;
+        await logRunSummary(startedAt, tickers, "completed", null, results);
+        return results;
+    } catch (err) {
+        await logRunSummary(startedAt, tickers, "failed", err instanceof Error ? err.message : "Unknown run failure.", results);
+        throw err;
+    }
+}
+
+/**
+ * Real run-level summary -- one row per real invocation of
+ * runBatchScan(), the actual answer to "did the autonomous batch
+ * scanner run, and what happened" as a persisted record, not just
+ * the transient in-page results table. Counts computed directly
+ * from the real, already-produced BatchRunResult[] -- not a second,
+ * independent calculation that could drift from what the UI shows.
+ *
+ * riskApprovedCount uses outcome === "execute" specifically -- that
+ * outcome value is only ever set after clearing every real gate
+ * (committee thresholds, portfolio exposure, AND round73's Quant
+ * Control check), so it genuinely means "risk-approved," not just
+ * "attempted."
+ */
+async function logRunSummary(
+    startedAt: string,
+    watchlist: string[],
+    status: "completed" | "failed",
+    error: string | null,
+    results: BatchRunResult[]
+): Promise<void> {
+    if (!isSupabaseConfigured()) return;
+    try {
+        const supabase = await createClient();
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return;
+
+        const { error: insertError } = await supabase.from("quant_runs").insert({
+            user_id: user.id,
+            started_at: startedAt,
+            completed_at: new Date().toISOString(),
+            watchlist,
+            status,
+            error,
+            tickers_count: watchlist.filter(t => t.trim()).length,
+            decisions_count: results.length,
+            trade_plans_count: results.filter(r => r.plan && r.plan.direction !== "none").length,
+            risk_approved_count: results.filter(r => r.outcome === "execute").length,
+            orders_submitted_count: results.filter(r => r.executed).length,
+            orders_filled_count: results.filter(r => r.orderStatus === "filled").length,
+        });
+
+        if (insertError) {
+            console.error("quant_runs insert failed:", insertError.message);
+        }
+    } catch (err) {
+        console.error("logRunSummary threw:", err instanceof Error ? err.message : err);
+    }
 }
 
 async function logBatchDecision(
@@ -249,5 +306,60 @@ export async function getDailySummary(): Promise<DailySummary | null> {
         };
     } catch {
         return null;
+    }
+}
+
+export interface QuantRun {
+    id: string;
+    startedAt: string;
+    completedAt: string | null;
+    watchlist: string[];
+    status: "completed" | "failed";
+    error: string | null;
+    tickersCount: number;
+    decisionsCount: number;
+    tradePlansCount: number;
+    riskApprovedCount: number;
+    ordersSubmittedCount: number;
+    ordersFilledCount: number;
+}
+
+/**
+ * Real run history -- the actual answer to "did Quant run, and what
+ * happened" as a persisted, browsable record. See logRunSummary()'s
+ * docstring for how each row's counts are computed.
+ */
+export async function getRecentRuns(limit = 10): Promise<QuantRun[]> {
+    if (!isSupabaseConfigured()) return [];
+    try {
+        const supabase = await createClient();
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return [];
+
+        const { data, error } = await supabase
+            .from("quant_runs")
+            .select("id, started_at, completed_at, watchlist, status, error, tickers_count, decisions_count, trade_plans_count, risk_approved_count, orders_submitted_count, orders_filled_count")
+            .eq("user_id", user.id)
+            .order("started_at", { ascending: false })
+            .limit(limit);
+
+        if (error || !data) return [];
+
+        return data.map(row => ({
+            id: row.id,
+            startedAt: row.started_at,
+            completedAt: row.completed_at,
+            watchlist: row.watchlist,
+            status: row.status as "completed" | "failed",
+            error: row.error,
+            tickersCount: row.tickers_count,
+            decisionsCount: row.decisions_count,
+            tradePlansCount: row.trade_plans_count,
+            riskApprovedCount: row.risk_approved_count,
+            ordersSubmittedCount: row.orders_submitted_count,
+            ordersFilledCount: row.orders_filled_count,
+        }));
+    } catch {
+        return [];
     }
 }
