@@ -40,7 +40,16 @@ export class CompanyBuilder {
         const data = await response.json();
 
         if (!data || !data.ticker) {
-            throw new Error(`No Finnhub profile found for ${ticker}.`);
+            // Real, simple heuristic hint, not a full company-name
+            // resolution system (that's a separate, larger feature,
+            // already flagged elsewhere in this app as not built).
+            // Most real US tickers are 1-5 characters -- a longer
+            // input is a real, common sign someone typed a company
+            // name (e.g. "TESLA") instead of its ticker ("TSLA").
+            const hint = ticker.length > 5
+                ? ` This looks like it might be a company name rather than a ticker symbol — try the stock's actual ticker instead (e.g. "TSLA" for Tesla).`
+                : "";
+            throw new Error(`No Finnhub profile found for ${ticker}.${hint}`);
         }
 
         return {
