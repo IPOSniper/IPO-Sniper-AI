@@ -79,3 +79,44 @@ export async function findBestContract(ticker: string, direction: "call" | "put"
         return { success: false, error: err instanceof Error ? err.message : "Failed to find a matching contract." };
     }
 }
+
+/**
+ * Real, browsable chain -- the actual fix for a real gap: the only
+ * way to select a contract outside the "standard" DTE/delta range
+ * was to manually copy a raw OCC symbol from a separate page. This
+ * returns real contracts (bid/ask/delta/expiration, all real Alpaca
+ * data) the user can pick from directly in the order form, sorted
+ * near-the-money first (closest |delta| to 0.5, a reasonable, stated
+ * default -- not the only possible sort, but a sensible one for
+ * "show me the most relevant contracts first").
+ *
+ * Deliberately capped at 15 results -- this is a picker for a form,
+ * not a full chain browser (that's what the Options Chain panel on
+ * the research page already is).
+ */
+export async function browseOptionChain(
+    ticker: string,
+    type: "call" | "put"
+): Promise<{ success: boolean; contracts?: OptionContract[]; error?: string }> {
+    const normalizedTicker = ticker.trim().toUpperCase();
+    if (!normalizedTicker) return { success: false, error: "Enter a ticker first." };
+
+    try {
+        const chain = await new AlpacaOptionsProvider().getOptionChain(normalizedTicker);
+        const filtered = chain.filter(c => c.type === type);
+
+        if (filtered.length === 0) {
+            return { success: false, error: `No real ${type} contracts found for ${normalizedTicker}.` };
+        }
+
+        const sorted = [...filtered].sort((a, b) => {
+            const distA = Math.abs(Math.abs(a.delta ?? 0) - 0.5);
+            const distB = Math.abs(Math.abs(b.delta ?? 0) - 0.5);
+            return distA - distB;
+        });
+
+        return { success: true, contracts: sorted.slice(0, 15) };
+    } catch (err) {
+        return { success: false, error: err instanceof Error ? err.message : "Failed to load the real options chain." };
+    }
+}

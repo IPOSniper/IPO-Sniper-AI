@@ -3,7 +3,8 @@
 import { useState, useTransition, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { placeOrder, killSwitch, getEquityQuoteForOrderForm } from "@/app/(app)/hedge-fund/paper-trading/actions";
-import { findBestContract, type ContractRecommendation, type ChainDiagnostics } from "@/app/(app)/hedge-fund/contract-finder/actions";
+import { findBestContract, browseOptionChain, type ContractRecommendation, type ChainDiagnostics } from "@/app/(app)/hedge-fund/contract-finder/actions";
+import type { OptionContract } from "@/engine/trading/providers/AlpacaOptionsProvider";
 import type { TradingAccount, TradingPosition, TradeOrderResult, OrderSide } from "@/engine/trading/contracts/TradeOrder";
 
 interface PaperTradingPanelProps {
@@ -50,6 +51,9 @@ export default function PaperTradingPanel({
     const [finderStatus, setFinderStatus] = useState<"idle" | "finding" | "error" | "not-found">("idle");
     const [recommendation, setRecommendation] = useState<ContractRecommendation | null>(null);
     const [diagnostics, setDiagnostics] = useState<ChainDiagnostics | null>(null);
+    const [browsedContracts, setBrowsedContracts] = useState<OptionContract[] | null>(null);
+    const [browsingChain, setBrowsingChain] = useState(false);
+    const [browseError, setBrowseError] = useState<string | null>(null);
     const [side, setSide] = useState<OrderSide>("buy");
     const [qty, setQty] = useState("");
     const [reasoning, setReasoning] = useState("");
@@ -107,6 +111,26 @@ export default function PaperTradingPanel({
         setTicker(recommendation.contract.symbol);
         setQty(String(recommendation.estimatedQty));
         setSide("buy");
+    }
+
+    async function handleBrowseChain() {
+        setBrowsedContracts(null);
+        setBrowseError(null);
+        setBrowsingChain(true);
+        const response = await browseOptionChain(findTicker, findDirection);
+        setBrowsingChain(false);
+        if (!response.success || !response.contracts) {
+            setBrowseError(response.error ?? "Failed to load the real chain.");
+            return;
+        }
+        setBrowsedContracts(response.contracts);
+    }
+
+    function handlePickBrowsedContract(contract: OptionContract) {
+        setAssetType("option");
+        setTicker(contract.symbol);
+        setSide("buy");
+        setBrowsedContracts(null);
     }
 
     function handleSubmit(e: React.FormEvent) {
@@ -249,7 +273,34 @@ export default function PaperTradingPanel({
                                 {diagnostics.availableExpirations.length > 0 && (
                                     <p>Real expirations available: {diagnostics.availableExpirations.slice(0, 6).join(", ")}{diagnostics.availableExpirations.length > 6 ? ` (+${diagnostics.availableExpirations.length - 6} more)` : ""}</p>
                                 )}
-                                <p className="mt-1 text-zinc-600">Use the Options Chain panel on the research page for this ticker to pick a specific real contract manually.</p>
+                                <p className="mt-1 text-zinc-600">Pick a real contract from the actual chain below, or use the Options Chain panel on the research page.</p>
+                                <button
+                                    type="button"
+                                    onClick={handleBrowseChain}
+                                    disabled={browsingChain}
+                                    className="mt-2 rounded-md border border-violet-800 px-3 py-1 text-[11px] text-violet-300 hover:bg-violet-950/40 disabled:opacity-50"
+                                >
+                                    {browsingChain ? "Loading real chain…" : "Browse real chain"}
+                                </button>
+                                {browseError && <p className="mt-1 text-red-400">{browseError}</p>}
+                                {browsedContracts && (
+                                    <div className="mt-2 max-h-48 space-y-1 overflow-y-auto">
+                                        {browsedContracts.map(c => (
+                                            <button
+                                                type="button"
+                                                key={c.symbol}
+                                                onClick={() => handlePickBrowsedContract(c)}
+                                                className="flex w-full items-center justify-between rounded-md bg-zinc-900 px-2 py-1.5 text-left hover:bg-zinc-800"
+                                            >
+                                                <span className="font-mono text-[10px] text-zinc-300">${c.strikePrice} · {c.expirationDate}</span>
+                                                <span className="text-[10px] text-zinc-500">
+                                                    {c.bidPrice !== null && c.askPrice !== null ? `$${c.bidPrice.toFixed(2)}/$${c.askPrice.toFixed(2)}` : "—"}
+                                                    {c.delta !== null && ` · Δ${c.delta.toFixed(2)}`}
+                                                </span>
+                                            </button>
+                                        ))}
+                                    </div>
+                                )}
                             </div>
                         ) : (
                             <p className="text-zinc-600">The real chain has no {findDirection} contracts at all for this ticker right now.</p>

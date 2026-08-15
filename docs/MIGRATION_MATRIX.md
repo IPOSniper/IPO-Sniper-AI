@@ -335,3 +335,9 @@ Confirmed via direct code read: the "Contract Symbol" field mismatch reported (`
 **Real, new feature**: a "Check real price" link next to the Ticker field for equity orders, using the same real `FinnhubQuoteProvider` already used elsewhere in this app — on-demand (not fetched per keystroke, which would mean an API call per character typed), shows real price + % change. Stale quotes are cleared automatically when the ticker changes, so an old price can't linger misleadingly next to a new ticker.
 
 **Explicitly NOT built**: a per-contract options quote. `AlpacaOptionsProvider` only has `getOptionChain()` (the full chain), not a single-contract lookup — a real, separate gap. The form now says so directly, pointing to "Find Best Contract" and the Options Chain panel (both already show real bid/ask) as the current real alternative.
+
+## Real, browsable contract picker (added this session)
+
+Real fix for a real gap: the only way to select a contract outside the standard 35–45 DTE / 0.30–0.40 delta range was to manually copy a raw 21-character OCC symbol from a separate page. New `browseOptionChain()` fetches the real chain, sorted near-the-money first (closest |delta| to 0.5 — a reasonable, stated default, not the only possible sort), capped at 15 results (a form picker, not a full chain browser — that's what the Options Chain panel already is).
+
+New inline UI: "Browse real chain" button appears when the standard match fails, showing a real, clickable list (strike, expiration, real bid/ask, real delta) — clicking one auto-fills the Contract Symbol field and switches Asset Type to Option, same real pattern as the existing "Use This Contract" flow. Deliberately does NOT auto-fill a suggested quantity (unlike the standard-match flow, which has a real risk-sized estimate) — `browseOptionChain()` doesn't do risk-based sizing, so fabricating a qty number here would misrepresent it as a real calculation.
