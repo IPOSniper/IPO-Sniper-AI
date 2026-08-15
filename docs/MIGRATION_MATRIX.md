@@ -327,3 +327,11 @@ New `getClosedTradesSummary()` groups a user's real filled orders by ticker, run
 **Portfolio Summary Cards' "Win Rate" now shows the real number** once at least one real closed trade exists — previously permanently showed "—". Correctly distinguishes a genuine 0% win rate (real data, just no wins yet) from "no data at all" (still shows "—" until the first real closed trade).
 
 **Real, stated limitations, not glossed over**: only orders with real, captured fill data count (historical orders from before round75 are excluded). Short positions (sell before any matching buy) aren't handled — this app is long-only. FIFO is a real, defensible, but not the only possible lot-matching convention.
+
+## Real "Check real price" on the manual order form (added this session)
+
+Confirmed via direct code read: the "Contract Symbol" field mismatch reported (`AAPL260320C00220000` sitting in the field) is almost certainly placeholder text, not a real bug — the input has no `disabled`/`readOnly` attribute, it's a normal editable field. That exact string is the placeholder shown when empty. Flagged for the user to verify directly rather than assumed fixed with no evidence.
+
+**Real, new feature**: a "Check real price" link next to the Ticker field for equity orders, using the same real `FinnhubQuoteProvider` already used elsewhere in this app — on-demand (not fetched per keystroke, which would mean an API call per character typed), shows real price + % change. Stale quotes are cleared automatically when the ticker changes, so an old price can't linger misleadingly next to a new ticker.
+
+**Explicitly NOT built**: a per-contract options quote. `AlpacaOptionsProvider` only has `getOptionChain()` (the full chain), not a single-contract lookup — a real, separate gap. The form now says so directly, pointing to "Find Best Contract" and the Options Chain panel (both already show real bid/ask) as the current real alternative.

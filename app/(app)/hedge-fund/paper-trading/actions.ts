@@ -312,3 +312,32 @@ async function logOrderAttempt(params: LogOrderAttemptParams): Promise<void> {
         console.error("logOrderAttempt threw:", err instanceof Error ? err.message : err);
     }
 }
+
+/**
+ * Real, on-demand equity quote for the manual order form -- not
+ * auto-fetched on every keystroke (would mean a real API call per
+ * character typed), triggered explicitly instead. Reuses the same
+ * real FinnhubQuoteProvider already used elsewhere in this app, not
+ * a second implementation.
+ *
+ * Options are NOT covered here -- a real per-contract quote lookup
+ * (distinct from AlpacaOptionsProvider.getOptionChain(), which
+ * returns a full chain, not one contract) doesn't exist yet. Real
+ * options pricing is already visible via "Find Best Contract" and
+ * the Options Chain panel on the research page -- this is a real,
+ * separate gap for a future round, not silently worked around here.
+ */
+export async function getEquityQuoteForOrderForm(ticker: string): Promise<{ success: boolean; price?: number; changePercent?: number; error?: string }> {
+    const normalized = ticker.trim().toUpperCase();
+    if (!normalized) return { success: false, error: "Enter a ticker first." };
+
+    try {
+        const quote = await new FinnhubQuoteProvider().getQuote(normalized);
+        if (!quote.price || quote.price <= 0) {
+            return { success: false, error: `No real quote available for ${normalized}.` };
+        }
+        return { success: true, price: quote.price, changePercent: quote.changePercent };
+    } catch (err) {
+        return { success: false, error: err instanceof Error ? err.message : "Quote lookup failed." };
+    }
+}

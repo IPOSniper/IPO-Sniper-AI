@@ -2,7 +2,7 @@
 
 import { useState, useTransition, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { placeOrder, killSwitch } from "@/app/(app)/hedge-fund/paper-trading/actions";
+import { placeOrder, killSwitch, getEquityQuoteForOrderForm } from "@/app/(app)/hedge-fund/paper-trading/actions";
 import { findBestContract, type ContractRecommendation, type ChainDiagnostics } from "@/app/(app)/hedge-fund/contract-finder/actions";
 import type { TradingAccount, TradingPosition, TradeOrderResult, OrderSide } from "@/engine/trading/contracts/TradeOrder";
 
@@ -42,6 +42,9 @@ export default function PaperTradingPanel({
     const [isPending, startTransition] = useTransition();
     const [ticker, setTicker] = useState("");
     const [assetType, setAssetType] = useState<"equity" | "option">("equity");
+    const [quote, setQuote] = useState<{ price: number; changePercent: number } | null>(null);
+    const [quoteError, setQuoteError] = useState<string | null>(null);
+    const [checkingQuote, setCheckingQuote] = useState(false);
     const [findTicker, setFindTicker] = useState("");
     const [findDirection, setFindDirection] = useState<"call" | "put">("call");
     const [finderStatus, setFinderStatus] = useState<"idle" | "finding" | "error" | "not-found">("idle");
@@ -65,6 +68,19 @@ export default function PaperTradingPanel({
         }, REFRESH_INTERVAL_MS);
         return () => clearInterval(interval);
     }, [autoRefresh, router]);
+
+    async function handleCheckPrice() {
+        setQuote(null);
+        setQuoteError(null);
+        setCheckingQuote(true);
+        const result = await getEquityQuoteForOrderForm(ticker);
+        setCheckingQuote(false);
+        if (result.success && result.price !== undefined) {
+            setQuote({ price: result.price, changePercent: result.changePercent ?? 0 });
+        } else {
+            setQuoteError(result.error ?? "Quote lookup failed.");
+        }
+    }
 
     async function handleFindContract() {
         setFinderStatus("finding");
@@ -299,11 +315,37 @@ export default function PaperTradingPanel({
                         </label>
                         <input
                             value={ticker}
-                            onChange={e => setTicker(e.target.value)}
+                            onChange={e => { setTicker(e.target.value); setQuote(null); setQuoteError(null); }}
                             placeholder={assetType === "option" ? "AAPL260320C00220000" : "AMD"}
                             className={assetType === "option" ? "w-48 rounded-md border border-zinc-700 bg-zinc-950 px-2 py-1 text-sm text-white" : "w-24 rounded-md border border-zinc-700 bg-zinc-950 px-2 py-1 text-sm text-white"}
                             required
                         />
+                        {assetType === "equity" && (
+                            <div className="mt-1">
+                                <button
+                                    type="button"
+                                    onClick={handleCheckPrice}
+                                    disabled={!ticker.trim() || checkingQuote}
+                                    className="text-[10px] text-violet-400 underline disabled:opacity-50"
+                                >
+                                    {checkingQuote ? "Checking…" : "Check real price"}
+                                </button>
+                                {quote && (
+                                    <p className="text-[10px] text-zinc-400">
+                                        ${quote.price.toFixed(2)}{" "}
+                                        <span className={quote.changePercent >= 0 ? "text-emerald-400" : "text-red-400"}>
+                                            ({quote.changePercent >= 0 ? "+" : ""}{quote.changePercent.toFixed(2)}%)
+                                        </span>
+                                    </p>
+                                )}
+                                {quoteError && <p className="text-[10px] text-red-400">{quoteError}</p>}
+                            </div>
+                        )}
+                        {assetType === "option" && (
+                            <p className="mt-1 text-[10px] text-zinc-600">
+                                Use &ldquo;Find Best Contract&rdquo; above, or check the Options Chain on the research page for real bid/ask — a direct per-contract quote isn&apos;t built into this form yet.
+                            </p>
+                        )}
                     </div>
                     <div>
                         <label className="mb-1 block text-xs text-zinc-500">Side</label>
