@@ -363,3 +363,13 @@ Deliberately kept as two separate progress bars, not combined into one number �
 ## Better error hint for company-name-instead-of-ticker mistakes (added this session)
 
 Real, small fix for a real, direct report: searching "TESLA" (company name) instead of "TSLA" (ticker) failed with an unhelpful raw error. Confirmed the error message propagates directly to the UI (`research/[ticker]/page.tsx`'s catch block shows `error.message` verbatim, no truncation) before improving it. Added a simple, honest heuristic hint (most real US tickers are 1-5 characters, so a longer input is a real, common sign of a company name) — not a full company-name-to-ticker resolution system, which remains a separate, larger, not-built feature already flagged elsewhere in this app.
+
+## Real per-run drill-down tree (added this session)
+
+Real completion of the drill-down tree explicitly deferred in round79's commit. New `run_id` column linking `quant_trade_decisions` back to a specific `quant_runs` row — a real, generated UUID (`crypto.randomUUID()`, a standard Node global) is created once at the top of `runBatchScan()` and threaded through every per-ticker `logBatchDecision()` call, then used as the explicit `id` for the run's own `quant_runs` summary row (rather than letting Postgres auto-generate one, since the ID needs to be known before the per-ticker logging happens).
+
+Run History rows are now real, clickable (`RunHistoryRow`, a new client component) — expanding one fetches (`getRunDetail()`) and shows every individual ticker decision genuinely linked to that specific run: direction, trade quality, confidence, agreement, and the real reasoning text.
+
+**Real, honest limitation stated directly in the UI**: historical decisions logged before this round have `run_id = null` and can't be attributed back to any specific run — expanding one of those older runs shows an explicit message explaining why, rather than silently showing an empty list that could be misread as "nothing happened."
+
+Also fixed the same silent-swallow bug (bare `catch {}`, no error check on the insert result) in `logBatchDecision()` that's already been fixed twice elsewhere this session — same fix, same reasoning.

@@ -57,6 +57,7 @@ export async function runBatchScan(
     gates: AutoExecutionGates = DEFAULT_AUTO_EXECUTION_GATES
 ): Promise<BatchRunResult[]> {
 
+    const runId = crypto.randomUUID();
     const startedAt = new Date().toISOString();
     const strategist = new QuantStrategist();
     const scanner = new BatchScanner();
@@ -140,7 +141,7 @@ export async function runBatchScan(
                 orderStatus = `Passed all gates, but the ${gates.maxAutoExecutionsThisRun}-trade run limit was already reached.`;
             }
 
-            await logBatchDecision(ticker, plan, selectedContract, evaluation, executed);
+            await logBatchDecision(runId, ticker, plan, selectedContract, evaluation, executed);
 
             results.push({ ...evaluation, executed, orderStatus });
         } catch (err) {
@@ -157,10 +158,10 @@ export async function runBatchScan(
         }
         }
 
-        await logRunSummary(startedAt, tickers, "completed", null, results);
+        await logRunSummary(runId, startedAt, tickers, "completed", null, results);
         return results;
     } catch (err) {
-        await logRunSummary(startedAt, tickers, "failed", err instanceof Error ? err.message : "Unknown run failure.", results);
+        await logRunSummary(runId, startedAt, tickers, "failed", err instanceof Error ? err.message : "Unknown run failure.", results);
         throw err;
     }
 }
@@ -180,6 +181,7 @@ export async function runBatchScan(
  * "attempted."
  */
 async function logRunSummary(
+    runId: string,
     startedAt: string,
     watchlist: string[],
     status: "completed" | "failed",
@@ -193,6 +195,7 @@ async function logRunSummary(
         if (!user) return;
 
         const { error: insertError } = await supabase.from("quant_runs").insert({
+            id: runId,
             user_id: user.id,
             started_at: startedAt,
             completed_at: new Date().toISOString(),
@@ -216,6 +219,7 @@ async function logRunSummary(
 }
 
 async function logBatchDecision(
+    runId: string,
     ticker: string,
     plan: BatchRunResult["plan"],
     selectedContract: BatchRunResult["selectedContract"],
@@ -228,7 +232,8 @@ async function logBatchDecision(
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) return;
 
-        await supabase.from("quant_trade_decisions").insert({
+        const { error } = await supabase.from("quant_trade_decisions").insert({
+            run_id: runId,
             user_id: user.id,
             ticker,
             direction: plan.direction,
@@ -252,8 +257,12 @@ async function logBatchDecision(
             contract_ask_price: selectedContract?.askPrice ?? null,
             reasoning: [`[Batch: ${evaluation.outcome}${executed ? ", executed" : ""}] ${evaluation.reason}`, ...plan.reasoning],
         });
-    } catch {
-        // Swallow — a broken log should never block the batch run itself.
+
+        if (error) {
+            console.error("quant_trade_decisions insert failed:", error.message);
+        }
+    } catch (err) {
+        console.error("logBatchDecision threw:", err instanceof Error ? err.message : err);
     }
 }
 
@@ -393,5 +402,51 @@ export async function getTotalRunsCount(): Promise<number> {
         return count;
     } catch {
         return 0;
+    }
+}
+
+export interface RunDecisionDetail {
+    ticker: string;
+    direction: string;
+    tradeQualityScore: number | null;
+    committeeConfidence: number | null;
+    committeeAgreement: number | null;
+    reasoning: string[] | null;
+}
+
+/**
+ * Real per-run drill-down -- every individual ticker decision that
+ * belongs to one specific real run, linked via the real run_id
+ * column (see round82's migration). Historical decisions logged
+ * before that column existed have run_id = null and can't be
+ * attributed to any specific run -- returns an empty array for those
+ * run IDs rather than guessing which decisions might belong to them.
+ */
+export async function getRunDetail(runId: string): Promise<RunDecisionDetail[]> {
+    if (!isSupabaseConfigured()) return [];
+    try {
+        const supabase = await createClient();
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return [];
+
+        const { data, error } = await supabase
+            .from("quant_trade_decisions")
+            .select("ticker, direction, trade_quality_score, committee_confidence, committee_agreement, reasoning")
+            .eq("user_id", user.id)
+            .eq("run_id", runId)
+            .order("ticker", { ascending: true });
+
+        if (error || !data) return [];
+
+        return data.map(row => ({
+            ticker: row.ticker,
+            direction: row.direction,
+            tradeQualityScore: row.trade_quality_score,
+            committeeConfidence: row.committee_confidence,
+            committeeAgreement: row.committee_agreement,
+            reasoning: row.reasoning,
+        }));
+    } catch {
+        return [];
     }
 }

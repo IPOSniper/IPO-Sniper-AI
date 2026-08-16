@@ -1,4 +1,5 @@
 import { getRecentRuns } from "@/app/(app)/hedge-fund/batch-scanner/actions";
+import RunHistoryRow from "@/components/hedge-fund/RunHistoryRow";
 
 /**
  * Real Quant Run Ledger -- the actual, persisted answer to "did
@@ -6,7 +7,8 @@ import { getRecentRuns } from "@/app/(app)/hedge-fund/batch-scanner/actions";
  * results table (which disappears on navigation). One real row per
  * runBatchScan() invocation, whether triggered manually (current
  * reality -- no scheduler exists yet) or eventually by a real
- * scheduler, once one exists.
+ * scheduler, once one exists. Each row is clickable (RunHistoryRow)
+ * to drill into that specific run's real per-ticker decisions.
  */
 export default async function RunHistoryPanel() {
     const runs = await getRecentRuns(10);
@@ -24,22 +26,11 @@ export default async function RunHistoryPanel() {
         <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-4">
             <div className="mb-3 flex items-center justify-between">
                 <h3 className="text-sm font-medium text-zinc-300">Run History</h3>
-                <span className="text-[10px] text-zinc-600">Real — each "Run Trading Session" click, persisted</span>
+                <span className="text-[10px] text-zinc-600">Real — click a run to see its decisions</span>
             </div>
             <div className="space-y-2">
                 {runs.map(run => (
-                    <div key={run.id} className="rounded-md bg-zinc-950/50 p-2.5 text-xs">
-                        <div className="mb-1 flex items-center justify-between">
-                            <span className={run.status === "completed" ? "font-medium text-emerald-400" : "font-medium text-red-400"}>
-                                {run.status === "completed" ? "● Completed" : "● Failed"}
-                            </span>
-                            <span className="text-zinc-600">{new Date(run.startedAt).toLocaleString()}</span>
-                        </div>
-                        <p className="text-zinc-400">
-                            {run.tickersCount} tickers · {run.decisionsCount} decisions · {run.tradePlansCount} trade plans · {run.riskApprovedCount} risk-approved · {run.ordersSubmittedCount} submitted ({run.ordersFilledCount} filled)
-                        </p>
-                        {run.error && <p className="mt-1 text-red-400">Error: {run.error}</p>}
-                    </div>
+                    <RunHistoryRow key={run.id} run={run} />
                 ))}
             </div>
         </div>
