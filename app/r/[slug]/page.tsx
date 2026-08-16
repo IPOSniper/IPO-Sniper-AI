@@ -91,6 +91,13 @@ export default async function PublicReportPage({ params }: PageProps) {
 
     if (!research) notFound();
 
+    let isSignedIn = false;
+    if (isSupabaseConfigured()) {
+        const supabase = await createClient();
+        const { data: { user } } = await supabase.auth.getUser();
+        isSignedIn = !!user;
+    }
+
     const { company, report, committee, runtime } = research;
     const { financialStatements } = report.evidence;
     const generatedDate = new Date(runtime.generatedAt).toLocaleDateString("en-US", {
@@ -136,7 +143,18 @@ export default async function PublicReportPage({ params }: PageProps) {
                     <a href="/" className="text-sm text-zinc-500 hover:text-zinc-300">
                         &larr; IPO Sniper AI
                     </a>
-                    <PrintButton />
+                    <div className="flex items-center gap-3">
+                        {isSignedIn ? (
+                            <a href="/workstation" className="rounded-md border border-zinc-700 px-3 py-1.5 text-xs text-zinc-300 hover:border-zinc-500 hover:text-white">
+                                Back to App
+                            </a>
+                        ) : (
+                            <a href="/login" className="rounded-md bg-violet-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-violet-500">
+                                Sign in for the full report
+                            </a>
+                        )}
+                        <PrintButton />
+                    </div>
                 </header>
 
                 <article>

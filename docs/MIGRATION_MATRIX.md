@@ -373,3 +373,7 @@ Run History rows are now real, clickable (`RunHistoryRow`, a new client componen
 **Real, honest limitation stated directly in the UI**: historical decisions logged before this round have `run_id = null` and can't be attributed back to any specific run — expanding one of those older runs shows an explicit message explaining why, rather than silently showing an empty list that could be misread as "nothing happened."
 
 Also fixed the same silent-swallow bug (bare `catch {}`, no error check on the insert result) in `logBatchDecision()` that's already been fixed twice elsewhere this session — same fix, same reasoning.
+
+## Public research page: real "Sign in for the full report" CTA (added this session)
+
+Real gap found via direct report: scanning a Share Card's QR code correctly lands on the public `/r/[slug]` snapshot (by design — News-excluded, compliance-safe) — but the page never told anyone how to get the fuller, authenticated version. Added a real CTA in the header, reusing the same auth-check pattern already built for `/education`'s public layout: shows "Sign in for the full report" (→ `/login`) when not signed in, or "Back to App" (→ `/workstation`) when the viewer happens to already be signed in (e.g., viewing their own Share Card link).
