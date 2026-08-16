@@ -158,13 +158,6 @@ function LoginForm() {
             Continue with GitHub
           </Button>
         </div>
-
-        <p className="mt-6 text-center text-sm text-zinc-500">
-          Don&apos;t have an account?{" "}
-          <Link href="/signup" className="text-white hover:underline">
-            Sign up
-          </Link>
-        </p>
       </div>
     </div>
   );

@@ -377,3 +377,9 @@ Also fixed the same silent-swallow bug (bare `catch {}`, no error check on the i
 ## Public research page: real "Sign in for the full report" CTA (added this session)
 
 Real gap found via direct report: scanning a Share Card's QR code correctly lands on the public `/r/[slug]` snapshot (by design — News-excluded, compliance-safe) — but the page never told anyone how to get the fuller, authenticated version. Added a real CTA in the header, reusing the same auth-check pattern already built for `/education`'s public layout: shows "Sign in for the full report" (→ `/login`) when not signed in, or "Back to App" (→ `/workstation`) when the viewer happens to already be signed in (e.g., viewing their own Share Card link).
+
+## Single-owner access lockdown (added this session)
+
+Real, deliberate access restriction per direct instruction: this app is meant for single-owner access only. Reverted round83's "Sign in for the full report" CTA on the public research page entirely — it contradicts this goal by inviting outsiders to sign up. `/signup` page now shows a real "Sign-ups are closed" message instead of a working form (original form removed as real dead code, not left disabled-but-present). Removed the "Don't have an account? Sign up" invitation from the login page for the same consistency reason.
+
+**Real security note, stated directly and not glossed over**: this app-level UI change alone is NOT the actual security boundary — Supabase's signup API is publicly callable directly (via its anon key), bypassing this page entirely. The real, robust fix requires disabling "Allow new users to sign up" in Supabase's own dashboard (Authentication → Settings), confirmed via Supabase's own documentation before giving this instruction — a real, external, account-level action outside what this code can enforce on its own.
