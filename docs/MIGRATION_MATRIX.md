@@ -399,3 +399,11 @@ Real, well-scoped second piece of Phase 1 (Data Abstraction). Pure type definiti
 **Real, honest scoping**: this defines the shape only. No ingestion, detection, or scoring pipeline exists yet — that's Phase 2, and depends on Track B's licensed provider being confirmed for anything beyond SEC/earnings data (the only two source types currently `confirmed-permitted` for `internal-decision` use). No existing behavior changes by this file existing.
 
 **Also verified this round**: NewsAPI's $449/month Business tier pricing, confirmed via 3 independent sources. Found Currents API (already used in this app, flagged `needs-verification` in the registry) has paid plans starting at $99/month — real, useful context for Track B.
+
+## Provider interfaces + granular authorization flags — Phase 1 complete (added this session)
+
+Real completion of both remaining requested Phase 1 pieces in one round. New `ProviderInterfaces.ts` — real contracts (`MarketDataProvider`, `OptionsProvider`, `SECProvider`, `EarningsProvider`, `NewsProvider`) Quant should eventually depend on instead of specific vendors by name. Return types grounded in real, already-existing provider shapes (`Quote`, `OptionContract`, `SECFiling`, `EarningsCalendarEntry`, `MarketEvent`) rather than inventing parallel types that could drift from what's actually returned today.
+
+`DataSourceRegistry` extended with the requested granular flags: `allowedEnvironments` (development/testing/production), `aiInferenceAllowed`, `storageAllowed`, `redistributionAllowed` — each `null` where genuinely unresearched (not defaulted to `false`, which would misrepresent "unknown" as "denied"). `isDataSourceAuthorized()` now also checks the environment dimension, defaulting to this app's real current `NODE_ENV`.
+
+**Deliberately, explicitly NOT done this round**: no existing provider (`FinnhubQuoteProvider`, `AlpacaOptionsProvider`, etc.) was refactored to formally implement these interfaces, and no new production data provider was connected — per the explicit instruction not to prematurely connect anything. This is the contract-definition step only.
