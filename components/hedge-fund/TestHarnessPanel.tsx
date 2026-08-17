@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useState, useTransition } from "react";
-import { startTestHarness, pauseTestHarness, resumeTestHarness, stopTestHarness, getActiveTestHarness, type TestHarnessState } from "@/app/(app)/hedge-fund/test-harness/actions";
+import { startTestHarness, pauseTestHarness, resumeTestHarness, stopTestHarness, getActiveTestHarness, runTestHarnessCycle, type TestHarnessState } from "@/app/(app)/hedge-fund/test-harness/actions";
+import type { CycleResult } from "@/engine/quant/orchestration/ObservationCycle";
 
 const STATUS_COLOR: Record<string, string> = {
     IDLE: "text-zinc-400",
@@ -29,6 +30,7 @@ export default function TestHarnessPanel({ defaultWatchlist }: { defaultWatchlis
     const [name, setName] = useState("Quant Validation Test");
     const [watchlist, setWatchlist] = useState(defaultWatchlist);
     const [message, setMessage] = useState<{ kind: "success" | "error"; text: string } | null>(null);
+    const [cycleResult, setCycleResult] = useState<CycleResult | null>(null);
     const [isPending, startTransition] = useTransition();
 
     useEffect(() => {
@@ -62,6 +64,19 @@ export default function TestHarnessPanel({ defaultWatchlist }: { defaultWatchlis
         });
     }
 
+    function handleRunCycle() {
+        setMessage(null);
+        startTransition(async () => {
+            const result = await runTestHarnessCycle();
+            if (result.success && result.result) {
+                setCycleResult(result.result);
+                getActiveTestHarness().then(setState);
+            } else {
+                setMessage({ kind: "error", text: result.error ?? "Cycle failed." });
+            }
+        });
+    }
+
     if (loading) {
         return (
             <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-4">
@@ -75,12 +90,12 @@ export default function TestHarnessPanel({ defaultWatchlist }: { defaultWatchlis
         <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-4">
             <div className="mb-2 flex items-center justify-between">
                 <h3 className="text-sm font-medium text-zinc-300">Autonomous Quant Test Harness</h3>
-                <span className="text-[10px] text-zinc-600">Real — Stage A: persistent state, not yet self-advancing</span>
+                <span className="text-[10px] text-zinc-600">Real — cycle logic built (round114), manually triggerable only — no real scheduler yet</span>
             </div>
 
             {!state ? (
                 <div className="space-y-2">
-                    <p className="text-xs text-zinc-500">No active test. Real, honest note: starting a test creates real, persistent state, but nothing advances it automatically yet — Stage B (a real scheduler) hasn't been built.</p>
+                    <p className="text-xs text-zinc-500">No active test. Starting one creates real, persistent state. Each cycle must be run manually via the button below — no real scheduler is connected yet (Round 115).</p>
                     <div className="flex flex-wrap items-end gap-2">
                         <div>
                             <label className="mb-1 block text-xs text-zinc-500">Name</label>
@@ -117,7 +132,10 @@ export default function TestHarnessPanel({ defaultWatchlist }: { defaultWatchlis
                     </div>
                     <div className="flex gap-2">
                         {state.status === "RUNNING" && (
-                            <button onClick={() => handleAction(pauseTestHarness)} disabled={isPending} className="rounded-md border border-zinc-700 px-3 py-1 text-xs text-zinc-300 hover:border-zinc-500 disabled:opacity-50">Pause</button>
+                            <>
+                                <button onClick={handleRunCycle} disabled={isPending} className="rounded-md bg-blue-600 px-3 py-1 text-xs font-medium text-white hover:bg-blue-500 disabled:opacity-50">Run One Cycle</button>
+                                <button onClick={() => handleAction(pauseTestHarness)} disabled={isPending} className="rounded-md border border-zinc-700 px-3 py-1 text-xs text-zinc-300 hover:border-zinc-500 disabled:opacity-50">Pause</button>
+                            </>
                         )}
                         {state.status === "PAUSED" && (
                             <button onClick={() => handleAction(resumeTestHarness)} disabled={isPending} className="rounded-md border border-zinc-700 px-3 py-1 text-xs text-zinc-300 hover:border-zinc-500 disabled:opacity-50">Resume</button>
@@ -126,6 +144,20 @@ export default function TestHarnessPanel({ defaultWatchlist }: { defaultWatchlis
                             <button onClick={() => handleAction(() => stopTestHarness())} disabled={isPending} className="rounded-md border border-red-900 px-3 py-1 text-xs text-red-400 hover:border-red-700 disabled:opacity-50">Stop</button>
                         )}
                     </div>
+
+                    {cycleResult && (
+                        <div className="rounded-md bg-zinc-950/50 p-2.5 text-xs">
+                            <p className="mb-1 font-medium text-zinc-300">Cycle result — {new Date(cycleResult.cycleCompletedAt).toLocaleTimeString()}</p>
+                            <div className="grid grid-cols-2 gap-x-4 gap-y-0.5 text-zinc-400">
+                                <span>Observation: <span className="text-white">{cycleResult.observation}</span></span>
+                                <span>Positions Reviewed: <span className="text-white">{cycleResult.positionsReviewed}</span></span>
+                                <span>Material Events: <span className="text-white">{cycleResult.materialEventsFound}</span></span>
+                                <span>New Decision: <span className="text-white">{cycleResult.newDecisionFormed ? "Yes" : "No"}</span></span>
+                                <span className="col-span-2">Status: <span className={cycleResult.status === "COMPLETE" ? "text-emerald-400" : "text-amber-400"}>{cycleResult.status}</span></span>
+                            </div>
+                            {cycleResult.error && <p className="mt-1 text-red-400">{cycleResult.error}</p>}
+                        </div>
+                    )}
                 </div>
             )}
 

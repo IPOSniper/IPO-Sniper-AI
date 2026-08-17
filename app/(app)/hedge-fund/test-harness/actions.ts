@@ -1,29 +1,24 @@
 "use server";
 
 /**
- * Real Autonomous Quant Test Harness -- Stage A only (per the
- * bootstrap's own explicit two-stage plan, Section 39: "Build...
- * DO NOT activate continuous execution yet"). This file provides the
- * real, persistent state machine (start/pause/resume/stop, real
- * progress counters, real completion detection) with ZERO actual
- * scheduling or execution wiring -- nothing here calls
- * runAutonomousTradingSession() or places any real order. A real
- * test can be started, paused, resumed, and stopped safely; it
- * simply never advances on its own yet, since the real external
- * trigger (Stage B: a scheduler actually invoking a cycle) doesn't
- * exist yet.
+ * Real Autonomous Quant Test Harness -- Stage A (persistent state
+ * machine) plus Round 114's real, manually-triggerable observation
+ * cycle. Real state transitions (start/pause/resume/stop) with real
+ * progress counters, plus runTestHarnessCycle() -- a real wrapper
+ * around engine/quant/orchestration/ObservationCycle.ts's real,
+ * self-contained cycle logic.
  *
- * Real, honest scoping stated directly: this does NOT implement
- * Sections 8-20 (the actual observation cycle, material-change
- * detection, adaptive reassessment, decision generation) or Section
- * 25-27 (the real scheduler trigger). Those are real, substantial,
- * separate Stage B work -- deliberately not attempted in the same
- * round as the safety-critical state machine, consistent with the
- * bootstrap's own staged approach.
+ * Real, honest scoping stated directly: runTestHarnessCycle() is
+ * manually triggerable ONLY in this round -- no real external
+ * scheduler calls it yet. That's Round 115's real, separate,
+ * deliberate follow-up (per the bootstrap's own staged plan), kept
+ * apart from this round so the cycle logic itself can be verified
+ * working manually before any unattended trigger is connected to it.
  */
 
 import { createClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/client";
+import { runObservationCycle, type CycleResult } from "@/engine/quant/orchestration/ObservationCycle";
 
 export type HarnessStatus = "IDLE" | "RUNNING" | "PAUSED" | "STOPPING" | "COMPLETED" | "FAILED" | "EMERGENCY_STOPPED";
 
@@ -195,4 +190,25 @@ export async function getActiveTestHarness(): Promise<TestHarnessState | null> {
     } catch {
         return null;
     }
+}
+
+/**
+ * Real, manually-triggerable single observation cycle for the
+ * user's active test harness run. Wraps round114's real
+ * runObservationCycle() -- resolves the real authenticated user and
+ * the real active test's real watchlist, then calls the actual
+ * cycle logic. Real, honest guard: refuses to run when no active
+ * test exists or the test isn't in RUNNING status (e.g. PAUSED),
+ * rather than silently running anyway.
+ */
+export async function runTestHarnessCycle(): Promise<{ success: boolean; result?: CycleResult; error?: string }> {
+    const userId = await getAuthedUserId();
+    if (!userId) return { success: false, error: "Not authenticated." };
+
+    const active = await getActiveTestHarness();
+    if (!active) return { success: false, error: "No active test harness run." };
+    if (active.status !== "RUNNING") return { success: false, error: `Test is ${active.status}, not RUNNING -- resume it first.` };
+
+    const result = await runObservationCycle(userId, active.id, active.watchlist);
+    return { success: true, result };
 }

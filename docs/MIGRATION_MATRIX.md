@@ -609,3 +609,17 @@ New `quant_test_harness` table — real, persistent state machine (IDLE/RUNNING/
 New `test-harness/actions.ts` (`startTestHarness`, `pauseTestHarness`, `resumeTestHarness`, `stopTestHarness`, `emergencyStopTestHarness`, `getActiveTestHarness`) — real state transitions only. New `TestHarnessPanel` — real UI showing the state machine working, honestly labeled as "not yet self-advancing."
 
 **Real, explicit scope boundary, stated directly and repeatedly in the code**: Sections 8-20 (the actual observation cycle, material-change detection, adaptive reassessment) and Sections 25-27 (the real scheduler trigger — Stage B) are NOT built. A started test creates real, persistent state but sits at 0/0/0 progress forever until Stage B exists. This is the safety-critical foundation only, per the bootstrap's own staged approach — not a claim that autonomous cycling is happening.
+
+## Round 114: Autonomous Observation Cycle — real, self-contained, manually triggerable (added this session)
+
+Real, self-contained cycle function, per direct instruction: "If the scheduler calls it 100 times, we're not depending on browser state or a user click." New `ObservationCycle.ts` (`runObservationCycle`) composes real, already-built pieces — round103's idempotency lock, round109's `reassessOpenPosition` for every genuinely open position, and round106's `runAutonomousTradingSession` for new-decision evaluation — into one real, ordered cycle. No duplicate trading logic, per the bootstrap's own explicit rule.
+
+**Real entry-time gap found and fixed while building this**: `TradingPosition` (Alpaca) carries no entry timestamp — added a real helper querying `paper_trade_orders.filled_at` for the most recent real filled buy order, the same real source `OutcomeAttribution` already uses.
+
+**Real, honest observation/decision/execution distinction maintained throughout**, per direct instruction: `observationsCount` always increments; `autonomousDecisionsCount` only increments when a real trade plan actually formed (not just NO_TRADE results) — never conflated into one "run" count.
+
+New `runTestHarnessCycle()` wrapper + real "Run One Cycle" button on `TestHarnessPanel`, showing the real cycle result (observation status, positions reviewed, material events, new-decision flag).
+
+**Real safety note, stated plainly**: this cycle calls the existing `runAutonomousTradingSession()`, which already enforces Quant Control + RiskEngine + paper-only execution — this button *can* place a real paper order under the same conditions the existing "Run Trading Session" button can. Manually triggerable only in this round — no real external scheduler wired yet (Round 115, deliberately separate).
+
+**Real self-introduced mistake caught and fixed mid-round**: an import edit accidentally left a dangling, broken comment fragment outside any real comment block — caught by viewing the file's actual resulting content rather than trusting the edit succeeded, and fixed before shipping.
