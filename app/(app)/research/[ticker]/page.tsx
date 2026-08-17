@@ -33,8 +33,12 @@ export default async function ResearchPage({ params }: PageProps) {
                     await ingestRecentEvents(user.id, ticker);
                 }
             }
-        } catch {
-            // Real ingestion failures shouldn't block real research.
+        } catch (err) {
+            // Real ingestion failures shouldn't block real research,
+            // but should still be logged -- silently swallowing this
+            // was the same bug class already found and fixed
+            // multiple times elsewhere this session.
+            console.error("Research-page event ingestion failed:", err instanceof Error ? err.message : err);
         }
 
         return (

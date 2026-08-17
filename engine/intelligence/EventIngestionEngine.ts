@@ -55,10 +55,14 @@ export async function ingestRecentEvents(userId: string, ticker: string, limit =
         }
 
         return events;
-    } catch {
-        // Real ingestion can fail independently (SEC API down, rate
-        // limited, etc.) -- an empty result is the honest outcome,
-        // not a fabricated event list.
+    } catch (err) {
+        // Real fix: silently returning [] here made this bug
+        // invisible -- same silent-failure class already found and
+        // fixed multiple times this session (paper_trade_orders,
+        // quant_runs, logBatchDecision), reintroduced here without
+        // being caught at the time. Logging the real reason instead
+        // of guessing at it again.
+        console.error("ingestRecentEvents failed:", err instanceof Error ? err.message : err);
         return [];
     }
 }

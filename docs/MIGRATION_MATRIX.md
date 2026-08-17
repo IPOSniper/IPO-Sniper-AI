@@ -465,3 +465,9 @@ Real first wiring for round90's `ingestRecentEvents()`, which was built but deli
 **Real deduplication added first**: without it, every repeat visit to the same ticker would re-insert the same real SEC filings as duplicate rows, since `eventId` (`"sec-{accessionNumber}"`) is deterministic per real filing. `saveEvent()` now checks for an existing row by `event_id` before inserting.
 
 **Real, honest trade-off stated directly, not glossed over**: this is an *awaited* call — adds real latency (2 sequential SEC EDGAR calls plus per-filing dedup/insert checks) to every research page load, not a free background operation. Chosen for consistency with this app's established pattern (most data fetches are awaited directly in Server Components) over introducing a new fire-and-forget pattern inconsistent with the rest of the app.
+
+## Fix real silent failure in event ingestion — same bug class, caught late (added this session)
+
+Real, confirmed bug found via direct verification: AAPL was genuinely researched (visible in AI Activity Feed), but `market_events` stayed at 0 rows. Root cause: `ingestRecentEvents()`'s catch block was a bare `catch {}` with no error logging — the exact same silent-failure class already found and fixed multiple times this session (`paper_trade_orders`, `quant_runs`, `logBatchDecision`), reintroduced here in round90 without being caught at the time.
+
+Both this catch block and the research page's own wrapping catch now log the real error via `console.error`. This doesn't fix the underlying cause yet — that's still unknown — but makes it discoverable via Vercel's function logs on the next attempt, instead of remaining invisible.
