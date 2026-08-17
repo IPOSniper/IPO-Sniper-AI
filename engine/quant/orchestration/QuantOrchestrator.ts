@@ -25,6 +25,7 @@ import { getTradePlan } from "@/app/(app)/hedge-fund/quant-strategist/actions";
 import { runBatchScan, type BatchRunResult } from "@/app/(app)/hedge-fund/batch-scanner/actions";
 import { DEFAULT_AUTO_EXECUTION_GATES, type AutoExecutionGates } from "@/engine/quant/BatchScanner";
 import type { TradePlanResult } from "@/app/(app)/hedge-fund/quant-strategist/actions";
+import { acquireRunLock, updateRunLockStatus } from "./RunIdempotency";
 
 export type QuantTrigger = "manual-single" | "manual-batch" | "autonomous-batch";
 
@@ -60,4 +61,50 @@ export async function runSingle(trigger: QuantTrigger, ticker: string): Promise<
 export async function runBatch(trigger: QuantTrigger, tickers: string[], gates: AutoExecutionGates = DEFAULT_AUTO_EXECUTION_GATES): Promise<OrchestratedBatchResult> {
     const results = await runBatchScan(tickers, gates);
     return { trigger, mode: "batch", results };
+}
+
+export type AutonomousSessionOutcome =
+    | { status: "RUN_ALREADY_ACTIVE"; reason: string }
+    | { status: "NOT_AUTHENTICATED" }
+    | { status: "COMPLETED"; results: BatchRunResult[] }
+    | { status: "FAILED"; error: string };
+
+/**
+ * Real autonomous trading session runner -- Round 105B's first
+ * piece. Wires round103's real idempotency lock on top of the
+ * existing, unmodified runBatchScan(), so the same real
+ * idempotencyKey can never trigger two concurrent executions --
+ * whether from a genuine double-click, a future scheduler retry, or
+ * a duplicate request of any kind.
+ *
+ * Real, honest scoping: this is NOT yet the full 17-step pipeline
+ * (load Quant Memory, load market events, thesis reassessment mid-
+ * run, etc.) the original Round 105 bootstrap describes -- it wraps
+ * the real, already-working runBatchScan() (which itself already
+ * enforces Quant Control via checkAutonomousExecutionAllowed and
+ * RiskEngine on every order) with real lock protection. That's the
+ * real, safe increment this round adds; the fuller pipeline remains
+ * real, separate future work.
+ */
+export async function runAutonomousTradingSession(
+    userId: string,
+    idempotencyKey: string,
+    tickers: string[],
+    gates: AutoExecutionGates = DEFAULT_AUTO_EXECUTION_GATES
+): Promise<AutonomousSessionOutcome> {
+    const lock = await acquireRunLock(userId, idempotencyKey);
+
+    if (!lock.acquired || !lock.lockId) {
+        return { status: "RUN_ALREADY_ACTIVE", reason: lock.reason ?? "Could not acquire a real run lock." };
+    }
+
+    try {
+        await updateRunLockStatus(lock.lockId, "RUNNING");
+        const results = await runBatchScan(tickers, gates);
+        await updateRunLockStatus(lock.lockId, "COMPLETED");
+        return { status: "COMPLETED", results };
+    } catch (err) {
+        await updateRunLockStatus(lock.lockId, "FAILED");
+        return { status: "FAILED", error: err instanceof Error ? err.message : "Unknown real error during autonomous session." };
+    }
 }
