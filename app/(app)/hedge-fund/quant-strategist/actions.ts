@@ -203,7 +203,7 @@ export async function getTradePlan(ticker: string): Promise<
  * of what QuantStrategist suggested. When a decisionId is provided
  * and the order succeeds, links the two records together.
  */
-export async function executeTradePlan(contractSymbol: string, qty: number, planSummary: string, decisionId?: string | null) {
+export async function executeTradePlan(ticker: string, contractSymbol: string, qty: number, planSummary: string, decisionId?: string | null) {
     // Real, server-side enforcement -- see checkAutonomousExecutionAllowed's
     // docstring. Checked here, not just in the UI, so this can't be
     // bypassed by calling the server action directly.
@@ -212,7 +212,12 @@ export async function executeTradePlan(contractSymbol: string, qty: number, plan
         return { success: false as const, error: control.reason };
     }
 
-    const result = await placeOrder(contractSymbol, "buy", qty, `Quant Strategist: ${planSummary}`, undefined, "option");
+    // Real Contract Integrity Gate -- passes the real ticker this
+    // trade plan was actually built for as expectedUnderlying, so
+    // placeOrder() independently verifies the contract really is for
+    // this ticker before any order reaches Alpaca, regardless of
+    // what contractSymbol happens to be.
+    const result = await placeOrder(contractSymbol, "buy", qty, `Quant Strategist: ${planSummary}`, undefined, "option", ticker);
 
     if (result.success && result.order && decisionId) {
         await linkDecisionToOrder(decisionId, result.order.brokerOrderId);

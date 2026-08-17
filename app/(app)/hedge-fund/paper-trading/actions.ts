@@ -94,7 +94,8 @@ export async function placeOrder(
     qty: number,
     reasoning?: string,
     limits: RiskLimits = DEFAULT_RISK_LIMITS,
-    assetType: "equity" | "option" = "equity"
+    assetType: "equity" | "option" = "equity",
+    expectedUnderlying?: string
 ): Promise<PlaceOrderResult> {
 
     const normalizedTicker = ticker.trim().toUpperCase();
@@ -129,6 +130,33 @@ export async function placeOrder(
         if (!underlying) {
             return { success: false, error: `"${normalizedTicker}" doesn't look like a valid OCC option contract symbol (expected format: TICKER + YYMMDD + C/P + 8-digit strike, e.g. AAPL260320C00220000).` };
         }
+
+        // Real Contract Integrity Gate -- server-side, independent of
+        // whatever the UI form happens to contain. When a caller
+        // supplies expectedUnderlying (what the decision/user actually
+        // intended to trade), the real contract's own real extracted
+        // underlying must match it exactly, or the order is blocked
+        // before it ever reaches Alpaca. This is the actual safety
+        // boundary -- a stale contract symbol left in a form (e.g.
+        // AAPL260320C00022000 sitting there after the user switched
+        // tickers to SPCX) cannot silently execute, because the
+        // server independently verifies what the contract itself
+        // really represents, not what the client claims it typed for.
+        if (expectedUnderlying && underlying !== expectedUnderlying.trim().toUpperCase()) {
+            await logOrderAttempt({
+                ticker: normalizedTicker,
+                side,
+                qty,
+                brokerOrderId: null,
+                status: null,
+                estimatedOrderValue: null,
+                riskAllowed: false,
+                riskBlockedReason: `CONTRACT_MISMATCH: requested underlying "${expectedUnderlying.trim().toUpperCase()}" but contract "${normalizedTicker}" is for "${underlying}".`,
+                reasoning,
+            });
+            return { success: false, error: `Contract mismatch: you selected ${expectedUnderlying.trim().toUpperCase()}, but this contract (${normalizedTicker}) is for ${underlying}. No order was sent.` };
+        }
+
         try {
             const chain = await optionsProvider.getOptionChain(underlying);
             const contract = chain.find(c => c.symbol === normalizedTicker);

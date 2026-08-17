@@ -55,6 +55,7 @@ export default function PaperTradingPanel({
     const [browsingChain, setBrowsingChain] = useState(false);
     const [browseError, setBrowseError] = useState<string | null>(null);
     const [side, setSide] = useState<OrderSide>("buy");
+    const [contractSourceTicker, setContractSourceTicker] = useState<string | null>(null);
     const [qty, setQty] = useState("");
     const [reasoning, setReasoning] = useState("");
     const [message, setMessage] = useState<{ kind: "error" | "success"; text: string } | null>(null);
@@ -111,6 +112,10 @@ export default function PaperTradingPanel({
         setTicker(recommendation.contract.symbol);
         setQty(String(recommendation.estimatedQty));
         setSide("buy");
+        // Real, known-good link -- this contract was genuinely found
+        // for findTicker, so that's the real expectedUnderlying to
+        // verify server-side before this order can ever be submitted.
+        setContractSourceTicker(findTicker.trim().toUpperCase());
     }
 
     async function handleBrowseChain() {
@@ -130,6 +135,8 @@ export default function PaperTradingPanel({
         setAssetType("option");
         setTicker(contract.symbol);
         setSide("buy");
+        // Real, known-good link -- same reasoning as handleUseContract.
+        setContractSourceTicker(findTicker.trim().toUpperCase());
         setBrowsedContracts(null);
     }
 
@@ -140,7 +147,15 @@ export default function PaperTradingPanel({
         const qtyNum = Number(qty);
 
         startTransition(async () => {
-            const result = await placeOrder(ticker, side, qtyNum, reasoning || undefined, undefined, assetType);
+            // Real Contract Integrity Gate -- only passed when
+            // genuinely known (contractSourceTicker is set only when
+            // this exact contract was actually found via Find Best
+            // Contract/Browse Chain for a specific ticker). A
+            // manually-typed contract symbol with no tracked source
+            // has no reliable "expected" ticker to check against, so
+            // it's correctly left unchecked here rather than guessed.
+            const expectedUnderlying = assetType === "option" ? (contractSourceTicker ?? undefined) : undefined;
+            const result = await placeOrder(ticker, side, qtyNum, reasoning || undefined, undefined, assetType, expectedUnderlying);
 
             if (!result.success) {
                 setMessage({ kind: "error", text: result.error ?? "Order failed." });
@@ -149,6 +164,7 @@ export default function PaperTradingPanel({
 
             setMessage({ kind: "success", text: `Order submitted: ${result.order?.side} ${result.order?.qty} ${result.order?.ticker} (status: ${result.order?.status})` });
             setTicker("");
+            setContractSourceTicker(null);
             setQty("");
             setReasoning("");
             router.refresh();
@@ -234,7 +250,22 @@ export default function PaperTradingPanel({
                         <label className="mb-1 block text-xs text-zinc-500">Ticker</label>
                         <input
                             value={findTicker}
-                            onChange={e => setFindTicker(e.target.value)}
+                            onChange={e => {
+                                setFindTicker(e.target.value);
+                                // Real fix: clear any previously-found
+                                // contract immediately when the search
+                                // ticker changes -- otherwise a stale
+                                // contract from an earlier successful
+                                // search (e.g. AAPL) can keep sitting in
+                                // the Contract Symbol field after
+                                // switching to a new ticker (e.g. SPCX)
+                                // whose search hasn't found a match yet.
+                                if (assetType === "option") setTicker("");
+                                setContractSourceTicker(null);
+                                setRecommendation(null);
+                                setDiagnostics(null);
+                                setBrowsedContracts(null);
+                            }}
                             placeholder="CSCO"
                             className="w-28 rounded-md border border-zinc-700 bg-zinc-950 px-2 py-1 text-sm text-white"
                         />
@@ -366,7 +397,7 @@ export default function PaperTradingPanel({
                         </label>
                         <input
                             value={ticker}
-                            onChange={e => { setTicker(e.target.value); setQuote(null); setQuoteError(null); }}
+                            onChange={e => { setTicker(e.target.value); setQuote(null); setQuoteError(null); setContractSourceTicker(null); }}
                             placeholder={assetType === "option" ? "AAPL260320C00220000" : "AMD"}
                             className={assetType === "option" ? "w-48 rounded-md border border-zinc-700 bg-zinc-950 px-2 py-1 text-sm text-white" : "w-24 rounded-md border border-zinc-700 bg-zinc-950 px-2 py-1 text-sm text-white"}
                             required

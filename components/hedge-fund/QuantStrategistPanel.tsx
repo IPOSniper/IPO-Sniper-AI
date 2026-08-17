@@ -81,7 +81,7 @@ export default function QuantStrategistPanel() {
         setExecuteMessage(null);
 
         const planSummary = `${DIRECTION_LABEL[result.plan.direction]} on ${result.ticker}, ${result.plan.confidence}% committee confidence`;
-        const response = await executeTradePlan(result.selectedContract.symbol, result.suggestedQty, planSummary, result.decisionId);
+        const response = await executeTradePlan(result.ticker, result.selectedContract.symbol, result.suggestedQty, planSummary, result.decisionId);
 
         if (response.success && response.order) {
             setExecuteStatus("done");

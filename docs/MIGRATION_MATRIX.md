@@ -545,3 +545,13 @@ Real fix to a genuine weakness the Rounds 104-105 bootstrap correctly identified
 Fixed via a real, precise 2-step link using data that already existed but wasn't being used together: (1) find the exact real entry order via its unique `filled_avg_price` + `filled_at` + `ticker`, (2) match that order's real `broker_order_id` against the exact `quant_trade_decisions` row that produced it (both tables share this same real value via `linkDecisionToOrder`, confirmed via direct schema check before writing this). No schema change needed — both real columns already existed; they just weren't being joined together for this purpose.
 
 **Everything else in the Rounds 104-105 bootstrap remains deliberately unbuilt** — the full autonomous runner (105A), scheduler-compatible architecture, and the broader learning-record schema (104A, 104E-104H) are real, substantial future work, not attempted in this round given the genuine scope.
+
+## Round 104.5: Contract Integrity Gate — closing a real execution-safety gap (added this session)
+
+Real, urgent fix for a genuine bug directly observed in production: a stale contract symbol (AAPL) persisting in the Place Order form after switching the search ticker to SPCX, whose real chain search hadn't yet found a matching contract.
+
+**The real server-side gate** (the actual security boundary — never trust the UI alone): `placeOrder()` now accepts an optional `expectedUnderlying` parameter. When supplied, the server independently extracts the real underlying from the contract symbol itself (via the existing `extractUnderlyingFromOccSymbol`) and blocks the order with a clear `CONTRACT_MISMATCH` error — before it ever reaches Alpaca — if it doesn't match. Wired into all three real callers, found via direct grep rather than assumed: the manual Place Order form, Quant Strategist's `executeTradePlan()`, and — most critically — **Batch Scanner's autonomous execution path**, which runs without human review.
+
+**Real, careful scoping for the manual form**: rather than blindly passing the "Find Best Contract" ticker field (which could false-positive block a legitimately, manually-typed contract symbol unrelated to any search), added a new `contractSourceTicker` state that's only set when a contract was genuinely selected via Find/Browse. A hand-typed contract symbol has no reliable "expected" ticker and is correctly left unchecked rather than guessed.
+
+**The real UI fix**: the Contract Symbol field now clears immediately when the search ticker changes, so a stale contract from an earlier successful search can no longer linger and look ready to submit.

@@ -128,7 +128,8 @@ export async function runBatchScan(
                     suggestedQty,
                     `Batch Scanner (autonomous): ${evaluation.reason}`,
                     undefined,
-                    "option"
+                    "option",
+                    ticker
                 );
                 if (orderResult.success && orderResult.order) {
                     executed = true;
