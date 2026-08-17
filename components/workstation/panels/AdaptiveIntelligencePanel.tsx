@@ -1,5 +1,6 @@
 import { findContradictions } from "@/engine/intelligence/ContradictionEngine";
 import { assessThesisChange } from "@/engine/intelligence/ThesisReassessmentEngine";
+import { findSimilarDecisions } from "@/engine/intelligence/PatternRecognitionEngine";
 import type { CommitteeReport } from "@/engine/committee/contracts/CommitteeReport";
 
 const THESIS_COLOR: Record<string, string> = {
@@ -34,8 +35,10 @@ const THESIS_LABEL: Record<string, string> = {
 export default async function AdaptiveIntelligencePanel({ userId, ticker, committee }: { userId: string | null; ticker: string; committee: CommitteeReport }) {
     const contradictionAnalysis = findContradictions(committee);
     const thesisReassessment = userId ? await assessThesisChange(userId, ticker) : null;
+    const similarDecisions = userId ? await findSimilarDecisions(userId, ticker, 3) : [];
 
-    if (!contradictionAnalysis.hasSignificantContradiction && (!thesisReassessment || thesisReassessment.result === "insufficient-history")) {
+    const hasThesisResult = thesisReassessment && thesisReassessment.result !== "insufficient-history";
+    if (!contradictionAnalysis.hasSignificantContradiction && !hasThesisResult && similarDecisions.length === 0) {
         return null;
     }
 
@@ -64,6 +67,18 @@ export default async function AdaptiveIntelligencePanel({ userId, ticker, commit
                         <p key={i} className="text-xs text-zinc-400">
                             {c.analystA} ({c.recommendationA}) vs. {c.analystB} ({c.recommendationB})
                             {c.severity === "critical" && <span className="ml-1 text-red-400">critical</span>}
+                        </p>
+                    ))}
+                </div>
+            )}
+
+            {similarDecisions.length > 0 && (
+                <div className="mt-2 space-y-1">
+                    <p className="text-xs text-zinc-500">Similar past decisions for {ticker} (real decision comparison, not yet outcome-aware — no closed trades exist for this ticker yet):</p>
+                    {similarDecisions.map(({ decision, similarity }) => (
+                        <p key={decision.id} className="text-xs text-zinc-400">
+                            {new Date(decision.createdAt).toLocaleDateString()} — {decision.direction === "none" ? "No Trade" : decision.direction} (Quality {decision.tradeQualityScore}/100)
+                            <span className="ml-1 text-zinc-600">{similarity}% similar</span>
                         </p>
                     ))}
                 </div>

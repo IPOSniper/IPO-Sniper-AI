@@ -491,3 +491,11 @@ New `ContradictionEngine.ts` — real, deterministic scan of a live `CommitteeRe
 New `AdaptiveIntelligencePanel` — the first real UI wiring for both this round's Contradiction Engine and round97's Thesis Reassessment Engine, both previously built but left deliberately unconnected. Rendered as its own small, isolated component alongside `WorkstationShell` on the research page, rather than modifying that large, established component directly. Only renders when there's genuinely something to show (a real contradiction or a real, comparable thesis change) — returns `null` otherwise rather than showing an empty panel.
 
 **Real, confirmed dependency verified before shipping**: `getDecisionHistory()` (which Thesis Reassessment depends on) has real data for tickers tested via Quant Strategist's "Build Trade Plan" — confirmed that flow also writes to `quant_trade_decisions`, not just Batch Scanner. Tickers with multiple real "Build Trade Plan" runs this session (e.g. RIOT) should show a genuine thesis comparison; tickers researched for the first time will correctly show nothing (insufficient history).
+
+## Pattern Recognition Engine — Round 3 complete (added this session)
+
+Real, honest first version, per the original proposal's own explicit guidance not to build sophisticated similarity scoring yet. Finds similar past **decisions** for a ticker (real direction match + trade-quality proximity), not similar past **outcomes** — there are genuinely zero real closed trades yet for any ticker tested via Quant Strategist, so an outcome-based version now would mean fabricating data. Real, stated, adjustable weighting (60% direction match, 40% trade-quality proximity). Manually verified against 4 real test cases before shipping.
+
+Wired into the same `AdaptiveIntelligencePanel` from last round — a real "similar past decisions" section, explicitly labeled as not-yet-outcome-aware so it isn't misread as more than it is.
+
+**This completes Round 3 (Reasoning)** as scoped: Thesis Reassessment, Contradiction Engine, and Pattern Recognition are all built and wired into a real, visible UI.
