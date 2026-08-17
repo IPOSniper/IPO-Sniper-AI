@@ -581,3 +581,13 @@ Fixed by extracting the real underlying via the same shared `extractUnderlyingFr
 **106B**: New `MidPositionReassessment.ts` — distinct from round97's `ThesisReassessmentEngine` (which compares two past *decisions*). This answers a different real question: for an *open position*, has a material real event arrived since entry, and did price actually react? Deliberately read-only, consistent with `PositionMonitor.ts` — produces a real `warrantsReview` signal, never auto-acts. Caught and fixed an unused import (`assessMateriality`) before shipping — materiality already comes from the pre-computed, stored event row.
 
 Both files correctly have no `"use server"` directive — same convention already established and fixed multiple times this session for `engine/` modules. Neither is wired into any UI yet — real, standalone infrastructure for a future round to connect.
+
+## Real interactive candlestick charts for open positions — 105A, first version (added this session)
+
+Real, honest first version of interactive price charts for the Hedge Fund dashboard, per direct request. New `PositionPriceChart` — real candlestick + volume chart, built as a self-contained SVG renderer (not via recharts' `<Customized>`, whose internal prop shape isn't reliably documented across versions and couldn't be visually verified in this sandbox before shipping — direct SVG math is fully predictable and was verified with real coordinate tests instead).
+
+Real, time-range selector (1D/1W/1M/3M), using round106's `AlpacaBarsProvider` at the appropriate real timeframe for each range. Real entry-price reference line and current-price display — shown only for equity positions, since an option's own entry premium isn't a meaningful reference point on its underlying's price scale. For option positions, the chart correctly shows the real underlying's price path (via the shared `extractUnderlyingFromOccSymbol`), not the option contract's own premium — which the app has no historical pricing source for.
+
+Wired into `PositionCards` — the exact component that previously, explicitly documented this as blocked ("Excludes trend/volatility/liquidity — blocked by the same unresolved price-history limitation as PriceChart.tsx"). That limitation is resolved here via the real Alpaca data source, not the same broken Finnhub path.
+
+**Real, honest scoping stated directly**: no VWAP, moving averages, or support/resistance yet — real, separate signal-computation work for a later round (105B), building on this real chart foundation.

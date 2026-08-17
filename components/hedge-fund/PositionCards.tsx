@@ -1,5 +1,7 @@
 import type { TradingPosition } from "@/engine/trading/contracts/TradeOrder";
 import type { PositionRiskResult } from "@/engine/portfolio/PortfolioRiskAggregator";
+import { extractUnderlyingFromOccSymbol } from "@/engine/trading/contracts/occSymbol";
+import PositionPriceChart from "./PositionPriceChart/PositionPriceChart";
 
 const RECOMMENDATION_COLOR: Record<string, string> = {
     STRONG_BUY: "text-emerald-400 border-emerald-900/50",
@@ -44,11 +46,20 @@ function healthLabel(score: number): { label: string; color: string } {
 }
 
 /**
- * Real position cards -- no mini price chart, per direct decision:
- * PriceChart.tsx has a real, confirmed, still-unresolved limitation
- * ("Price history unavailable — check FINNHUB_API_KEY / plan access
- * to /stock/candle"), and building new charts against the same
- * uncertain data source risked repeating that failure.
+ * Real position cards -- now with a real per-card price chart. The
+ * previously-noted PriceChart.tsx limitation ("Price history
+ * unavailable — check FINNHUB_API_KEY / plan access to
+ * /stock/candle") is resolved here via round106/round109's real
+ * Alpaca-based price data (AlpacaBarsProvider), not the same broken
+ * Finnhub source this docstring originally warned about.
+ *
+ * For option positions, the chart shows the real UNDERLYING's price
+ * path (extracted via the shared extractUnderlyingFromOccSymbol),
+ * not the option contract's own real premium path -- and the
+ * entry/current price reference line is correctly omitted for
+ * options, since the option's own entry premium (e.g. $16.20) isn't
+ * a meaningful reference point on the underlying's own price scale
+ * (e.g. SPCX trading in the $130s).
  *
  * Merges two real, already-fetched sources by ticker -- neither
  * alone has everything a card needs: real Alpaca TradingPosition
@@ -133,10 +144,22 @@ export default function PositionCards({
                             </div>
 
                             {topRisk && (
-                                <p className="text-[10px] text-zinc-500">
+                                <p className="mb-2 text-[10px] text-zinc-500">
                                     Top risk: {topRisk.title} <span className="text-zinc-600">({topRisk.severity}/100)</span>
                                 </p>
                             )}
+
+                            {(() => {
+                                const underlying = extractUnderlyingFromOccSymbol(ticker);
+                                const isOption = underlying !== null;
+                                return (
+                                    <PositionPriceChart
+                                        ticker={underlying ?? ticker}
+                                        entryPrice={!isOption && trading ? trading.avgEntryPrice : undefined}
+                                        currentPrice={!isOption && trading ? trading.currentPrice : undefined}
+                                    />
+                                );
+                            })()}
                         </div>
                     );
                 })}
