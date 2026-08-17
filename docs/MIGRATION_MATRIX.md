@@ -417,3 +417,11 @@ New `DataVisibility` type (`PUBLIC | INTERNAL | PRIVATE_QUANT | RESTRICTED`) —
 New `assertPublicSafe(sourceId)` — the real enforcement primitive for "never use UI visibility as security." Throws rather than returning a boolean, so a public code path can't accidentally ignore a failed check and serve data anyway. Not yet wired into any real public page (`/r/[slug]`, `/education`) — per the same "don't prematurely connect" discipline as the rest of Phase 1, this is the primitive; wiring it into those real pages is separate, real next work.
 
 **Caught and fixed two real self-introduced mistakes this round** — two `str_replace` edits accidentally dropped adjacent fields (Finnhub's `aiInferenceAllowed`/`storageAllowed`/`redistributionAllowed` and part of its `notes` text) by using an old_str that was wider than intended. Caught immediately by verifying each edit's actual result against the file rather than trusting the tool call succeeded, and fixed with full, precise block rewrites before proceeding.
+
+## Materiality Engine + real SEC-filing event normalizer — Phase 2 begins (added this session)
+
+Real, deliberately scoped start to Phase 2 (Event Intelligence). Skipped Novelty Engine this round — it needs real historical pattern data to compare against, which doesn't exist yet; building it now would mean fabricating scores rather than computing real ones.
+
+New `MaterialityEngine.ts` — pure, deterministic, rule-based `EventType → MaterialityLevel` scoring (not an AI/LLM call), grounded in the proposal's own real examples. Exhaustive over all 15 real `EventType` values (verified directly, not assumed).
+
+New `SecFilingEventNormalizer.ts` — a genuine, working, **authorized** ingestion path: SEC EDGAR is the one source already `confirmed-permitted` for `internal-decision` use in the registry, so this proves the real Provider → Normalize → Event Schema pipeline end to end without connecting anything not yet authorized (no news provider touched). Real, honest limitation stated directly: `SECFiling` only carries filing metadata, not document content — an 8-K's real headline/summary can't know what was actually announced without parsing the filing text, which isn't wired in here. Maps to the honest generic `"unexpected"` category rather than guessing, and `summary` stays `null` rather than being fabricated.
