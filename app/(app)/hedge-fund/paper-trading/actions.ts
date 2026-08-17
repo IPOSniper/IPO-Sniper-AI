@@ -7,21 +7,11 @@ import { AlpacaOptionsProvider } from "@/engine/trading/providers/AlpacaOptionsP
 import { RiskEngine, DEFAULT_RISK_LIMITS, type RiskLimits } from "@/engine/trading/risk/RiskEngine";
 import { FinnhubQuoteProvider } from "@/engine/evidence/providers/FinnhubQuoteProvider";
 import type { TradingAccount, TradingPosition, TradeOrderResult, OrderSide } from "@/engine/trading/contracts/TradeOrder";
+import { extractUnderlyingFromOccSymbol } from "@/engine/trading/contracts/occSymbol";
 
 const provider = new AlpacaPaperTradingProvider();
 const optionsProvider = new AlpacaOptionsProvider();
 const riskEngine = new RiskEngine();
-
-/**
- * An OCC contract symbol starts with the underlying ticker, followed
- * by a 6-digit date (YYMMDD). Extracting the ticker this way avoids
- * asking the caller to separately track "what's the underlying for
- * this contract" -- it's already encoded in the symbol itself.
- */
-function extractUnderlyingFromOccSymbol(occSymbol: string): string | null {
-    const match = occSymbol.match(/^([A-Z]+)\d{6}[CP]\d{8}$/);
-    return match ? match[1] : null;
-}
 
 export interface AccountResult {
     success: boolean;

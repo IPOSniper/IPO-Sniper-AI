@@ -1,5 +1,6 @@
 import { ResearchEngine } from "../research/researchEngine";
 import { FinnhubQuoteProvider } from "../evidence/providers/FinnhubQuoteProvider";
+import { extractUnderlyingFromOccSymbol } from "../trading/contracts/occSymbol";
 import type { ExecutiveDecision, Risk } from "../models/InvestmentDecisionReport";
 
 /**
@@ -13,6 +14,15 @@ export interface PortfolioPosition {
     ticker: string;
     shares: number;
     costBasis: number;
+    /**
+     * Optional, already-known real market value for this position
+     * (e.g. from Alpaca's own live position data, which correctly
+     * prices both equities and options). When provided, this is used
+     * directly instead of re-fetching a quote -- FinnhubQuoteProvider
+     * doesn't understand OCC option symbols and would otherwise fail
+     * with "No quote available" for every option position.
+     */
+    knownMarketValue?: number;
 }
 
 export interface PositionRiskResult {
@@ -133,14 +143,26 @@ export class PortfolioRiskAggregator {
         position: PortfolioPosition
     ): Promise<Omit<PositionRiskResult, "weight">> {
 
-        const [quote, { investmentDecision }] = await Promise.all([
-            this.quotes.getQuote(position.ticker),
-            this.research.analyzeFull({ ticker: position.ticker }),
+        // Real fix: an option position's ticker is an OCC symbol
+        // (e.g. "IREN260821P00038500"), which FinnhubQuoteProvider
+        // and the research engine's company lookup don't understand.
+        // Extract the real underlying for research, and use the
+        // real, already-known market value (from Alpaca's own live
+        // position data) instead of re-fetching a quote that would
+        // fail for option symbols.
+        const underlying = extractUnderlyingFromOccSymbol(position.ticker);
+        const researchTicker = underlying ?? position.ticker;
+
+        const [marketValue, { investmentDecision }] = await Promise.all([
+            position.knownMarketValue !== undefined
+                ? Promise.resolve(position.knownMarketValue)
+                : this.quotes.getQuote(position.ticker).then(q => q.price * position.shares),
+            this.research.analyzeFull({ ticker: researchTicker }),
         ]);
 
         return {
             ticker: position.ticker,
-            marketValue: quote.price * position.shares,
+            marketValue,
             recommendation: investmentDecision.executiveDecision.recommendation,
             conviction: investmentDecision.executiveDecision.capitalAllocationScore,
             risks: investmentDecision.riskRadar.risks,

@@ -173,6 +173,13 @@ export async function getPortfolioRisk(): Promise<PortfolioRiskResult> {
             ticker: p.ticker,
             shares: p.qty,
             costBasis: p.avgEntryPrice,
+            // Real, already-known market value from Alpaca's own
+            // live position data -- correctly prices both equities
+            // and options, unlike FinnhubQuoteProvider, which
+            // doesn't understand OCC option symbols and would
+            // otherwise fail every option position with "No quote
+            // available."
+            knownMarketValue: p.marketValue,
         }));
     } catch {
         // Alpaca not configured/reachable -- fall back to manual
