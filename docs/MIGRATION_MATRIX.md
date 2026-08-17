@@ -425,3 +425,13 @@ Real, deliberately scoped start to Phase 2 (Event Intelligence). Skipped Novelty
 New `MaterialityEngine.ts` — pure, deterministic, rule-based `EventType → MaterialityLevel` scoring (not an AI/LLM call), grounded in the proposal's own real examples. Exhaustive over all 15 real `EventType` values (verified directly, not assumed).
 
 New `SecFilingEventNormalizer.ts` — a genuine, working, **authorized** ingestion path: SEC EDGAR is the one source already `confirmed-permitted` for `internal-decision` use in the registry, so this proves the real Provider → Normalize → Event Schema pipeline end to end without connecting anything not yet authorized (no news provider touched). Real, honest limitation stated directly: `SECFiling` only carries filing metadata, not document content — an 8-K's real headline/summary can't know what was actually announced without parsing the filing text, which isn't wired in here. Maps to the honest generic `"unexpected"` category rather than guessing, and `summary` stays `null` rather than being fabricated.
+
+## Event Ingestion Engine — Round 2 as complete as it can be without Track B (added this session)
+
+Real completion of Round 2's remaining achievable piece. New `ingestRecentEvents(ticker)` — the actual caller for round89's `normalizeSecFilingToEvent()`, which was a real, working function that nothing in the app invoked yet. This is the first point where the real Provider → Normalize → Event Schema pipeline is genuinely callable end to end.
+
+**Real, honest limitation stated directly**: structurally verified against the real `SECEdgarProvider`'s actual method signatures (`getCIK`, `getFilings`), but not runtime-tested against live SEC data — this sandbox has no network access to actually execute it. Same caveat that applies to every piece of code built this session; worth stating plainly rather than implying more confidence than warranted.
+
+**Round 2 is now as complete as it can be without Track B**: Materiality Engine (round89) + SEC event ingestion (this round) are done. A general multi-source `EventIngestionEngine` isn't meaningful yet — there's only one authorized source to coordinate. Novelty Engine remains genuinely blocked on Round 4's Quant Memory existing first, not skipped by choice.
+
+Not wired into any existing UI or decision path this round — remains pure, callable infrastructure, consistent with the same discipline as rounds 85–89.
