@@ -1,11 +1,16 @@
 "use server";
 
 /**
- * Real Outcome Attribution -- Round 6, second piece, the actual real
+ * Real Outcome Attribution -- Round 6/104, the actual real
  * learning-loop foundation. Given a real closed trade, finds the
- * real decision that most likely led to it (same ticker, executed
- * before the trade's real entry time) and compares Quant's own real
- * confidence at decision time against what actually happened.
+ * EXACT real decision that produced it via a precise, real link
+ * (matching the exact filled order first, by its unique real
+ * filled_avg_price + filled_at + ticker, then that order's real
+ * broker_order_id against the exact decision that generated it) --
+ * not a "most recent decision for this ticker" guess, which the
+ * Round 104 bootstrap correctly identified as a real weakness when
+ * multiple trades exist for the same ticker (round102's original
+ * version had exactly this imprecision, fixed here).
  *
  * Real, honest scoping: this is a real, simple calibration check
  * (was Quant's confidence well-founded, overconfident, or
@@ -14,8 +19,7 @@
  * original proposal eventually wants. That fuller breakdown needs
  * the real event/materiality context this trade was made under
  * (round86-92's MarketEvent data), which isn't wired into this
- * comparison yet -- real, separate, later work. This is the first
- * real predicted-vs-actual signal, not the complete one.
+ * comparison yet -- real, separate, later work.
  */
 
 import { createClient } from "@/lib/supabase/server";
@@ -36,10 +40,10 @@ const HIGH_QUALITY_THRESHOLD = 80;
 const LOW_QUALITY_THRESHOLD = 50;
 
 /**
- * Real attribution for one real closed trade -- finds the real
- * decision most likely responsible for it (same ticker, executed,
- * created before the trade's real entry) and checks whether Quant's
- * own real confidence at the time was well-founded.
+ * Real attribution for one real closed trade -- finds the EXACT real
+ * decision responsible for it via a precise, real link (not a
+ * ticker+time-proximity guess) and checks whether Quant's own real
+ * confidence at the time was well-founded.
  */
 export async function attributeOutcome(userId: string, closedTrade: ClosedTrade): Promise<OutcomeAttributionResult> {
     const base = { ticker: closedTrade.ticker, returnPct: closedTrade.returnPct };
@@ -50,15 +54,34 @@ export async function attributeOutcome(userId: string, closedTrade: ClosedTrade)
 
     try {
         const supabase = await createClient();
+
+        // Step 1: find the EXACT real entry order this closed trade's
+        // FIFO match came from -- its real filled_avg_price and
+        // filled_at are unique to that specific order, not just
+        // "some order for this ticker."
+        const { data: orderRow, error: orderError } = await supabase
+            .from("paper_trade_orders")
+            .select("broker_order_id")
+            .eq("user_id", userId)
+            .eq("ticker", closedTrade.ticker)
+            .eq("side", "buy")
+            .eq("filled_avg_price", closedTrade.entryPrice)
+            .eq("filled_at", closedTrade.entryAt)
+            .not("broker_order_id", "is", null)
+            .limit(1)
+            .maybeSingle();
+
+        if (orderError || !orderRow || !orderRow.broker_order_id) {
+            return { ...base, tradeQualityScore: null, calibration: "no-linked-decision" };
+        }
+
+        // Step 2: find the exact decision that produced that exact
+        // order, via the real shared broker_order_id.
         const { data, error } = await supabase
             .from("quant_trade_decisions")
             .select("trade_quality_score")
             .eq("user_id", userId)
-            .eq("ticker", closedTrade.ticker)
-            .not("broker_order_id", "is", null)
-            .lte("created_at", closedTrade.entryAt)
-            .order("created_at", { ascending: false })
-            .limit(1)
+            .eq("broker_order_id", orderRow.broker_order_id)
             .maybeSingle();
 
         if (error || !data) {

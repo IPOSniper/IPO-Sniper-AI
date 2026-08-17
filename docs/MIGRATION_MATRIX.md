@@ -537,3 +537,11 @@ New `quant_run_locks` table — real enforcement via a database-level unique con
 **Real, honest scoping**: this provides the lock primitive only. It is NOT yet wired into `runBatchScan()` or `QuantOrchestrator.runBatch()` — doing so safely requires deciding a real, deterministic idempotency-key scheme that doesn't accidentally block two genuinely-intended separate runs within the same window. That's real, separate follow-up work.
 
 **Everything else in the Rounds 6-7 bootstrap remains deliberately unbuilt this round** — the full decision-snapshot schema (6A), position lifecycle state machine (6B), thesis reassessment triggered by new events during monitoring (6D), the full 100-cycle validation dashboard (7B-7F), and the human-vs-Quant comparison (7F) are all real, substantial pieces of separate future work, not attempted here given the genuine scope and risk involved.
+
+## OutcomeAttribution: precise decision-to-order link (fixes real 104B gap) (added this session)
+
+Real fix to a genuine weakness the Rounds 104-105 bootstrap correctly identified: round102's original `attributeOutcome()` matched a closed trade to a decision via "most recent decision for this ticker" — imprecise when multiple trades exist for the same ticker, exactly as the bootstrap's own 104B section warns against ("do not rely solely on ticker matching").
+
+Fixed via a real, precise 2-step link using data that already existed but wasn't being used together: (1) find the exact real entry order via its unique `filled_avg_price` + `filled_at` + `ticker`, (2) match that order's real `broker_order_id` against the exact `quant_trade_decisions` row that produced it (both tables share this same real value via `linkDecisionToOrder`, confirmed via direct schema check before writing this). No schema change needed — both real columns already existed; they just weren't being joined together for this purpose.
+
+**Everything else in the Rounds 104-105 bootstrap remains deliberately unbuilt** — the full autonomous runner (105A), scheduler-compatible architecture, and the broader learning-record schema (104A, 104E-104H) are real, substantial future work, not attempted in this round given the genuine scope.
