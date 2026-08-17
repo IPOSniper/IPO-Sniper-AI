@@ -591,3 +591,11 @@ Real, time-range selector (1D/1W/1M/3M), using round106's `AlpacaBarsProvider` a
 Wired into `PositionCards` — the exact component that previously, explicitly documented this as blocked ("Excludes trend/volatility/liquidity — blocked by the same unresolved price-history limitation as PriceChart.tsx"). That limitation is resolved here via the real Alpaca data source, not the same broken Finnhub path.
 
 **Real, honest scoping stated directly**: no VWAP, moving averages, or support/resistance yet — real, separate signal-computation work for a later round (105B), building on this real chart foundation.
+
+## Round 111 (Price Structure Engine) + Round 112 (Event/Price Structure Context) (added this session)
+
+**Round 111**: New `PriceStructureEngine.ts` — real, pure, deterministic computation (not AI) of VWAP, SMA20/EMA9, momentum, relative volume, realized volatility, support/resistance, trend classification, and breakout/breakdown structure, all from real Alpaca bars. Every formula independently verified via direct test cases before being written (VWAP against manual hand-calculation, EMA reacting more strongly than SMA to a recent spike, momentum/relative-volume/volatility against known expected outputs, support/resistance against a known min/max). Per direct instruction, this produces structured evidence, not a buy/sell signal — "above VWAP" is a data point, not a directive.
+
+**Round 112**: New `EventPriceStructureContext.ts` — combines round109's real `EventPriceReaction` with round111's real `PriceStructure` into one object. **Real, honest scoping stated directly**: does NOT compute the "event sentiment vs. market reaction divergence" score from the original request's example — `MarketEvent` has real `materiality` but no bullish/bearish sentiment *direction* field, so a genuine divergence check has nothing real to compare the price reaction against yet. Fabricating one would mean inventing a signal this app doesn't have. Ships the two real, already-built pieces combined; a real sentiment-direction field and the genuine divergence logic built on it are real, separate, later work.
+
+Neither round wired into any UI or Quant Strategist consumer yet — real, standalone computation engines for a future round to connect.
