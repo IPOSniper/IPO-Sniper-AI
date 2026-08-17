@@ -573,3 +573,11 @@ Real bug found via direct production report: Portfolio Risk showed "Couldn't ana
 Real, same-root-cause bug flagged right after fixing Portfolio Risk's option-quote issue: `getIndustryExposure()` called `fetchIndustry(p.ticker)` directly — Finnhub's `/stock/profile2` doesn't recognize OCC option symbols any more than its quote endpoint does, so both IREN and SPCX's option positions showed "Unknown."
 
 Fixed by extracting the real underlying via the same shared `extractUnderlyingFromOccSymbol` before fetching. **Real detail caught while fixing this**: `aggregateIndustryExposure()` keys its lookup by ticker via a Map — fetching the industry for the underlying alone would have left the result keyed by the wrong ticker (e.g. "IREN" instead of "IREN260821P00038500"), silently failing to match during aggregation. Fixed by remapping each result back to its real position ticker before aggregating.
+
+## 106A (Event + Price Reaction Engine) + 106B (Mid-Position Adaptive Reassessment) (added this session)
+
+**106A**: New `EventPriceReaction.ts` — real correlation between round91-92's ingested events and round106's real Alpaca price bars. Real, honest scoping: daily-close comparison (event day vs. prior trading day), not the full intraday alignment the original vision describes — building genuine intraday event-to-bar matching is real, separate, harder work. Manually verified against 3 real test cases (a real event-day price jump, correct percent calculation, and honest `-1`/null handling when no bar exists for a date) before shipping.
+
+**106B**: New `MidPositionReassessment.ts` — distinct from round97's `ThesisReassessmentEngine` (which compares two past *decisions*). This answers a different real question: for an *open position*, has a material real event arrived since entry, and did price actually react? Deliberately read-only, consistent with `PositionMonitor.ts` — produces a real `warrantsReview` signal, never auto-acts. Caught and fixed an unused import (`assessMateriality`) before shipping — materiality already comes from the pre-computed, stored event row.
+
+Both files correctly have no `"use server"` directive — same convention already established and fixed multiple times this session for `engine/` modules. Neither is wired into any UI yet — real, standalone infrastructure for a future round to connect.
