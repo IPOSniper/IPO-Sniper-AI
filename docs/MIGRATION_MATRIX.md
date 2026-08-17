@@ -457,3 +457,11 @@ Real, deliberately scoped response to this round's own Section 2 ("do not duplic
 New `getTickerMemory()` combines all three per ticker. New `getMemoryStats()` gives real aggregate counts for the small diagnostic panel Section 22 explicitly allows (not a full UI) — new `QuantMemoryPanel` shows this on the Hedge Fund page.
 
 **Real, honest gaps not built this round, stated directly**: explicit event-to-decision linking (`event_ids[]`, Section 10's lineage structure) — decisions and events currently share a ticker but aren't formally linked by ID. No new `recordDecision()`/`recordSituation()`/`recordOutcome()` write wrappers — the real writes already happen via existing `logBatchDecision()`/`saveEvent()`/order-fill logging; wrapping them would be the exact duplication Section 2 warns against. No privacy/visibility enforcement tests (Section 20). Similarity scoring, Pattern Recognition, and Thesis Reassessment remain explicitly deferred per Section 24 — this round is the data-access foundation those would consume, not those engines themselves.
+
+## Real event ingestion wired into research page + deduplication fix (added this session)
+
+Real first wiring for round90's `ingestRecentEvents()`, which was built but deliberately left unconnected. Now triggers on every real research page visit (after research itself succeeds), best-effort — wrapped so an ingestion failure never breaks the research page.
+
+**Real deduplication added first**: without it, every repeat visit to the same ticker would re-insert the same real SEC filings as duplicate rows, since `eventId` (`"sec-{accessionNumber}"`) is deterministic per real filing. `saveEvent()` now checks for an existing row by `event_id` before inserting.
+
+**Real, honest trade-off stated directly, not glossed over**: this is an *awaited* call — adds real latency (2 sequential SEC EDGAR calls plus per-filing dedup/insert checks) to every research page load, not a free background operation. Chosen for consistency with this app's established pattern (most data fetches are awaited directly in Server Components) over introducing a new fire-and-forget pattern inconsistent with the rest of the app.

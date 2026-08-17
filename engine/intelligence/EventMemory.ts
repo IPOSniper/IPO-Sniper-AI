@@ -28,6 +28,21 @@ export async function saveEvent(userId: string, event: MarketEvent): Promise<voi
     if (!isSupabaseConfigured()) return;
     try {
         const supabase = await createClient();
+
+        // Real deduplication -- without this, every repeat visit to
+        // the same ticker's research page would re-ingest and
+        // re-insert the same real SEC filings as new duplicate rows,
+        // since eventId (a real, stable "sec-{accessionNumber}"
+        // value) is deterministic per real filing.
+        const { data: existing } = await supabase
+            .from("market_events")
+            .select("id")
+            .eq("user_id", userId)
+            .eq("event_id", event.eventId)
+            .maybeSingle();
+
+        if (existing) return;
+
         const { error } = await supabase.from("market_events").insert({
             user_id: userId,
             event_id: event.eventId,
