@@ -599,3 +599,13 @@ Wired into `PositionCards` — the exact component that previously, explicitly d
 **Round 112**: New `EventPriceStructureContext.ts` — combines round109's real `EventPriceReaction` with round111's real `PriceStructure` into one object. **Real, honest scoping stated directly**: does NOT compute the "event sentiment vs. market reaction divergence" score from the original request's example — `MarketEvent` has real `materiality` but no bullish/bearish sentiment *direction* field, so a genuine divergence check has nothing real to compare the price reaction against yet. Fabricating one would mean inventing a signal this app doesn't have. Ships the two real, already-built pieces combined; a real sentiment-direction field and the genuine divergence logic built on it are real, separate, later work.
 
 Neither round wired into any UI or Quant Strategist consumer yet — real, standalone computation engines for a future round to connect.
+
+## Autonomous Quant Test Harness — Stage A only, per the bootstrap's own staged plan (added this session)
+
+Real, deliberately scoped response to a 40-section bootstrap requesting a full, self-scheduling autonomous test harness. Followed the bootstrap's own explicit Section 39 instruction: "Build in two stages... DO NOT activate continuous execution yet." This round is Stage A only — genuinely safe, since nothing here calls `runAutonomousTradingSession()` or places any real order.
+
+New `quant_test_harness` table — real, persistent state machine (IDLE/RUNNING/PAUSED/STOPPING/COMPLETED/FAILED/EMERGENCY_STOPPED), real configurable targets (observations/autonomous runs/completed cycles), real live progress counters. One active test per user enforced via a real partial unique index — a simpler, extension-free alternative to a gist exclusion constraint (which would need `btree_gist`).
+
+New `test-harness/actions.ts` (`startTestHarness`, `pauseTestHarness`, `resumeTestHarness`, `stopTestHarness`, `emergencyStopTestHarness`, `getActiveTestHarness`) — real state transitions only. New `TestHarnessPanel` — real UI showing the state machine working, honestly labeled as "not yet self-advancing."
+
+**Real, explicit scope boundary, stated directly and repeatedly in the code**: Sections 8-20 (the actual observation cycle, material-change detection, adaptive reassessment) and Sections 25-27 (the real scheduler trigger — Stage B) are NOT built. A started test creates real, persistent state but sits at 0/0/0 progress forever until Stage B exists. This is the safety-critical foundation only, per the bootstrap's own staged approach — not a claim that autonomous cycling is happening.
