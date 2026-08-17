@@ -445,3 +445,15 @@ New `market_events` table — real, persisted storage for `MarketEvent` objects,
 New `NoveltyEngine.ts` — real novelty scoring (0-100) computed from real historical event counts (Round A's memory layer), not a fabricated number. Simple, stated, adjustable decay curve (100 / (1 + priorCount/3)) — manually verified against 4 real test cases (0/3/9/100 prior events → 100/50/25/3) before shipping. Explicitly NOT the full pattern-matching novelty detection the original proposal eventually wants (price/volume/regime combinations) — that's real, separate, later work once Pattern Recognition exists; this function's signature is designed so a richer implementation can replace its internals without changing any caller.
 
 `EventIngestionEngine.ts` updated to actually use both new pieces — every ingested event now gets a real novelty score and is persisted, completing the loop. Verified zero external call sites existed before changing `ingestRecentEvents`'s signature (added a required `userId` parameter) — safe, since round90 explicitly shipped it unwired.
+
+## Quant Memory Engine — unified read layer, per "don't duplicate" instruction (added this session)
+
+Real, deliberately scoped response to this round's own Section 2 ("do not duplicate existing systems... extend rather than create competing systems"). New `QuantMemoryEngine.ts` maps the requested three-layer model directly onto existing, real tables rather than building parallel storage:
+
+- **Decision Memory** → `quant_trade_decisions` (already an immutable, append-only per-decision snapshot including real committee state and real No-Trade decisions — satisfied this round's immutability and no-trade-memory requirements with zero new columns)
+- **Situation Memory** → `market_events` (round91-92)
+- **Outcome Memory** → closed-trade tracking (round76's real FIFO matcher, reused directly — not a second P&L calculation)
+
+New `getTickerMemory()` combines all three per ticker. New `getMemoryStats()` gives real aggregate counts for the small diagnostic panel Section 22 explicitly allows (not a full UI) — new `QuantMemoryPanel` shows this on the Hedge Fund page.
+
+**Real, honest gaps not built this round, stated directly**: explicit event-to-decision linking (`event_ids[]`, Section 10's lineage structure) — decisions and events currently share a ticker but aren't formally linked by ID. No new `recordDecision()`/`recordSituation()`/`recordOutcome()` write wrappers — the real writes already happen via existing `logBatchDecision()`/`saveEvent()`/order-fill logging; wrapping them would be the exact duplication Section 2 warns against. No privacy/visibility enforcement tests (Section 20). Similarity scoring, Pattern Recognition, and Thesis Reassessment remain explicitly deferred per Section 24 — this round is the data-access foundation those would consume, not those engines themselves.
