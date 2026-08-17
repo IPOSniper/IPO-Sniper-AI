@@ -40,9 +40,15 @@ export async function ingestRecentEvents(userId: string, ticker: string, limit =
     try {
         const provider = new SECEdgarProvider();
         const cik = await provider.getCIK(normalizedTicker);
-        if (!cik) return [];
+        if (!cik) {
+            console.error(`ingestRecentEvents: no real CIK found for ${normalizedTicker} -- SEC EDGAR lookup returned nothing.`);
+            return [];
+        }
 
         const filings = await provider.getFilings(cik);
+        if (filings.length === 0) {
+            console.error(`ingestRecentEvents: real CIK ${cik} found for ${normalizedTicker}, but getFilings() returned zero real filings.`);
+        }
         const events: MarketEvent[] = [];
 
         for (const filing of filings.slice(0, limit)) {
