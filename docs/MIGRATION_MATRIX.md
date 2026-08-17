@@ -475,3 +475,11 @@ Both this catch block and the research page's own wrapping catch now log the rea
 ## Log the honest empty-result paths in event ingestion (added this session)
 
 Real finding from direct log verification: `GET /research/MU 200` confirmed the research page genuinely succeeded, but zero error messages appeared near that timestamp — meaning `ingestRecentEvents()` wasn't throwing an exception. Most likely explanation: it's hitting one of its own honest, non-exception early returns (`if (!cik) return []`, or zero real filings from `getFilings()`), which round95's fix never logged since they're not `catch` blocks. Added explicit `console.error` logging for both cases, so the next real attempt will show exactly why ingestion produced nothing, rather than remaining ambiguous between "silently failed" and "silently succeeded with no data."
+
+## Thesis Reassessment Engine — Round 3, genuinely unblocked (added this session)
+
+Real first piece of Round 3 (Reasoning), built now that Quant Memory (Round 4) has been proven end-to-end with real data this session (10 real SEC events for MU, decision history queryable, deduplication confirmed working). Pure, deterministic comparison logic (not an AI/LLM call) — compares a ticker's most recent real decision against its previous one via `getDecisionHistory()`.
+
+Real, stated, adjustable threshold (±10 points on confidence/trade-quality) for what counts as a "meaningful" change — manually verified against 5 real test cases (strengthened, weakened, reversed direction, invalidated, unchanged) before shipping.
+
+**Real, honest scoping**: with fewer than 2 real decisions for a ticker, returns an honest `insufficient-history` result rather than guessing. Does NOT yet incorporate market reaction or event context (the full "Existing Thesis + New Evidence + Market Reaction + Historical Context" input the original proposal describes) — that's real, separate, later work; this is the decision-to-decision comparison layer first.
