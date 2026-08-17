@@ -3,6 +3,7 @@ import { ResearchService } from "@/engine/services/ResearchService";
 import { createClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/client";
 import { ingestRecentEvents } from "@/engine/intelligence/EventIngestionEngine";
+import AdaptiveIntelligencePanel from "@/components/workstation/panels/AdaptiveIntelligencePanel";
 
 interface PageProps {
     params: Promise<{ ticker: string }>;
@@ -25,11 +26,13 @@ export default async function ResearchPage({ params }: PageProps) {
         // no auth session, etc.) never breaks the research page
         // itself -- this is a real, best-effort side effect, not a
         // dependency of rendering the page.
+        let userId: string | null = null;
         try {
             if (isSupabaseConfigured()) {
                 const supabase = await createClient();
                 const { data: { user } } = await supabase.auth.getUser();
                 if (user) {
+                    userId = user.id;
                     await ingestRecentEvents(user.id, ticker);
                 }
             }
@@ -42,10 +45,13 @@ export default async function ResearchPage({ params }: PageProps) {
         }
 
         return (
-            <WorkstationShell
-                research={research}
-                ticker={ticker}
-            />
+            <>
+                <AdaptiveIntelligencePanel userId={userId} ticker={ticker} committee={research.committee} />
+                <WorkstationShell
+                    research={research}
+                    ticker={ticker}
+                />
+            </>
         );
     } catch (error) {
         return (
