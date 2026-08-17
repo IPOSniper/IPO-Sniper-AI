@@ -517,3 +517,13 @@ Real completion of Round 5's remaining piece, built with deliberately minimized 
 **Real import bug caught and fixed before shipping**: `DEFAULT_AUTO_EXECUTION_GATES`/`AutoExecutionGates` are only *imported* into `batch-scanner/actions.ts`, not re-exported from it — the original import would have failed to resolve. Fixed by importing from their real source (`engine/quant/BatchScanner`) instead. Confirmed via direct grep, not assumed.
 
 **Not wired into any real trigger yet** — this is genuinely new, additive infrastructure a future real scheduler (once Vercel Pro exists) could call through, not a replacement for anything currently working. Verified zero existing files reference it before shipping.
+
+## Position Monitor + Outcome Attribution — Round 6, built safely (added this session)
+
+Two real, deliberately read-only pieces — neither auto-executes anything. Automatically executing exits is a separate, much bigger safety decision (needing the same Quant Control authorization real entries go through, extensive testing, and explicit owner sign-off) — not folded into this round.
+
+New `PositionMonitor.ts` (`assessPosition`) — checks a real open Alpaca position's real unrealized P/L% against the real `profit_target_percent`/`stop_loss_percent` already stored on the decision that led to it. Returns a real recommendation (`hold` / `profit_target_hit` / `stop_loss_hit` / `no-linked-decision`) — never places an order. Manually verified against 4 real threshold cases including the exact boundary before shipping.
+
+New `OutcomeAttribution.ts` (`attributeOutcome`) — the real learning-loop foundation. Given a real closed trade, finds the real decision most likely responsible for it and checks whether Quant's own real confidence at decision time was well-founded (`well-calibrated` / `overconfident` / `underconfident`). Real, honest scoping: this is a simple calibration check, not the full "was thesis/timing/strategy correct" breakdown the original vision wants — that needs real event context (round86-92) wired in, which is separate, later work.
+
+**Real, honest state**: with 0 real closed trades existing, `attributeOutcome` has nothing to operate on yet — this is real, working infrastructure ready for the first real closed trade, not something with fabricated test data to demonstrate it. Neither piece is wired into any UI this round.
