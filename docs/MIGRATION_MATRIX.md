@@ -435,3 +435,13 @@ Real completion of Round 2's remaining achievable piece. New `ingestRecentEvents
 **Round 2 is now as complete as it can be without Track B**: Materiality Engine (round89) + SEC event ingestion (this round) are done. A general multi-source `EventIngestionEngine` isn't meaningful yet — there's only one authorized source to coordinate. Novelty Engine remains genuinely blocked on Round 4's Quant Memory existing first, not skipped by choice.
 
 Not wired into any existing UI or decision path this round — remains pure, callable infrastructure, consistent with the same discipline as rounds 85–89.
+
+## Round A: Real Quant Event Memory (added this session)
+
+New `market_events` table — real, persisted storage for `MarketEvent` objects, which have existed as an in-memory type only since round86. New `EventMemory.ts` (`saveEvent`, `getHistoricalEventCount`) — the actual access layer. Built ahead of Round 3's Pattern Recognition per real dependency order: Pattern Recognition and Novelty Detection both need real historical events to compare against, and there was nothing to compare against until this existed. No `"use server"` directive — matches the established convention that `engine/` modules are plain server-only utilities, not Server Actions themselves.
+
+## Round B: Real Novelty Engine, genuinely unblocked (added this session)
+
+New `NoveltyEngine.ts` — real novelty scoring (0-100) computed from real historical event counts (Round A's memory layer), not a fabricated number. Simple, stated, adjustable decay curve (100 / (1 + priorCount/3)) — manually verified against 4 real test cases (0/3/9/100 prior events → 100/50/25/3) before shipping. Explicitly NOT the full pattern-matching novelty detection the original proposal eventually wants (price/volume/regime combinations) — that's real, separate, later work once Pattern Recognition exists; this function's signature is designed so a richer implementation can replace its internals without changing any caller.
+
+`EventIngestionEngine.ts` updated to actually use both new pieces — every ingested event now gets a real novelty score and is persisted, completing the loop. Verified zero external call sites existed before changing `ingestRecentEvents`'s signature (added a required `userId` parameter) — safe, since round90 explicitly shipped it unwired.
