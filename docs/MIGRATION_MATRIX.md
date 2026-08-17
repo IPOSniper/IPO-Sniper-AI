@@ -499,3 +499,11 @@ Real, honest first version, per the original proposal's own explicit guidance no
 Wired into the same `AdaptiveIntelligencePanel` from last round — a real "similar past decisions" section, explicitly labeled as not-yet-outcome-aware so it isn't misread as more than it is.
 
 **This completes Round 3 (Reasoning)** as scoped: Thesis Reassessment, Contradiction Engine, and Pattern Recognition are all built and wired into a real, visible UI.
+
+## Adaptive Conviction Engine (Round 4 complete) + Lead Strategist coordinator (Round 5 begins) (added this session)
+
+New `AdaptiveConvictionEngine.ts` — real, deterministic combination (not AI) of the committee's own real base confidence with round97's real thesis-change delta and round98's real contradiction severities. **Real flaw caught and fixed via honest testing against actual RIOT production data**: pairwise contradiction counting (8 real contradiction pairs from just 2-3 genuinely outlier analysts) would have crashed conviction from 64 to 4 uncapped — added a real, stated cap (max 20-point contradiction penalty) so the adjustment stays meaningful rather than misrepresenting "a couple of analysts disagree" as "total committee chaos." Verified against RIOT's real 8-contradiction case before and after the fix.
+
+New `QuantLeadStrategist.ts` — Round 5's first piece, a real, thin coordinator combining every Round 3-4 engine's output into one structured assessment. Explicitly does NOT replace `QuantStrategist.ts`'s existing trade-plan logic or make any trade decision itself — the coordination role only, per the original proposal's own stated principle.
+
+`AdaptiveIntelligencePanel` updated to use this new coordinator (one call instead of three separate engine calls) and now displays the real adjusted conviction score alongside thesis/contradiction/pattern data.
