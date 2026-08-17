@@ -507,3 +507,13 @@ New `AdaptiveConvictionEngine.ts` — real, deterministic combination (not AI) o
 New `QuantLeadStrategist.ts` — Round 5's first piece, a real, thin coordinator combining every Round 3-4 engine's output into one structured assessment. Explicitly does NOT replace `QuantStrategist.ts`'s existing trade-plan logic or make any trade decision itself — the coordination role only, per the original proposal's own stated principle.
 
 `AdaptiveIntelligencePanel` updated to use this new coordinator (one call instead of three separate engine calls) and now displays the real adjusted conviction score alongside thesis/contradiction/pattern data.
+
+## QuantOrchestrator — Round 5 complete, built the safe way (added this session)
+
+Real completion of Round 5's remaining piece, built with deliberately minimized risk. New `QuantOrchestrator.ts` — a real, thin coordination layer over the two existing, working, tested flows (`getTradePlan()`, `runBatchScan()`), per the original proposal's own principle: "Manual → QuantOrchestrator. Autonomous Scheduler → QuantOrchestrator. Same decision engine, different trigger."
+
+**Deliberately safe approach**: neither `getTradePlan()` nor `runBatchScan()` was modified in any way — this orchestrator only wraps them behind one unified entry point (`runSingle()`/`runBatch()`, both tagged with a real `QuantTrigger`). The existing UI's direct calls to both functions keep working exactly as they do today, completely unrisked.
+
+**Real import bug caught and fixed before shipping**: `DEFAULT_AUTO_EXECUTION_GATES`/`AutoExecutionGates` are only *imported* into `batch-scanner/actions.ts`, not re-exported from it — the original import would have failed to resolve. Fixed by importing from their real source (`engine/quant/BatchScanner`) instead. Confirmed via direct grep, not assumed.
+
+**Not wired into any real trigger yet** — this is genuinely new, additive infrastructure a future real scheduler (once Vercel Pro exists) could call through, not a replacement for anything currently working. Verified zero existing files reference it before shipping.
