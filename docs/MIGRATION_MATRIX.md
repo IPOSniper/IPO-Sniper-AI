@@ -527,3 +527,13 @@ New `PositionMonitor.ts` (`assessPosition`) — checks a real open Alpaca positi
 New `OutcomeAttribution.ts` (`attributeOutcome`) — the real learning-loop foundation. Given a real closed trade, finds the real decision most likely responsible for it and checks whether Quant's own real confidence at decision time was well-founded (`well-calibrated` / `overconfident` / `underconfident`). Real, honest scoping: this is a simple calibration check, not the full "was thesis/timing/strategy correct" breakdown the original vision wants — that needs real event context (round86-92) wired in, which is separate, later work.
 
 **Real, honest state**: with 0 real closed trades existing, `attributeOutcome` has nothing to operate on yet — this is real, working infrastructure ready for the first real closed trade, not something with fabricated test data to demonstrate it. Neither piece is wired into any UI this round.
+
+## Run Idempotency — the critical safety piece from the Rounds 6-7 bootstrap (added this session)
+
+Real, deliberately scoped response to a 26-subsection bootstrap: rather than attempting all of it, built the single most critical, genuinely missing safety piece first — Section 7I's explicit requirement that "the same autonomous run must never execute twice because of browser refresh, duplicate scheduler request, retry, network timeout, Vercel retry, user double-click."
+
+New `quant_run_locks` table — real enforcement via a database-level unique constraint on `(user_id, idempotency_key)`, not just an application-level check that could race under genuine concurrent requests. New `RunIdempotency.ts` (`acquireRunLock`, `updateRunLockStatus`) — real lock acquire/release primitives. A genuine duplicate attempt (Postgres error 23505, confirmed via 3+ independent sources before writing this check) is handled as an expected, real outcome (`acquired: false` with a real reason), not an exceptional failure.
+
+**Real, honest scoping**: this provides the lock primitive only. It is NOT yet wired into `runBatchScan()` or `QuantOrchestrator.runBatch()` — doing so safely requires deciding a real, deterministic idempotency-key scheme that doesn't accidentally block two genuinely-intended separate runs within the same window. That's real, separate follow-up work.
+
+**Everything else in the Rounds 6-7 bootstrap remains deliberately unbuilt this round** — the full decision-snapshot schema (6A), position lifecycle state machine (6B), thesis reassessment triggered by new events during monitoring (6D), the full 100-cycle validation dashboard (7B-7F), and the human-vs-Quant comparison (7F) are all real, substantial pieces of separate future work, not attempted here given the genuine scope and risk involved.
