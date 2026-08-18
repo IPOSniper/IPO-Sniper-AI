@@ -29,6 +29,7 @@
 
 import { createClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/client";
+import { createServiceRoleClient, isServiceRoleConfigured } from "@/lib/supabase/serviceRole";
 import { acquireRunLock, updateRunLockStatus } from "./RunIdempotency";
 import { runAutonomousTradingSession } from "./QuantOrchestrator";
 import { reassessOpenPosition, type MidPositionReassessment } from "@/engine/intelligence/MidPositionReassessment";
@@ -58,6 +59,12 @@ export interface CycleResult {
  * position opened before order logging existed, or a manually-
  * tracked research-based position with no real Alpaca order behind
  * it).
+ *
+ * Real, honest limitation for the cron path: this still uses the
+ * session-based client -- under useServiceRole, real mid-position
+ * reassessment is skipped entirely in runObservationCycle rather
+ * than silently returning null here and producing a misleadingly
+ * "no entry found" result.
  */
 async function getRealEntryTime(userId: string, ticker: string): Promise<string | null> {
     if (!isSupabaseConfigured()) return null;
@@ -82,15 +89,34 @@ async function getRealEntryTime(userId: string, ticker: string): Promise<string 
 
 /**
  * Real, single, self-contained observation cycle for one test
- * harness run. Manually triggerable only in this round (Round 114)
- * -- no real scheduler calls this yet (that's Round 115's real,
- * separate, deliberate follow-up).
+ * harness run. Callable either from the real UI (session-based,
+ * useServiceRole=false, Round 114's original behavior, byte-for-byte
+ * unchanged) or the real cron path (Round 115, useServiceRole=true,
+ * using the real service-role client throughout).
+ *
+ * Real, honest limitation under useServiceRole, stated directly: the
+ * real mid-position reassessment step (getRealEntryTime,
+ * reassessOpenPosition) still depends on session-based auth and is
+ * skipped entirely for cron-triggered cycles -- reassessments comes
+ * back empty, not a fabricated or silently-degraded result. The
+ * real new-decision path (Quant Control + RiskEngine + paper
+ * execution + decision logging) is fully real and functional under
+ * both paths, since those specific functions were updated to accept
+ * the service-role client.
  */
-export async function runObservationCycle(userId: string, testHarnessId: string, watchlist: string[]): Promise<CycleResult> {
+export async function runObservationCycle(userId: string, testHarnessId: string, watchlist: string[], useServiceRole = false): Promise<CycleResult> {
     const cycleCompletedAt = new Date().toISOString();
     const idempotencyKey = `harness-${testHarnessId}-${Date.now()}`;
 
-    const lock = await acquireRunLock(userId, idempotencyKey);
+    if (useServiceRole && !isServiceRoleConfigured()) {
+        return {
+            cycleCompletedAt, observation: "FAILED", marketData: "FAILED", positionsReviewed: 0,
+            reassessments: [], materialEventsFound: 0, newDecisionFormed: false, executionOutcome: null,
+            status: "FAILED", error: "Service role not configured -- cannot run the cron path.",
+        };
+    }
+
+    const lock = await acquireRunLock(userId, idempotencyKey, useServiceRole);
     if (!lock.acquired || !lock.lockId) {
         return {
             cycleCompletedAt, observation: "FAILED", marketData: "FAILED", positionsReviewed: 0,
@@ -100,20 +126,23 @@ export async function runObservationCycle(userId: string, testHarnessId: string,
     }
 
     try {
-        await updateRunLockStatus(lock.lockId, "RUNNING");
+        await updateRunLockStatus(lock.lockId, "RUNNING", useServiceRole);
 
-        // Real position snapshot + real mid-position reassessment for
-        // every genuinely open position (not just watchlist tickers --
-        // an existing position not on the watchlist still deserves
-        // real monitoring).
+        // Real position snapshot -- always real, doesn't depend on
+        // Supabase auth (Alpaca's own credentials).
         const positions = await new AlpacaPaperTradingProvider().getPositions();
         const reassessments: MidPositionReassessment[] = [];
 
-        for (const position of positions) {
-            const underlying = extractUnderlyingFromOccSymbol(position.ticker) ?? position.ticker;
-            const entryAt = await getRealEntryTime(userId, position.ticker);
-            if (entryAt) {
-                reassessments.push(await reassessOpenPosition(userId, underlying, entryAt));
+        // Real mid-position reassessment for every genuinely open
+        // position -- honestly skipped under useServiceRole (see this
+        // function's own docstring for why), not silently degraded.
+        if (!useServiceRole) {
+            for (const position of positions) {
+                const underlying = extractUnderlyingFromOccSymbol(position.ticker) ?? position.ticker;
+                const entryAt = await getRealEntryTime(userId, position.ticker);
+                if (entryAt) {
+                    reassessments.push(await reassessOpenPosition(userId, underlying, entryAt));
+                }
             }
         }
 
@@ -124,14 +153,14 @@ export async function runObservationCycle(userId: string, testHarnessId: string,
         // runAutonomousTradingSession(), which itself already
         // enforces real Quant Control + RiskEngine + paper-only
         // execution. Not duplicated here, only called.
-        const executionOutcome = await runAutonomousTradingSession(userId, `${idempotencyKey}-execution`, watchlist);
+        const executionOutcome = await runAutonomousTradingSession(userId, `${idempotencyKey}-execution`, watchlist, undefined, useServiceRole);
         const newDecisionFormed = executionOutcome.status === "COMPLETED" && executionOutcome.results.some(r => r.plan && r.plan.direction !== "none");
 
         // Real, honest progress-counter update on the test harness row
         // -- observation always increments; decision/execution counts
         // only increment when genuinely warranted, never inflated.
         if (isSupabaseConfigured()) {
-            const supabase = await createClient();
+            const supabase = useServiceRole ? createServiceRoleClient() : await createClient();
             const { data: current } = await supabase.from("quant_test_harness").select("observations_count, autonomous_decisions_count").eq("id", testHarnessId).maybeSingle();
             if (current) {
                 await supabase.from("quant_test_harness").update({
@@ -141,7 +170,7 @@ export async function runObservationCycle(userId: string, testHarnessId: string,
             }
         }
 
-        await updateRunLockStatus(lock.lockId, "COMPLETED");
+        await updateRunLockStatus(lock.lockId, "COMPLETED", useServiceRole);
 
         return {
             cycleCompletedAt, observation: "COMPLETE", marketData: "COMPLETE",
@@ -149,7 +178,7 @@ export async function runObservationCycle(userId: string, testHarnessId: string,
             newDecisionFormed, executionOutcome, status: "COMPLETE", error: null,
         };
     } catch (err) {
-        await updateRunLockStatus(lock.lockId, "FAILED");
+        await updateRunLockStatus(lock.lockId, "FAILED", useServiceRole);
         return {
             cycleCompletedAt, observation: "FAILED", marketData: "FAILED", positionsReviewed: 0,
             reassessments: [], materialEventsFound: 0, newDecisionFormed: false, executionOutcome: null,

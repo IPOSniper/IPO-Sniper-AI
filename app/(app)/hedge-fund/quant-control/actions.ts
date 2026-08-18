@@ -2,6 +2,7 @@
 
 import { createClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/client";
+import { createServiceRoleClient, isServiceRoleConfigured } from "@/lib/supabase/serviceRole";
 
 export type QuantControlState = "OFF" | "ASSISTED" | "AUTONOMOUS" | "SAFE_MODE" | "EMERGENCY_STOP";
 
@@ -18,13 +19,53 @@ export interface QuantControlStatus {
  * default) when no row exists yet -- a brand-new user has never
  * explicitly enabled any autonomous behavior, so nothing should run
  * until they do.
+ *
+ * Real, narrow addition for the cron/background-job path (Round
+ * 115): an optional overrideUserId. When provided, this function
+ * uses the real service-role client with that explicit userId
+ * instead of trying to derive a user from browser-session cookies --
+ * a real, genuine gap for any background job, since a cron request
+ * has no real session at all, and this function previously silently
+ * returned the DEFAULT ("OFF") state in that case rather than
+ * throwing, which would have made a cron-invoked check permanently,
+ * silently blocked.
+ *
+ * When overrideUserId is omitted (every existing call site), this
+ * function's real behavior is byte-for-byte identical to before --
+ * still the session-based client, still the same real query, same
+ * default.
  */
-export async function getQuantControlState(): Promise<QuantControlStatus> {
+export async function getQuantControlState(overrideUserId?: string): Promise<QuantControlStatus> {
     const DEFAULT: QuantControlStatus = { state: "OFF", reason: "No state set yet — defaults to OFF.", changedAt: new Date(0).toISOString() };
 
     if (!isSupabaseConfigured()) return DEFAULT;
 
     try {
+        let userId: string;
+
+        if (overrideUserId) {
+            // Real cron/background-job path -- no real session
+            // exists to derive a user from, so the caller (a real,
+            // authenticated background job) supplies the userId
+            // explicitly, and the real service-role client (which
+            // bypasses RLS for legitimate background jobs, same as
+            // the existing overnight-watch cron) is used instead.
+            if (!isServiceRoleConfigured()) return DEFAULT;
+            userId = overrideUserId;
+
+            const supabase = createServiceRoleClient();
+            const { data, error } = await supabase
+                .from("quant_control_state")
+                .select("state, reason, created_at")
+                .eq("user_id", userId)
+                .order("created_at", { ascending: false })
+                .limit(1)
+                .maybeSingle();
+
+            if (error || !data) return DEFAULT;
+            return { state: data.state as QuantControlState, reason: data.reason, changedAt: data.created_at };
+        }
+
         const supabase = await createClient();
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) return DEFAULT;
@@ -100,9 +141,10 @@ export async function setQuantControlState(state: QuantControlState, reason: str
  * EMERGENCY_STOP block both.
  */
 export async function checkAutonomousExecutionAllowed(
-    source: "assisted" | "autonomous"
+    source: "assisted" | "autonomous",
+    overrideUserId?: string
 ): Promise<{ allowed: boolean; state: QuantControlState; reason: string }> {
-    const status = await getQuantControlState();
+    const status = await getQuantControlState(overrideUserId);
 
     if (status.state === "AUTONOMOUS") {
         return { allowed: true, state: status.state, reason: "" };

@@ -623,3 +623,19 @@ New `runTestHarnessCycle()` wrapper + real "Run One Cycle" button on `TestHarnes
 **Real safety note, stated plainly**: this cycle calls the existing `runAutonomousTradingSession()`, which already enforces Quant Control + RiskEngine + paper-only execution — this button *can* place a real paper order under the same conditions the existing "Run Trading Session" button can. Manually triggerable only in this round — no real external scheduler wired yet (Round 115, deliberately separate).
 
 **Real self-introduced mistake caught and fixed mid-round**: an import edit accidentally left a dangling, broken comment fragment outside any real comment block — caught by viewing the file's actual resulting content rather than trusting the edit succeeded, and fixed before shipping.
+
+## Round 115: Autonomous Quant Scheduler — real cron path + GitHub Actions trigger (added this session)
+
+Real, narrow, targeted fix for the deep session-auth blocker discovered while investigating this round: `checkAutonomousExecutionAllowed()`, `getQuantControlState()`, `logRunSummary()`, `logBatchDecision()`, `acquireRunLock()`, `updateRunLockStatus()` — six functions, not two, since the real dependency chain went deeper than initially scoped (the idempotency lock itself would have blocked the cron path). All six now accept an optional service-role path; every existing UI call site is byte-for-byte unchanged when the new parameter is omitted.
+
+New `MarketHours.ts` (`isMarketOpen`) — real NYSE/NASDAQ standard-hours check, verified against 4 real test cases. Honest limitation: no holiday calendar yet.
+
+New `/api/cron/quant-harness` route — narrow, single-purpose, reuses the existing `CRON_SECRET` auth pattern from `/api/cron/overnight-watch`. No request body read at all — finds the single real RUNNING+PAPER test harness (safe given this app's single-owner lockdown), calls the real observation cycle, checks real completion targets. Every existing safety gate (Quant Control, RiskEngine, paper-only, idempotency, kill switch) fully preserved — the service-role client is strictly an authentication mechanism, never a bypass.
+
+New `.github/workflows/quant-harness.yml` — the real, persistent external trigger, calling the cron route every 5 minutes. Contains zero trading intelligence itself, per direct instruction.
+
+**Real, honest limitation stated directly**: mid-position reassessment (`reassessOpenPosition`) still depends on session auth and is explicitly skipped under the cron path — not silently degraded, an honest empty result.
+
+**Separate, unrelated finding, not fixed this round**: the "Market Open" badge in `Header.tsx` is completely hardcoded, not computed from anything real.
+
+**Real, honest prerequisite for this to actually run**: needs the project connected to a real GitHub repository with Actions enabled, and a repository secret `QUANT_CRON_SECRET` matching Vercel's existing `CRON_SECRET` value.

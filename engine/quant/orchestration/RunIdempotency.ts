@@ -17,10 +17,22 @@
  * doesn't accidentally block two genuinely-intended separate runs
  * within the same window. That's real, separate follow-up work, not
  * done silently in this round.
+ *
+ * Real, narrow addition for the cron/background-job path (Round
+ * 115): both functions accept an optional useServiceRole flag. Even
+ * though userId is already a real, explicit parameter here, the
+ * underlying createClient() still enforces RLS based on the REAL
+ * session token it's authenticated with -- not whatever userId value
+ * is passed as a JS argument. Without a real session (a cron
+ * request), the insert/update fails at the database level regardless
+ * of the userId parameter, since auth.uid() is null. When
+ * useServiceRole is true, the real service-role client (which
+ * bypasses RLS for legitimate background jobs) is used instead.
  */
 
 import { createClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/client";
+import { createServiceRoleClient, isServiceRoleConfigured } from "@/lib/supabase/serviceRole";
 
 export type RunLockStatus = "STARTED" | "RUNNING" | "COMPLETED" | "FAILED" | "ABORTED";
 
@@ -37,12 +49,15 @@ export interface RunLockResult {
  * unique-constraint conflict -- a duplicate attempt is an expected,
  * real outcome to handle gracefully, not an exceptional failure.
  */
-export async function acquireRunLock(userId: string, idempotencyKey: string): Promise<RunLockResult> {
+export async function acquireRunLock(userId: string, idempotencyKey: string, useServiceRole = false): Promise<RunLockResult> {
     if (!isSupabaseConfigured()) {
         return { acquired: false, lockId: null, reason: "Supabase not configured -- cannot enforce idempotency." };
     }
+    if (useServiceRole && !isServiceRoleConfigured()) {
+        return { acquired: false, lockId: null, reason: "Service role not configured -- cannot run the cron path." };
+    }
     try {
-        const supabase = await createClient();
+        const supabase = useServiceRole ? createServiceRoleClient() : await createClient();
         const { data, error } = await supabase
             .from("quant_run_locks")
             .insert({ user_id: userId, idempotency_key: idempotencyKey, status: "STARTED" })
@@ -68,10 +83,11 @@ export async function acquireRunLock(userId: string, idempotencyKey: string): Pr
 }
 
 /** Real, honest status update once a locked run genuinely finishes (success or failure). */
-export async function updateRunLockStatus(lockId: string, status: RunLockStatus): Promise<void> {
+export async function updateRunLockStatus(lockId: string, status: RunLockStatus, useServiceRole = false): Promise<void> {
     if (!isSupabaseConfigured()) return;
+    if (useServiceRole && !isServiceRoleConfigured()) return;
     try {
-        const supabase = await createClient();
+        const supabase = useServiceRole ? createServiceRoleClient() : await createClient();
         const { error } = await supabase
             .from("quant_run_locks")
             .update({ status, completed_at: (status === "COMPLETED" || status === "FAILED" || status === "ABORTED") ? new Date().toISOString() : null })

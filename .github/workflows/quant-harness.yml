@@ -1,0 +1,36 @@
+# Real, persistent external trigger for the Autonomous Quant Test
+# Harness -- Round 115. Calls the real /api/cron/quant-harness route
+# on a schedule; the scheduler itself contains zero trading
+# intelligence, per direct instruction -- it's purely "invoke this
+# real endpoint periodically," nothing more.
+#
+# Real, honest prerequisite, not assumed: this file only does
+# anything once it's committed to a real GitHub repository with
+# Actions enabled, AND a real repository secret named
+# QUANT_CRON_SECRET is set (Settings -> Secrets and variables ->
+# Actions) matching the exact real CRON_SECRET value already
+# configured in Vercel's production environment variables.
+#
+# Real, deliberate interval: every 5 minutes. GitHub Actions'
+# schedule triggers are not guaranteed to run at the exact minute
+# specified (real, documented platform behavior -- can be delayed
+# under load), so this is an upper bound on frequency, not a precise
+# clock. The route itself is a real no-op (fast, cheap) outside real
+# market hours or when no test is RUNNING, so frequent invocation
+# outside those windows costs very little.
+name: Quant Test Harness Cron
+
+"on":
+  schedule:
+    - cron: "*/5 * * * *"
+  workflow_dispatch: {}
+
+jobs:
+  trigger-cycle:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Call the real observation cycle endpoint
+        run: |
+          curl -sf -X GET \
+            -H "Authorization: Bearer ${{ secrets.QUANT_CRON_SECRET }}" \
+            "https://ipo-sniper-ai.vercel.app/api/cron/quant-harness"

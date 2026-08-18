@@ -90,21 +90,22 @@ export async function runAutonomousTradingSession(
     userId: string,
     idempotencyKey: string,
     tickers: string[],
-    gates: AutoExecutionGates = DEFAULT_AUTO_EXECUTION_GATES
+    gates: AutoExecutionGates = DEFAULT_AUTO_EXECUTION_GATES,
+    useServiceRole = false
 ): Promise<AutonomousSessionOutcome> {
-    const lock = await acquireRunLock(userId, idempotencyKey);
+    const lock = await acquireRunLock(userId, idempotencyKey, useServiceRole);
 
     if (!lock.acquired || !lock.lockId) {
         return { status: "RUN_ALREADY_ACTIVE", reason: lock.reason ?? "Could not acquire a real run lock." };
     }
 
     try {
-        await updateRunLockStatus(lock.lockId, "RUNNING");
-        const results = await runBatchScan(tickers, gates);
-        await updateRunLockStatus(lock.lockId, "COMPLETED");
+        await updateRunLockStatus(lock.lockId, "RUNNING", useServiceRole);
+        const results = await runBatchScan(tickers, gates, useServiceRole ? userId : undefined);
+        await updateRunLockStatus(lock.lockId, "COMPLETED", useServiceRole);
         return { status: "COMPLETED", results };
     } catch (err) {
-        await updateRunLockStatus(lock.lockId, "FAILED");
+        await updateRunLockStatus(lock.lockId, "FAILED", useServiceRole);
         return { status: "FAILED", error: err instanceof Error ? err.message : "Unknown real error during autonomous session." };
     }
 }

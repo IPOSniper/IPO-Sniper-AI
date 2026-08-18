@@ -2,6 +2,7 @@
 
 import { createClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/client";
+import { createServiceRoleClient, isServiceRoleConfigured } from "@/lib/supabase/serviceRole";
 import { ResearchService } from "@/engine/services/ResearchService";
 import { QuantStrategist } from "@/engine/quant/QuantStrategist";
 import { BatchScanner, DEFAULT_AUTO_EXECUTION_GATES, type AutoExecutionGates, type BatchResult } from "@/engine/quant/BatchScanner";
@@ -54,7 +55,8 @@ export interface BatchRunResult extends BatchResult {
  */
 export async function runBatchScan(
     tickers: string[],
-    gates: AutoExecutionGates = DEFAULT_AUTO_EXECUTION_GATES
+    gates: AutoExecutionGates = DEFAULT_AUTO_EXECUTION_GATES,
+    overrideUserId?: string
 ): Promise<BatchRunResult[]> {
 
     const runId = crypto.randomUUID();
@@ -107,7 +109,7 @@ export async function runBatchScan(
                 // Emergency Stop while a batch is in progress) takes
                 // effect immediately rather than waiting for the next
                 // run.
-                const control = await checkAutonomousExecutionAllowed("autonomous");
+                const control = await checkAutonomousExecutionAllowed("autonomous", overrideUserId);
                 if (!control.allowed) {
                     results.push({
                         ticker,
@@ -142,7 +144,7 @@ export async function runBatchScan(
                 orderStatus = `Passed all gates, but the ${gates.maxAutoExecutionsThisRun}-trade run limit was already reached.`;
             }
 
-            await logBatchDecision(runId, ticker, plan, selectedContract, evaluation, executed);
+            await logBatchDecision(runId, ticker, plan, selectedContract, evaluation, executed, overrideUserId);
 
             results.push({ ...evaluation, executed, orderStatus });
         } catch (err) {
@@ -159,10 +161,10 @@ export async function runBatchScan(
         }
         }
 
-        await logRunSummary(runId, startedAt, tickers, "completed", null, results);
+        await logRunSummary(runId, startedAt, tickers, "completed", null, results, overrideUserId);
         return results;
     } catch (err) {
-        await logRunSummary(runId, startedAt, tickers, "failed", err instanceof Error ? err.message : "Unknown run failure.", results);
+        await logRunSummary(runId, startedAt, tickers, "failed", err instanceof Error ? err.message : "Unknown run failure.", results, overrideUserId);
         throw err;
     }
 }
@@ -187,17 +189,28 @@ async function logRunSummary(
     watchlist: string[],
     status: "completed" | "failed",
     error: string | null,
-    results: BatchRunResult[]
+    results: BatchRunResult[],
+    overrideUserId?: string
 ): Promise<void> {
     if (!isSupabaseConfigured()) return;
     try {
-        const supabase = await createClient();
-        const { data: { user } } = await supabase.auth.getUser();
-        if (!user) return;
+        let userId: string;
+        let supabase;
+
+        if (overrideUserId) {
+            if (!isServiceRoleConfigured()) return;
+            userId = overrideUserId;
+            supabase = createServiceRoleClient();
+        } else {
+            supabase = await createClient();
+            const { data: { user } } = await supabase.auth.getUser();
+            if (!user) return;
+            userId = user.id;
+        }
 
         const { error: insertError } = await supabase.from("quant_runs").insert({
             id: runId,
-            user_id: user.id,
+            user_id: userId,
             started_at: startedAt,
             completed_at: new Date().toISOString(),
             watchlist,
@@ -225,17 +238,28 @@ async function logBatchDecision(
     plan: BatchRunResult["plan"],
     selectedContract: BatchRunResult["selectedContract"],
     evaluation: BatchResult,
-    executed: boolean
+    executed: boolean,
+    overrideUserId?: string
 ): Promise<void> {
     if (!isSupabaseConfigured() || !plan) return;
     try {
-        const supabase = await createClient();
-        const { data: { user } } = await supabase.auth.getUser();
-        if (!user) return;
+        let userId: string;
+        let supabase;
+
+        if (overrideUserId) {
+            if (!isServiceRoleConfigured()) return;
+            userId = overrideUserId;
+            supabase = createServiceRoleClient();
+        } else {
+            supabase = await createClient();
+            const { data: { user } } = await supabase.auth.getUser();
+            if (!user) return;
+            userId = user.id;
+        }
 
         const { error } = await supabase.from("quant_trade_decisions").insert({
             run_id: runId,
-            user_id: user.id,
+            user_id: userId,
             ticker,
             direction: plan.direction,
             committee_confidence: plan.confidence,
