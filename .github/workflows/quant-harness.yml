@@ -39,3 +39,9 @@ jobs:
           curl -sf -X GET \
             -H "Authorization: Bearer ${{ secrets.QUANT_CRON_SECRET }}" \
             "https://ipo-sniper-ai.vercel.app/api/cron/quant-harness"
+
+# Real "kickstart" comment -- GitHub Actions has a well-documented
+# behavior where new scheduled workflows can take 30min-1hr for
+# their first automatic run, and pushing a fresh commit to the
+# workflow file's own branch can force a real re-sync. This comment
+# exists solely to create that new commit.
