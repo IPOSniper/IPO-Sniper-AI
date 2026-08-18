@@ -649,3 +649,11 @@ New `hedge_fund_last_viewed_at` column on `profiles`. New `getWhileYouWereAway()
 New `WhileYouWereAwayPanel`, added at the very top of the Hedge Fund page — the actual daily entry point per the proposal's own framing.
 
 **Everything else in the 17-section proposal remains deliberately unbuilt** — the Quant Core, Opportunity Radar, full navigation rework, and visual design system are all real, substantial, separate future work.
+
+## "Rejections by Reason" breakdown (added this session)
+
+Real, honest confirmation that the autonomous cycle already does exactly what a direct "AUTONOMOUS PAPER-TRADING EXECUTION TEST" bootstrap describes (gather evidence, reassess, identify best opportunity, execute only if all gates pass, record everything, NO_TRADE with precise reason otherwise) — this is what every real cycle already does, confirmed directly via a real captured cycle result (IREN Long Put, 63% confidence, rejected against the 70% auto-execution gate with the exact reason recorded).
+
+Built the one real, missing piece: moving from counting raw cycles to understanding *why* real trade plans don't reach execution. New `getRejectionBreakdown()` — real, honest text-pattern classification over the already-stored `quant_trade_decisions.reasoning` array, no new schema. Categories: low agreement, low confidence, low evidence quality, no committee direction, and an honest "Other" bucket for anything that doesn't match a known pattern (not mis-filed into a category it doesn't belong to).
+
+Caught and fixed a real Next.js constraint violation before shipping: a non-async helper function was exported from a `"use server"` file (Next.js requires every export from a Server Actions file to be async) — moved the plain label data to a separate, non-server module.
