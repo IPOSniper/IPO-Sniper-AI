@@ -11,18 +11,23 @@
 # Actions) matching the exact real CRON_SECRET value already
 # configured in Vercel's production environment variables.
 #
-# Real, deliberate interval: every 5 minutes. GitHub Actions'
-# schedule triggers are not guaranteed to run at the exact minute
-# specified (real, documented platform behavior -- can be delayed
-# under load), so this is an upper bound on frequency, not a precise
-# clock. The route itself is a real no-op (fast, cheap) outside real
-# market hours or when no test is RUNNING, so frequent invocation
-# outside those windows costs very little.
+# Real, deliberate interval: every 10 minutes (not 5 or fewer) --
+# this app has already shown real Finnhub 429 rate-limit pressure
+# during manual testing earlier this session; 10 minutes gives Quant
+# meaningful new information between cycles without hammering
+# providers. Roughly 39 real cycles across a full ~6.5hr trading
+# session. GitHub Actions' schedule triggers are not guaranteed to
+# run at the exact minute specified (real, documented platform
+# behavior -- can be delayed under load), so this is an upper bound
+# on frequency, not a precise clock. The route itself is a real
+# no-op (fast, cheap) outside real market hours or when no test is
+# RUNNING, so frequent invocation outside those windows costs very
+# little.
 name: Quant Test Harness Cron
 
 "on":
   schedule:
-    - cron: "*/5 * * * *"
+    - cron: "*/10 * * * *"
   workflow_dispatch: {}
 
 jobs:
