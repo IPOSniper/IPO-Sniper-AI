@@ -90,7 +90,7 @@ export default function TestHarnessPanel({ defaultWatchlist }: { defaultWatchlis
         <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-4">
             <div className="mb-2 flex items-center justify-between">
                 <h3 className="text-sm font-medium text-zinc-300">Autonomous Quant Test Harness</h3>
-                <span className="text-[10px] text-zinc-600">Real — cycle logic built (round114), manually triggerable only — no real scheduler yet</span>
+                <span className="text-[10px] text-zinc-600">Real — GitHub Actions scheduler active (~every 10 min during market hours), plus manual "Run One Cycle"</span>
             </div>
 
             {!state ? (
