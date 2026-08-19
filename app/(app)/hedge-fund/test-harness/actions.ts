@@ -19,7 +19,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/client";
 import { runObservationCycle, type CycleResult } from "@/engine/quant/orchestration/ObservationCycle";
-import { getMostActiveStocks } from "@/engine/evidence/providers/AlpacaMoversProvider";
+import { scanForOpportunities } from "@/engine/quant/OpportunityScanner";
 
 export type HarnessStatus = "IDLE" | "RUNNING" | "PAUSED" | "STOPPING" | "COMPLETED" | "FAILED" | "EMERGENCY_STOPPED";
 
@@ -96,12 +96,20 @@ export async function startTestHarness(config: TestHarnessConfig): Promise<{ suc
 
     let finalWatchlist = config.watchlist;
     if (config.useDynamicDiscovery) {
-        // Real, bounded supplement -- top 10 real live most-active
-        // tickers, merged with the manual list, deduplicated. Bounded
-        // deliberately small given the real Finnhub rate-limit
-        // pressure already observed this session at just 15 tickers.
-        const movers = await getMostActiveStocks(10);
-        const discovered = movers.map(m => m.symbol);
+        // Real upgrade, per direct evidence: "Rejections by Reason"
+        // showed 77% of real decisions never even reached a
+        // committee direction -- consistent with a mostly-quiet
+        // static watchlist, not enough real signal for the committee
+        // to form a view. Uses round123's real OpportunityScanner
+        // (discovers real live active tickers, then ranks by a real,
+        // cheap price-structure "unusualness" score -- relative
+        // volume + momentum + volatility, zero AI/committee cost)
+        // instead of raw most-actives, so the real candidates added
+        // are genuinely more likely to have real signal worth
+        // evaluating. Still real, still bounded (top 8) given the
+        // real rate-limit pressure already observed this session.
+        const candidates = await scanForOpportunities(8, 20);
+        const discovered = candidates.map(c => c.ticker);
         finalWatchlist = Array.from(new Set([...config.watchlist, ...discovered]));
     }
 

@@ -108,7 +108,7 @@ export default function TestHarnessPanel({ defaultWatchlist }: { defaultWatchlis
                         </div>
                         <label className="flex items-center gap-1.5 pb-1.5 text-xs text-zinc-400">
                             <input type="checkbox" checked={useDynamicDiscovery} onChange={e => setUseDynamicDiscovery(e.target.checked)} />
-                            Add real live top-10 most-active tickers
+                            Add top 8 real, ranked unusual-activity candidates
                         </label>
                         <button onClick={handleStart} disabled={isPending} className="rounded-md bg-emerald-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-emerald-500 disabled:opacity-50">
                             Start Test
