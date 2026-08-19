@@ -31,6 +31,7 @@ export default function TestHarnessPanel({ defaultWatchlist }: { defaultWatchlis
     const [watchlist, setWatchlist] = useState(defaultWatchlist);
     const [useDynamicDiscovery, setUseDynamicDiscovery] = useState(false);
     const [replaceWatchlist, setReplaceWatchlist] = useState(false);
+    const [usePaperValidationGates, setUsePaperValidationGates] = useState(false);
     const [message, setMessage] = useState<{ kind: "success" | "error"; text: string } | null>(null);
     const [cycleResult, setCycleResult] = useState<CycleResult | null>(null);
     const [isPending, startTransition] = useTransition();
@@ -46,7 +47,7 @@ export default function TestHarnessPanel({ defaultWatchlist }: { defaultWatchlis
         setMessage(null);
         startTransition(async () => {
             const tickers = watchlist.split(",").map(t => t.trim().toUpperCase()).filter(Boolean);
-            const result = await startTestHarness({ name, watchlist: tickers, useDynamicDiscovery, replaceWatchlist });
+            const result = await startTestHarness({ name, watchlist: tickers, useDynamicDiscovery, replaceWatchlist, usePaperValidationGates });
             if (result.success && result.state) {
                 setState(result.state);
             } else {
@@ -117,6 +118,10 @@ export default function TestHarnessPanel({ defaultWatchlist }: { defaultWatchlis
                                 Replace the list above entirely — not restricted to any fixed tickers
                             </label>
                         )}
+                        <label className="flex items-center gap-1.5 pb-1.5 text-xs text-amber-400">
+                            <input type="checkbox" checked={usePaperValidationGates} onChange={e => setUsePaperValidationGates(e.target.checked)} />
+                            Lower auto-execution confidence gate to 60% (paper validation only — real Risk Engine, contract validation, position limits, and kill switch all remain fully active)
+                        </label>
                         <button onClick={handleStart} disabled={isPending} className="rounded-md bg-emerald-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-emerald-500 disabled:opacity-50">
                             Start Test
                         </button>

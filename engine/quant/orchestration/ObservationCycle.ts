@@ -32,6 +32,7 @@ import { isSupabaseConfigured } from "@/lib/supabase/client";
 import { createServiceRoleClient, isServiceRoleConfigured } from "@/lib/supabase/serviceRole";
 import { acquireRunLock, updateRunLockStatus } from "./RunIdempotency";
 import { runAutonomousTradingSession } from "./QuantOrchestrator";
+import { PAPER_VALIDATION_EXECUTION_GATES } from "@/engine/quant/BatchScanner";
 import { runAutonomousExitCheck, type ExitOutcome } from "./AutonomousExitEngine";
 import { reassessOpenPosition, type MidPositionReassessment } from "@/engine/intelligence/MidPositionReassessment";
 import { AlpacaPaperTradingProvider } from "@/engine/trading/providers/AlpacaPaperTradingProvider";
@@ -107,7 +108,7 @@ async function getRealEntryTime(userId: string, ticker: string): Promise<string 
  * both paths, since those specific functions were updated to accept
  * the service-role client.
  */
-export async function runObservationCycle(userId: string, testHarnessId: string, watchlist: string[], useServiceRole = false): Promise<CycleResult> {
+export async function runObservationCycle(userId: string, testHarnessId: string, watchlist: string[], useServiceRole = false, usePaperValidationGates = false): Promise<CycleResult> {
     const cycleCompletedAt = new Date().toISOString();
     const idempotencyKey = `harness-${testHarnessId}-${Date.now()}`;
 
@@ -164,7 +165,15 @@ export async function runObservationCycle(userId: string, testHarnessId: string,
         // runAutonomousTradingSession(), which itself already
         // enforces real Quant Control + RiskEngine + paper-only
         // execution. Not duplicated here, only called.
-        const executionOutcome = await runAutonomousTradingSession(userId, `${idempotencyKey}-execution`, watchlist, undefined, useServiceRole);
+        // Real, explicit, per-run choice between the real live-money
+        // default gates (70% confidence) and the real, separately-
+        // named paper-validation gates (60% confidence) -- per
+        // direct, deliberate instruction. Never silently substituted;
+        // the caller must explicitly opt in via
+        // usePaperValidationGates, and this app is PAPER-only
+        // regardless of which gate set is chosen.
+        const gates = usePaperValidationGates ? PAPER_VALIDATION_EXECUTION_GATES : undefined;
+        const executionOutcome = await runAutonomousTradingSession(userId, `${idempotencyKey}-execution`, watchlist, gates, useServiceRole);
         const newDecisionFormed = executionOutcome.status === "COMPLETED" && executionOutcome.results.some(r => r.plan && r.plan.direction !== "none");
 
         // Real, honest progress-counter update on the test harness row

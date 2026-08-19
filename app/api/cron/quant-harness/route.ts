@@ -54,7 +54,7 @@ export async function GET(request: NextRequest) {
         const supabase = createServiceRoleClient();
         const { data: activeTest, error } = await supabase
             .from("quant_test_harness")
-            .select("id, user_id, watchlist, status, environment, observations_count, autonomous_decisions_count, completed_trade_cycles_count, target_observations, target_autonomous_runs, target_completed_trade_cycles")
+            .select("id, user_id, watchlist, status, environment, observations_count, autonomous_decisions_count, completed_trade_cycles_count, target_observations, target_autonomous_runs, target_completed_trade_cycles, use_paper_validation_gates")
             .eq("status", "RUNNING")
             .eq("environment", "paper")
             .maybeSingle();
@@ -66,7 +66,7 @@ export async function GET(request: NextRequest) {
             return NextResponse.json({ success: true, skipped: true, reason: "No active RUNNING+PAPER test harness found." });
         }
 
-        const result = await runObservationCycle(activeTest.user_id, activeTest.id, activeTest.watchlist, true);
+        const result = await runObservationCycle(activeTest.user_id, activeTest.id, activeTest.watchlist, true, activeTest.use_paper_validation_gates);
 
         // Real, honest completion check -- per the real, configured
         // targets on this specific test, not a hardcoded 100.

@@ -34,6 +34,8 @@ export interface TestHarnessConfig {
     useDynamicDiscovery?: boolean;
     /** Real, optional full replacement: when true (requires useDynamicDiscovery), the real discovered/ranked candidates ARE the watchlist -- the manually-typed tickers are not included at all. Per direct instruction not to restrict Quant to a fixed, hand-picked list. */
     replaceWatchlist?: boolean;
+    /** Real, explicit, deliberate opt-in per direct instruction: lowers the real committee-confidence auto-execution gate from 70% to 60% for THIS test run only, using PAPER_VALIDATION_EXECUTION_GATES. Every other real gate (agreement, evidence quality, position limits, risk %, spread, kill switch, Risk Engine, contract validation, idempotency) remains unchanged. Persisted with the test so the real cron path applies it consistently, not just manual cycles. */
+    usePaperValidationGates?: boolean;
 }
 
 export interface TestHarnessState {
@@ -46,6 +48,7 @@ export interface TestHarnessState {
     targetCompletedTradeCycles: number;
     observationIntervalSeconds: number;
     watchlist: string[];
+    usePaperValidationGates: boolean;
     observationsCount: number;
     autonomousDecisionsCount: number;
     completedTradeCyclesCount: number;
@@ -72,6 +75,7 @@ function mapRow(row: Record<string, unknown>): TestHarnessState {
         targetCompletedTradeCycles: row.target_completed_trade_cycles as number,
         observationIntervalSeconds: row.observation_interval_seconds as number,
         watchlist: row.watchlist as string[],
+        usePaperValidationGates: row.use_paper_validation_gates as boolean,
         observationsCount: row.observations_count as number,
         autonomousDecisionsCount: row.autonomous_decisions_count as number,
         completedTradeCyclesCount: row.completed_trade_cycles_count as number,
@@ -136,6 +140,7 @@ export async function startTestHarness(config: TestHarnessConfig): Promise<{ suc
                 target_completed_trade_cycles: config.targetCompletedTradeCycles ?? 25,
                 observation_interval_seconds: config.observationIntervalSeconds ?? 600,
                 watchlist: finalWatchlist,
+                use_paper_validation_gates: config.usePaperValidationGates ?? false,
                 started_at: new Date().toISOString(),
             })
             .select("*")
@@ -241,6 +246,6 @@ export async function runTestHarnessCycle(): Promise<{ success: boolean; result?
     if (!active) return { success: false, error: "No active test harness run." };
     if (active.status !== "RUNNING") return { success: false, error: `Test is ${active.status}, not RUNNING -- resume it first.` };
 
-    const result = await runObservationCycle(userId, active.id, active.watchlist);
+    const result = await runObservationCycle(userId, active.id, active.watchlist, false, active.usePaperValidationGates);
     return { success: true, result };
 }

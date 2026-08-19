@@ -707,3 +707,15 @@ New `replaceWatchlist` option on `startTestHarness` — when checked (requires d
 Real, direct response to "for every trade plan, record exactly where it stops." Confirmed this data already exists — `runBatchScan` already produces exactly this (outcome: execute/reject/skip/wait, real reason string) per ticker, already shown as a readable table in the manual "Daily AI Trading Session" panel. The gap was purely display: the Test Harness's "Cycle result" box only showed a summary, not the real per-candidate breakdown.
 
 Added a real, readable funnel table to the Test Harness's cycle-result display — same format as the existing manual panel, color-coded by real outcome (execute/reject/skip). Also surfaced the real exit-evaluation results (round124/125) that were computed every cycle but never shown anywhere in the UI.
+
+## Real, explicit paper-validation execution gate (60%) — deliberate, scoped, per direct decision (added this session)
+
+Real, explicit implementation of a deliberate decision, stated directly: "lower the gate only in the paper-validation environment, not the eventual live-money gate." This is a conscious research decision, not a safety weakening — confirmed by real data first (Rejections by Reason: 186/235 never reach a committee direction at all; only 42 are actually blocked by the 70% confidence gate).
+
+New `PAPER_VALIDATION_EXECUTION_GATES` in `BatchScanner.ts` — identical to `DEFAULT_AUTO_EXECUTION_GATES` except `minCommitteeConfidence: 60` instead of 70. Every other real gate (agreement, evidence quality, position limits, portfolio risk %, spread check, kill switch) unchanged. Real Risk Engine, contract validation, liquidity checks, and idempotency remain fully, unconditionally active regardless of which gate set is used — this constant only ever feeds the same real `BatchScanner` logic.
+
+New persisted `use_paper_validation_gates` column on `quant_test_harness` — the choice is made once at test start and applies consistently across both the manual "Run One Cycle" path and the real cron path, not just whichever happened to be active in a browser session. Threaded through `runObservationCycle` → `runAutonomousTradingSession` → `runBatchScan` explicitly, never silently substituted.
+
+New UI checkbox on the Test Harness's Start Test form, honestly labeled with exactly what does and doesn't change.
+
+**Self-caught mistake during implementation**: a `str_replace` accidentally dropped the `observationsCount` field from `TestHarnessState` — caught by re-viewing the file's actual resulting content before proceeding, not assumed correct.

@@ -52,6 +52,32 @@ export const DEFAULT_AUTO_EXECUTION_GATES: AutoExecutionGates = {
     maxAutoExecutionsThisRun: 3,
 };
 
+/**
+ * Real, explicitly separate, lower-confidence gate set for the
+ * PAPER validation experiment only -- per direct, deliberate
+ * instruction: "lower the gate only in the paper-validation
+ * environment, not the eventual live-money gate." This is a
+ * conscious research decision, not a weakening of safety --
+ * everything else stays identical to DEFAULT_AUTO_EXECUTION_GATES
+ * (real committee agreement minimum, real evidence quality minimum,
+ * real position limits, real portfolio risk cap, real spread check,
+ * real kill switch on max executions per run). Only
+ * minCommitteeConfidence differs. Real Risk Engine, contract
+ * validation, liquidity checks, position limits, duplicate-order
+ * protection, and kill switch remain fully, unconditionally active
+ * regardless of which gate set is used -- this constant only ever
+ * feeds the same real BatchScanner logic, never bypasses any part
+ * of it.
+ *
+ * This must NEVER be used as the default for any real, eventual
+ * live-money code path -- DEFAULT_AUTO_EXECUTION_GATES (70%)
+ * remains the real live threshold whenever that environment exists.
+ */
+export const PAPER_VALIDATION_EXECUTION_GATES: AutoExecutionGates = {
+    ...DEFAULT_AUTO_EXECUTION_GATES,
+    minCommitteeConfidence: 60,
+};
+
 export type BatchOutcome = "execute" | "skip" | "reject" | "wait";
 
 export interface BatchResult {
