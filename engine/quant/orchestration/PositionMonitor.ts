@@ -9,18 +9,19 @@
  * was originally built). Returns a real, honest recommendation --
  * this function does NOT place any sell order itself.
  *
- * Real, deliberate safety scoping, stated directly: automatically
- * executing exits is a real, separate, much bigger safety decision
- * (it would need the same real Quant Control authorization check
- * entries already go through, extensive testing, and explicit
- * owner sign-off) -- not something to fold into this round
- * alongside everything else. This round gives a human (or a future,
- * separate, carefully-built auto-exit system) the real signal to
- * act on, not an automatic action.
+ * Real, deliberate safety scoping, stated directly: this remains the
+ * real, read-only assessment primitive. The real, separate,
+ * carefully-built auto-exit system anticipated here has now been
+ * built on top of this function (Round 121, AutonomousExitEngine.ts)
+ * -- that file composes assessPosition() with the same real Quant
+ * Control + RiskEngine + idempotency chain already proven for
+ * entries, rather than modifying this function's own honest,
+ * read-only scope.
  */
 
 import { createClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/client";
+import { createServiceRoleClient, isServiceRoleConfigured } from "@/lib/supabase/serviceRole";
 import type { TradingPosition } from "@/engine/trading/contracts/TradeOrder";
 
 export type ExitRecommendation = "hold" | "profit_target_hit" | "stop_loss_hit" | "no-linked-decision";
@@ -40,8 +41,11 @@ export interface PositionAssessment {
  * executed quant_trade_decisions row exists for this ticker (e.g. a
  * manually-placed order via "Place order", which isn't linked to any
  * decision) -- not a guessed exit threshold.
+ *
+ * Real, narrow addition for the cron/background-job path (Round 121):
+ * an optional overrideUserId, same established pattern as round115.
  */
-export async function assessPosition(userId: string, position: TradingPosition): Promise<PositionAssessment> {
+export async function assessPosition(userId: string, position: TradingPosition, overrideUserId?: string): Promise<PositionAssessment> {
     const base: Omit<PositionAssessment, "profitTargetPercent" | "stopLossPercent" | "recommendation"> = {
         ticker: position.ticker,
         unrealizedPlPercent: position.unrealizedPlPercent,
@@ -50,9 +54,12 @@ export async function assessPosition(userId: string, position: TradingPosition):
     if (!isSupabaseConfigured()) {
         return { ...base, profitTargetPercent: null, stopLossPercent: null, recommendation: "no-linked-decision" };
     }
+    if (overrideUserId && !isServiceRoleConfigured()) {
+        return { ...base, profitTargetPercent: null, stopLossPercent: null, recommendation: "no-linked-decision" };
+    }
 
     try {
-        const supabase = await createClient();
+        const supabase = overrideUserId ? createServiceRoleClient() : await createClient();
         const { data, error } = await supabase
             .from("quant_trade_decisions")
             .select("profit_target_percent, stop_loss_percent")

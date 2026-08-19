@@ -32,6 +32,7 @@ import { isSupabaseConfigured } from "@/lib/supabase/client";
 import { createServiceRoleClient, isServiceRoleConfigured } from "@/lib/supabase/serviceRole";
 import { acquireRunLock, updateRunLockStatus } from "./RunIdempotency";
 import { runAutonomousTradingSession } from "./QuantOrchestrator";
+import { runAutonomousExitCheck, type ExitOutcome } from "./AutonomousExitEngine";
 import { reassessOpenPosition, type MidPositionReassessment } from "@/engine/intelligence/MidPositionReassessment";
 import { AlpacaPaperTradingProvider } from "@/engine/trading/providers/AlpacaPaperTradingProvider";
 import { extractUnderlyingFromOccSymbol } from "@/engine/trading/contracts/occSymbol";
@@ -43,6 +44,8 @@ export interface CycleResult {
     positionsReviewed: number;
     reassessments: MidPositionReassessment[];
     materialEventsFound: number;
+    /** Real, per-position exit evaluations -- Round 121. A real, non-empty array even when every position is correctly held (SKIPPED_NO_TRIGGER is an honest, valid outcome, not an error). */
+    exitOutcomes: ExitOutcome[];
     /** True only if runAutonomousTradingSession() actually formed at least one real trade plan (not just NO_TRADE decisions). */
     newDecisionFormed: boolean;
     /** Real outcome of the new-decision evaluation, when one was attempted. Null when skipped (e.g. lock already held). */
@@ -111,7 +114,7 @@ export async function runObservationCycle(userId: string, testHarnessId: string,
     if (useServiceRole && !isServiceRoleConfigured()) {
         return {
             cycleCompletedAt, observation: "FAILED", marketData: "FAILED", positionsReviewed: 0,
-            reassessments: [], materialEventsFound: 0, newDecisionFormed: false, executionOutcome: null,
+            reassessments: [], materialEventsFound: 0, exitOutcomes: [], newDecisionFormed: false, executionOutcome: null,
             status: "FAILED", error: "Service role not configured -- cannot run the cron path.",
         };
     }
@@ -120,7 +123,7 @@ export async function runObservationCycle(userId: string, testHarnessId: string,
     if (!lock.acquired || !lock.lockId) {
         return {
             cycleCompletedAt, observation: "FAILED", marketData: "FAILED", positionsReviewed: 0,
-            reassessments: [], materialEventsFound: 0, newDecisionFormed: false, executionOutcome: null,
+            reassessments: [], materialEventsFound: 0, exitOutcomes: [], newDecisionFormed: false, executionOutcome: null,
             status: "SKIPPED_LOCK_HELD", error: lock.reason,
         };
     }
@@ -148,6 +151,14 @@ export async function runObservationCycle(userId: string, testHarnessId: string,
 
         const materialEventsFound = reassessments.reduce((sum, r) => sum + r.eventsSinceEntry.filter(e => e.materiality === "high" || e.materiality === "critical").length, 0);
 
+        // Real Round 121 addition: for every genuinely open position,
+        // check the real, objective exit trigger (profit target /
+        // stop loss hit) and submit a real sell order if warranted --
+        // fully functional under both the UI and cron paths, since
+        // assessPosition/checkAutonomousExecutionAllowed/placeOrder
+        // were all updated to accept the real service-role client.
+        const exitOutcomes = await runAutonomousExitCheck(userId, idempotencyKey, useServiceRole);
+
         // Real new-decision evaluation over the harness's real
         // watchlist -- this is the existing, already-safe
         // runAutonomousTradingSession(), which itself already
@@ -174,14 +185,14 @@ export async function runObservationCycle(userId: string, testHarnessId: string,
 
         return {
             cycleCompletedAt, observation: "COMPLETE", marketData: "COMPLETE",
-            positionsReviewed: positions.length, reassessments, materialEventsFound,
+            positionsReviewed: positions.length, reassessments, materialEventsFound, exitOutcomes,
             newDecisionFormed, executionOutcome, status: "COMPLETE", error: null,
         };
     } catch (err) {
         await updateRunLockStatus(lock.lockId, "FAILED", useServiceRole);
         return {
             cycleCompletedAt, observation: "FAILED", marketData: "FAILED", positionsReviewed: 0,
-            reassessments: [], materialEventsFound: 0, newDecisionFormed: false, executionOutcome: null,
+            reassessments: [], materialEventsFound: 0, exitOutcomes: [], newDecisionFormed: false, executionOutcome: null,
             status: "FAILED", error: err instanceof Error ? err.message : "Unknown real error during observation cycle.",
         };
     }

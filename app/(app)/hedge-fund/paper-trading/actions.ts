@@ -2,6 +2,7 @@
 
 import { createClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/client";
+import { createServiceRoleClient, isServiceRoleConfigured } from "@/lib/supabase/serviceRole";
 import { AlpacaPaperTradingProvider } from "@/engine/trading/providers/AlpacaPaperTradingProvider";
 import { AlpacaOptionsProvider } from "@/engine/trading/providers/AlpacaOptionsProvider";
 import { RiskEngine, DEFAULT_RISK_LIMITS, type RiskLimits } from "@/engine/trading/risk/RiskEngine";
@@ -85,7 +86,8 @@ export async function placeOrder(
     reasoning?: string,
     limits: RiskLimits = DEFAULT_RISK_LIMITS,
     assetType: "equity" | "option" = "equity",
-    expectedUnderlying?: string
+    expectedUnderlying?: string,
+    overrideUserId?: string
 ): Promise<PlaceOrderResult> {
 
     const normalizedTicker = ticker.trim().toUpperCase();
@@ -134,6 +136,7 @@ export async function placeOrder(
         // really represents, not what the client claims it typed for.
         if (expectedUnderlying && underlying !== expectedUnderlying.trim().toUpperCase()) {
             await logOrderAttempt({
+                overrideUserId,
                 ticker: normalizedTicker,
                 side,
                 qty,
@@ -180,6 +183,7 @@ export async function placeOrder(
 
     if (!result.allowed) {
         await logOrderAttempt({
+                overrideUserId,
             ticker: normalizedTicker,
             side,
             qty,
@@ -197,6 +201,7 @@ export async function placeOrder(
         const order = await provider.placeOrder({ ticker: normalizedTicker, side, qty, reasoning, assetType });
 
         await logOrderAttempt({
+                overrideUserId,
             ticker: normalizedTicker,
             side,
             qty,
@@ -221,6 +226,7 @@ export async function placeOrder(
         // logged, so the audit trail shows the broker-level failure
         // distinctly from a risk-engine block.
         await logOrderAttempt({
+                overrideUserId,
             ticker: normalizedTicker,
             side,
             qty,
@@ -266,6 +272,8 @@ interface LogOrderAttemptParams {
     filledAvgPrice?: number | null;
     filledQty?: number | null;
     filledAt?: string | null;
+    /** Real, optional override for the cron/background-job path (Round 121's autonomous exit engine) -- when provided, uses the real service-role client + this explicit userId instead of session-based auth, same pattern established in round115. */
+    overrideUserId?: string;
 }
 
 /**
@@ -283,11 +291,18 @@ async function logOrderAttempt(params: LogOrderAttemptParams): Promise<void> {
     }
 
     try {
-        const supabase = await createClient();
-        const { data: { user } } = await supabase.auth.getUser();
+        let userId: string;
+        let supabase;
 
-        if (!user) {
-            return;
+        if (params.overrideUserId) {
+            if (!isServiceRoleConfigured()) return;
+            userId = params.overrideUserId;
+            supabase = createServiceRoleClient();
+        } else {
+            supabase = await createClient();
+            const { data: { user } } = await supabase.auth.getUser();
+            if (!user) return;
+            userId = user.id;
         }
 
         // Real fix: Supabase JS's .insert() does NOT throw on
@@ -301,7 +316,7 @@ async function logOrderAttempt(params: LogOrderAttemptParams): Promise<void> {
         // "No orders yet" while real orders clearly existed in
         // Alpaca's own history.
         const { error } = await supabase.from("paper_trade_orders").insert({
-            user_id: user.id,
+            user_id: userId,
             ticker: params.ticker,
             side: params.side,
             qty: params.qty,

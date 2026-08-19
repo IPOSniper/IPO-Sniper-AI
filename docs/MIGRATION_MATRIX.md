@@ -675,3 +675,13 @@ New `OpportunityScanner.ts` (`scanForOpportunities`) — composes round122's rea
 **Real, honest scope boundary stated directly**: this is Stage 1+2 only (broad discovery + cheap ranking). Event/materiality filtering, candidate-ranking refinement, and continuous re-scanning remain real, separate future work — not attempted here.
 
 **Separate, real, low-risk UI clarity fix**, per direct request to resolve the confusing "215 decisions" vs "13/100 decisions" contradiction: renamed `QuantMemoryPanel` to "Quant Memory (All-Time History)" and `TestHarnessPanel` to "Validation Experiment (Current Run)" — the exact distinction requested, making clear these are two different, non-contradictory real counts.
+
+## Round 121: Autonomous Exit Engine — the missing link for a complete trade cycle (added this session)
+
+Real, significant piece: the previously-missing autonomous exit capability. Even a successful autonomous entry had nothing downstream that could close it — `runBatchScan` only ever evaluates new entries, and `PositionMonitor`/`MidPositionReassessment` were both deliberately read-only. "Completed Trade Cycles: 0/25" was structurally blocked, not just waiting on volume.
+
+New `AutonomousExitEngine.ts` (`runAutonomousExitCheck`) — composes round102's real `assessPosition()` with the same real Quant Control + RiskEngine + idempotency chain already proven for entries. **Real, deliberately narrow trigger**: only two real, objective, non-AI-judgment signals authorize an autonomous exit — `profit_target_hit` or `stop_loss_hit`, computed from the real percentages the original entry decision itself specified. This is explicitly NOT a subjective "thesis feels weaker" exit — that remains `MidPositionReassessment`'s honest, read-only signal, untouched.
+
+**Real, necessary prerequisite fixes** (the same session-auth gap round115 fixed for entries existed for exits too): added the same optional `overrideUserId`/service-role pattern to `assessPosition()`, `logOrderAttempt()`, and `placeOrder()` — all three previously depended on session-based auth and would have silently failed or under-logged under the cron path. Every existing UI call site verified unaffected (parameter is optional, appended last).
+
+Wired into `runObservationCycle` — every real cycle now checks every real open position for a genuine exit trigger, in addition to evaluating new entries. `CycleResult` extended with a real `exitOutcomes` array.
