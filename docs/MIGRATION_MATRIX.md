@@ -685,3 +685,9 @@ New `AutonomousExitEngine.ts` (`runAutonomousExitCheck`) — composes round102's
 **Real, necessary prerequisite fixes** (the same session-auth gap round115 fixed for entries existed for exits too): added the same optional `overrideUserId`/service-role pattern to `assessPosition()`, `logOrderAttempt()`, and `placeOrder()` — all three previously depended on session-based auth and would have silently failed or under-logged under the cron path. Every existing UI call site verified unaffected (parameter is optional, appended last).
 
 Wired into `runObservationCycle` — every real cycle now checks every real open position for a genuine exit trigger, in addition to evaluating new entries. `CycleResult` extended with a real `exitOutcomes` array.
+
+## Critical safety fix: cross-cycle duplicate-sell protection for Autonomous Exit Engine (added this session)
+
+**Real, urgent bug found and fixed**, discovered while evaluating a direct concern ("scheduler runs while an exit order is pending... never allow SELL SELL SELL SELL"): round124's exit idempotency key was `Date.now()`-based, unique per cycle invocation — it only prevented a duplicate *within* one cycle, not across separate scheduler fires ~10 minutes apart. If a sell order didn't fill instantly, a subsequent cycle could genuinely have submitted a second sell for the same still-open position.
+
+New `hasRecentPendingSell()` in `AutonomousExitEngine.ts` — checks real, already-persisted `paper_trade_orders` for a real, recent (30-minute window — 3x the normal cycle cadence) sell attempt on the exact ticker before allowing another. Honest fail-safe: if the check itself fails, treats the state as unknown and blocks the new submission rather than assuming safety.
