@@ -19,6 +19,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/client";
 import { runObservationCycle, type CycleResult } from "@/engine/quant/orchestration/ObservationCycle";
+import { getMostActiveStocks } from "@/engine/evidence/providers/AlpacaMoversProvider";
 
 export type HarnessStatus = "IDLE" | "RUNNING" | "PAUSED" | "STOPPING" | "COMPLETED" | "FAILED" | "EMERGENCY_STOPPED";
 
@@ -29,6 +30,8 @@ export interface TestHarnessConfig {
     targetAutonomousRuns?: number;
     targetCompletedTradeCycles?: number;
     observationIntervalSeconds?: number;
+    /** Real, optional discovery: when true, real live "most active stocks" (Alpaca's own screener) are added to the manually-provided watchlist, bounded to a small real count -- not a replacement for the manual list, an honest supplement. */
+    useDynamicDiscovery?: boolean;
 }
 
 export interface TestHarnessState {
@@ -91,6 +94,17 @@ export async function startTestHarness(config: TestHarnessConfig): Promise<{ suc
         return { success: false, error: "Watchlist cannot be empty." };
     }
 
+    let finalWatchlist = config.watchlist;
+    if (config.useDynamicDiscovery) {
+        // Real, bounded supplement -- top 10 real live most-active
+        // tickers, merged with the manual list, deduplicated. Bounded
+        // deliberately small given the real Finnhub rate-limit
+        // pressure already observed this session at just 15 tickers.
+        const movers = await getMostActiveStocks(10);
+        const discovered = movers.map(m => m.symbol);
+        finalWatchlist = Array.from(new Set([...config.watchlist, ...discovered]));
+    }
+
     try {
         const supabase = await createClient();
         const { data, error } = await supabase
@@ -103,7 +117,7 @@ export async function startTestHarness(config: TestHarnessConfig): Promise<{ suc
                 target_autonomous_runs: config.targetAutonomousRuns ?? 100,
                 target_completed_trade_cycles: config.targetCompletedTradeCycles ?? 25,
                 observation_interval_seconds: config.observationIntervalSeconds ?? 600,
-                watchlist: config.watchlist,
+                watchlist: finalWatchlist,
                 started_at: new Date().toISOString(),
             })
             .select("*")

@@ -29,6 +29,7 @@ export default function TestHarnessPanel({ defaultWatchlist }: { defaultWatchlis
     const [loading, setLoading] = useState(true);
     const [name, setName] = useState("Quant Validation Test");
     const [watchlist, setWatchlist] = useState(defaultWatchlist);
+    const [useDynamicDiscovery, setUseDynamicDiscovery] = useState(false);
     const [message, setMessage] = useState<{ kind: "success" | "error"; text: string } | null>(null);
     const [cycleResult, setCycleResult] = useState<CycleResult | null>(null);
     const [isPending, startTransition] = useTransition();
@@ -44,7 +45,7 @@ export default function TestHarnessPanel({ defaultWatchlist }: { defaultWatchlis
         setMessage(null);
         startTransition(async () => {
             const tickers = watchlist.split(",").map(t => t.trim().toUpperCase()).filter(Boolean);
-            const result = await startTestHarness({ name, watchlist: tickers });
+            const result = await startTestHarness({ name, watchlist: tickers, useDynamicDiscovery });
             if (result.success && result.state) {
                 setState(result.state);
             } else {
@@ -105,6 +106,10 @@ export default function TestHarnessPanel({ defaultWatchlist }: { defaultWatchlis
                             <label className="mb-1 block text-xs text-zinc-500">Watchlist</label>
                             <input value={watchlist} onChange={e => setWatchlist(e.target.value)} className="w-64 rounded-md border border-zinc-700 bg-zinc-950 px-2 py-1 text-sm text-white" />
                         </div>
+                        <label className="flex items-center gap-1.5 pb-1.5 text-xs text-zinc-400">
+                            <input type="checkbox" checked={useDynamicDiscovery} onChange={e => setUseDynamicDiscovery(e.target.checked)} />
+                            Add real live top-10 most-active tickers
+                        </label>
                         <button onClick={handleStart} disabled={isPending} className="rounded-md bg-emerald-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-emerald-500 disabled:opacity-50">
                             Start Test
                         </button>

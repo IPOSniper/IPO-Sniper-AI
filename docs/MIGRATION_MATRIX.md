@@ -657,3 +657,11 @@ Real, honest confirmation that the autonomous cycle already does exactly what a 
 Built the one real, missing piece: moving from counting raw cycles to understanding *why* real trade plans don't reach execution. New `getRejectionBreakdown()` — real, honest text-pattern classification over the already-stored `quant_trade_decisions.reasoning` array, no new schema. Categories: low agreement, low confidence, low evidence quality, no committee direction, and an honest "Other" bucket for anything that doesn't match a known pattern (not mis-filed into a category it doesn't belong to).
 
 Caught and fixed a real Next.js constraint violation before shipping: a non-async helper function was exported from a `"use server"` file (Next.js requires every export from a Server Actions file to be async) — moved the plain label data to a separate, non-server module.
+
+## Real, bounded dynamic discovery — first step toward "any and every company" (added this session)
+
+Real, honest first step per direct instruction: "quant shouldn't be restricted to several ipos... it should be able to search any and every company." Explicitly NOT full market-wide screening — running the full 15-analyst committee against thousands of tickers is genuinely infeasible with this app's current sequential architecture (already-shown real Finnhub 429 pressure at just 15 tickers this session).
+
+New `AlpacaMoversProvider.ts` (`getMostActiveStocks`) — real, live "most active stocks" from Alpaca's own real screener endpoint (`/v1beta1/screener/stocks/most-actives`), confirmed real and documented via web search before building, using credentials this app already has (no new provider/API key). **Real, honest limitation**: the exact JSON response field names weren't verified against a live call (no network access in this sandbox to call real external APIs) — parsing is deliberately defensive, checking multiple plausible field-name variants and returning an honest empty array on mismatch rather than crashing. Verified via direct test against 4 plausible response shapes before shipping.
+
+Wired as an opt-in `useDynamicDiscovery` checkbox on the Test Harness's Start Test form — when checked, adds real, live top-10 most-active tickers to (not replacing) the manual watchlist, deduplicated. Deliberately bounded to 10, not "everything," given the real rate-limit ceiling already observed.
