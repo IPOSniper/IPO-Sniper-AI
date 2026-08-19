@@ -695,3 +695,9 @@ New `hasRecentPendingSell()` in `AutonomousExitEngine.ts` — checks real, alrea
 ## Upgrade dynamic discovery to use ranked Opportunity Scanner (added this session)
 
 Real, evidence-based improvement, per direct confirmation this remains the priority. "Rejections by Reason" showed 77% of decisions never reach a committee direction — consistent with a mostly-quiet static watchlist. Upgraded the Test Harness's existing `useDynamicDiscovery` option from round122's raw `getMostActiveStocks` to round123's `scanForOpportunities` — real, cheap price-structure ranking (relative volume + momentum + volatility, zero AI cost) instead of unranked most-actives. Real candidates added are now genuinely more likely to have signal worth the committee's evaluation. Still bounded (top 8) given the real rate-limit ceiling already observed.
+
+## Real "replace watchlist entirely" option — genuinely opening discovery to the market (added this session)
+
+Real, direct response to: "let's not restrict quant to these RIOT/IREN/RKLB/KTOS/CLSK stocks... open it up to every company on the market." Honest scoping: not literally every company (genuinely infeasible given the real, already-observed rate-limit ceiling) — but the static 5-ticker anchor can now be fully removed, replaced by real, live, ranked candidates from Alpaca's real whole-market "most active" screener (not restricted to any fixed sector or list).
+
+New `replaceWatchlist` option on `startTestHarness` — when checked (requires dynamic discovery also enabled), the real scanner's top-12 output *is* the watchlist; the manually-typed tickers aren't included at all. Real, honest fallback: if the scanner genuinely returns nothing, falls back to the manual list rather than starting a test with an empty watchlist.

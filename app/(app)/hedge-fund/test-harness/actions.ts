@@ -32,6 +32,8 @@ export interface TestHarnessConfig {
     observationIntervalSeconds?: number;
     /** Real, optional discovery: when true, real live "most active stocks" (Alpaca's own screener) are added to the manually-provided watchlist, bounded to a small real count -- not a replacement for the manual list, an honest supplement. */
     useDynamicDiscovery?: boolean;
+    /** Real, optional full replacement: when true (requires useDynamicDiscovery), the real discovered/ranked candidates ARE the watchlist -- the manually-typed tickers are not included at all. Per direct instruction not to restrict Quant to a fixed, hand-picked list. */
+    replaceWatchlist?: boolean;
 }
 
 export interface TestHarnessState {
@@ -108,9 +110,17 @@ export async function startTestHarness(config: TestHarnessConfig): Promise<{ suc
         // are genuinely more likely to have real signal worth
         // evaluating. Still real, still bounded (top 8) given the
         // real rate-limit pressure already observed this session.
-        const candidates = await scanForOpportunities(8, 20);
+        const candidates = await scanForOpportunities(config.replaceWatchlist ? 12 : 8, 20);
         const discovered = candidates.map(c => c.ticker);
-        finalWatchlist = Array.from(new Set([...config.watchlist, ...discovered]));
+
+        // Real, honest fallback: if replaceWatchlist is set but the
+        // real scanner genuinely returns nothing (e.g. Alpaca's
+        // screener is unavailable), fall back to the manual list
+        // rather than starting a real test with a genuinely empty
+        // watchlist.
+        finalWatchlist = config.replaceWatchlist
+            ? (discovered.length > 0 ? discovered : config.watchlist)
+            : Array.from(new Set([...config.watchlist, ...discovered]));
     }
 
     try {

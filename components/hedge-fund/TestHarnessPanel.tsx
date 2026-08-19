@@ -30,6 +30,7 @@ export default function TestHarnessPanel({ defaultWatchlist }: { defaultWatchlis
     const [name, setName] = useState("Quant Validation Test");
     const [watchlist, setWatchlist] = useState(defaultWatchlist);
     const [useDynamicDiscovery, setUseDynamicDiscovery] = useState(false);
+    const [replaceWatchlist, setReplaceWatchlist] = useState(false);
     const [message, setMessage] = useState<{ kind: "success" | "error"; text: string } | null>(null);
     const [cycleResult, setCycleResult] = useState<CycleResult | null>(null);
     const [isPending, startTransition] = useTransition();
@@ -45,7 +46,7 @@ export default function TestHarnessPanel({ defaultWatchlist }: { defaultWatchlis
         setMessage(null);
         startTransition(async () => {
             const tickers = watchlist.split(",").map(t => t.trim().toUpperCase()).filter(Boolean);
-            const result = await startTestHarness({ name, watchlist: tickers, useDynamicDiscovery });
+            const result = await startTestHarness({ name, watchlist: tickers, useDynamicDiscovery, replaceWatchlist });
             if (result.success && result.state) {
                 setState(result.state);
             } else {
@@ -110,6 +111,12 @@ export default function TestHarnessPanel({ defaultWatchlist }: { defaultWatchlis
                             <input type="checkbox" checked={useDynamicDiscovery} onChange={e => setUseDynamicDiscovery(e.target.checked)} />
                             Add top 8 real, ranked unusual-activity candidates
                         </label>
+                        {useDynamicDiscovery && (
+                            <label className="flex items-center gap-1.5 pb-1.5 text-xs text-amber-400">
+                                <input type="checkbox" checked={replaceWatchlist} onChange={e => setReplaceWatchlist(e.target.checked)} />
+                                Replace the list above entirely — not restricted to any fixed tickers
+                            </label>
+                        )}
                         <button onClick={handleStart} disabled={isPending} className="rounded-md bg-emerald-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-emerald-500 disabled:opacity-50">
                             Start Test
                         </button>
