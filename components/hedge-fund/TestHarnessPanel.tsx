@@ -168,6 +168,36 @@ export default function TestHarnessPanel({ defaultWatchlist }: { defaultWatchlis
                                 <span className="col-span-2">Status: <span className={cycleResult.status === "COMPLETE" ? "text-emerald-400" : "text-amber-400"}>{cycleResult.status}</span></span>
                             </div>
                             {cycleResult.error && <p className="mt-1 text-red-400">{cycleResult.error}</p>}
+
+                            {cycleResult.executionOutcome?.status === "COMPLETED" && cycleResult.executionOutcome.results.length > 0 && (
+                                <div className="mt-2 border-t border-zinc-800 pt-2">
+                                    <p className="mb-1 font-medium text-zinc-300">Real per-candidate funnel — exactly where each stopped</p>
+                                    <div className="space-y-1">
+                                        {cycleResult.executionOutcome.results.map(r => (
+                                            <div key={r.ticker} className="flex items-start justify-between gap-2">
+                                                <span className="w-14 shrink-0 font-medium text-white">{r.ticker}</span>
+                                                <span className={`w-16 shrink-0 ${r.outcome === "execute" ? "text-emerald-400" : r.outcome === "reject" ? "text-red-400" : "text-amber-400"}`}>{r.outcome.toUpperCase()}</span>
+                                                <span className="flex-1 text-zinc-500">{r.reason}</span>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+
+                            {cycleResult.exitOutcomes.length > 0 && (
+                                <div className="mt-2 border-t border-zinc-800 pt-2">
+                                    <p className="mb-1 font-medium text-zinc-300">Real exit evaluation — every open position checked</p>
+                                    <div className="space-y-1">
+                                        {cycleResult.exitOutcomes.map(e => (
+                                            <div key={e.ticker} className="flex items-start justify-between gap-2">
+                                                <span className="w-24 shrink-0 font-medium text-white">{e.ticker}</span>
+                                                <span className={`w-32 shrink-0 ${e.action === "SUBMITTED" ? "text-emerald-400" : e.action === "FAILED" ? "text-red-400" : "text-zinc-500"}`}>{e.action}</span>
+                                                <span className="flex-1 text-zinc-500">{e.recommendation}{e.error ? ` — ${e.error}` : ""}</span>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
                         </div>
                     )}
                 </div>

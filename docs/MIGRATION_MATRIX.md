@@ -701,3 +701,9 @@ Real, evidence-based improvement, per direct confirmation this remains the prior
 Real, direct response to: "let's not restrict quant to these RIOT/IREN/RKLB/KTOS/CLSK stocks... open it up to every company on the market." Honest scoping: not literally every company (genuinely infeasible given the real, already-observed rate-limit ceiling) — but the static 5-ticker anchor can now be fully removed, replaced by real, live, ranked candidates from Alpaca's real whole-market "most active" screener (not restricted to any fixed sector or list).
 
 New `replaceWatchlist` option on `startTestHarness` — when checked (requires dynamic discovery also enabled), the real scanner's top-12 output *is* the watchlist; the manually-typed tickers aren't included at all. Real, honest fallback: if the scanner genuinely returns nothing, falls back to the manual list rather than starting a test with an empty watchlist.
+
+## Real per-candidate execution funnel display (added this session)
+
+Real, direct response to "for every trade plan, record exactly where it stops." Confirmed this data already exists — `runBatchScan` already produces exactly this (outcome: execute/reject/skip/wait, real reason string) per ticker, already shown as a readable table in the manual "Daily AI Trading Session" panel. The gap was purely display: the Test Harness's "Cycle result" box only showed a summary, not the real per-candidate breakdown.
+
+Added a real, readable funnel table to the Test Harness's cycle-result display — same format as the existing manual panel, color-coded by real outcome (execute/reject/skip). Also surfaced the real exit-evaluation results (round124/125) that were computed every cycle but never shown anywhere in the UI.
