@@ -665,3 +665,13 @@ Real, honest first step per direct instruction: "quant shouldn't be restricted t
 New `AlpacaMoversProvider.ts` (`getMostActiveStocks`) — real, live "most active stocks" from Alpaca's own real screener endpoint (`/v1beta1/screener/stocks/most-actives`), confirmed real and documented via web search before building, using credentials this app already has (no new provider/API key). **Real, honest limitation**: the exact JSON response field names weren't verified against a live call (no network access in this sandbox to call real external APIs) — parsing is deliberately defensive, checking multiple plausible field-name variants and returning an honest empty array on mismatch rather than crashing. Verified via direct test against 4 plausible response shapes before shipping.
 
 Wired as an opt-in `useDynamicDiscovery` checkbox on the Test Harness's Start Test form — when checked, adds real, live top-10 most-active tickers to (not replacing) the manual watchlist, deduplicated. Deliberately bounded to 10, not "everything," given the real rate-limit ceiling already observed.
+
+## Round 121, first piece: Opportunity Scanner (cheap first-pass screening) + panel label clarity (added this session)
+
+Real, deliberately scoped first piece of the requested multi-stage discovery architecture, per direct instruction: "Widen the discovery universe, but don't make every ticker go through the full 15-analyst committee." Explicitly NOT the full 8-stage vision.
+
+New `OpportunityScanner.ts` (`scanForOpportunities`) — composes round122's real discovery (`getMostActiveStocks`) with round111's real, pure-math `PriceStructureEngine` (zero AI/committee cost — real Alpaca bar data only) into a real "cheap first-pass" stage. Ranks by a real, simple, honest composite "unusualness" score (normalized relative volume + momentum + volatility), verified via direct test cases (quiet vs. unusual stock, missing-data honesty, negative/positive momentum symmetry) before shipping. Returns only the top N candidates — the expensive committee stage isn't touched by this file at all.
+
+**Real, honest scope boundary stated directly**: this is Stage 1+2 only (broad discovery + cheap ranking). Event/materiality filtering, candidate-ranking refinement, and continuous re-scanning remain real, separate future work — not attempted here.
+
+**Separate, real, low-risk UI clarity fix**, per direct request to resolve the confusing "215 decisions" vs "13/100 decisions" contradiction: renamed `QuantMemoryPanel` to "Quant Memory (All-Time History)" and `TestHarnessPanel` to "Validation Experiment (Current Run)" — the exact distinction requested, making clear these are two different, non-contradictory real counts.

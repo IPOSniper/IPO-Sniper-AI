@@ -15,7 +15,7 @@ const STATUS_COLOR: Record<string, string> = {
 };
 
 /**
- * Real Autonomous Quant Test Harness panel -- Stage A UI. Real
+ * Real Validation Experiment (Current Run) panel -- Stage A UI. Real
  * start/pause/resume/stop controls over the real, persistent state
  * machine (test-harness/actions.ts). Deliberately, honestly labeled
  * as not yet self-advancing -- Stage B (a real scheduler actually
@@ -81,7 +81,7 @@ export default function TestHarnessPanel({ defaultWatchlist }: { defaultWatchlis
     if (loading) {
         return (
             <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-4">
-                <h3 className="mb-1 text-sm font-medium text-zinc-300">Autonomous Quant Test Harness</h3>
+                <h3 className="mb-1 text-sm font-medium text-zinc-300">Validation Experiment (Current Run)</h3>
                 <p className="text-xs text-zinc-600">Loading…</p>
             </div>
         );
@@ -90,7 +90,7 @@ export default function TestHarnessPanel({ defaultWatchlist }: { defaultWatchlis
     return (
         <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-4">
             <div className="mb-2 flex items-center justify-between">
-                <h3 className="text-sm font-medium text-zinc-300">Autonomous Quant Test Harness</h3>
+                <h3 className="text-sm font-medium text-zinc-300">Validation Experiment (Current Run)</h3>
                 <span className="text-[10px] text-zinc-600">Real — GitHub Actions scheduler active (~every 10 min during market hours), plus manual "Run One Cycle"</span>
             </div>
 

@@ -14,8 +14,8 @@ export default async function QuantMemoryPanel() {
     return (
         <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-4">
             <div className="mb-3 flex items-center justify-between">
-                <h3 className="text-sm font-medium text-zinc-300">Quant Memory</h3>
-                <span className="text-[10px] text-zinc-600">Real — unified read layer over existing decision/event/order data</span>
+                <h3 className="text-sm font-medium text-zinc-300">Quant Memory (All-Time History)</h3>
+                <span className="text-[10px] text-zinc-600">Real — unified read layer over existing decision/event/order data, not the current validation experiment below</span>
             </div>
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
                 <div className="rounded-lg bg-zinc-800/40 p-3 text-center">
