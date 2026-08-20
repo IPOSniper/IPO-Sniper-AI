@@ -1,15 +1,44 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useState } from "react";
-import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
+import { ComposedChart, Area, Line, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer } from "recharts";
 
 interface Point {
     date: string;
     close: number;
 }
 
+interface ChartPoint extends Point {
+    sma20: number | null;
+    ema9: number | null;
+}
+
 const RANGES = ["1M", "3M", "1Y"] as const;
 type Range = typeof RANGES[number];
+
+const SMA_PERIOD = 20;
+const EMA_PERIOD = 9;
+
+function computeSmaSeries(closes: number[], period: number): (number | null)[] {
+    return closes.map((_, i) => {
+        if (i < period - 1) return null;
+        const slice = closes.slice(i - period + 1, i + 1);
+        return slice.reduce((a, b) => a + b, 0) / period;
+    });
+}
+
+function computeEmaSeries(closes: number[], period: number): (number | null)[] {
+    const result: (number | null)[] = new Array(closes.length).fill(null);
+    if (closes.length < period) return result;
+    const k = 2 / (period + 1);
+    let ema = closes.slice(0, period).reduce((a, b) => a + b, 0) / period;
+    result[period - 1] = ema;
+    for (let i = period; i < closes.length; i++) {
+        ema = closes[i] * k + ema * (1 - k);
+        result[i] = ema;
+    }
+    return result;
+}
 
 export default function PriceChart({ ticker }: { ticker: string }) {
     const [range, setRange] = useState<Range>("3M");
@@ -40,6 +69,13 @@ export default function PriceChart({ ticker }: { ticker: string }) {
 
     const isUp = points.length >= 2 && points[points.length - 1].close >= points[0].close;
 
+    const closes = points.map(p => p.close);
+    const sma20Series = computeSmaSeries(closes, SMA_PERIOD);
+    const ema9Series = computeEmaSeries(closes, EMA_PERIOD);
+    const chartData: ChartPoint[] = points.map((p, i) => ({ ...p, sma20: sma20Series[i], ema9: ema9Series[i] }));
+    const hasEnoughForSma = points.length >= SMA_PERIOD;
+    const hasEnoughForEma = points.length >= EMA_PERIOD;
+
     return (
         <section className="rounded-xl border border-zinc-800 bg-zinc-950 p-4">
             <div className="flex items-center justify-between mb-2">
@@ -68,7 +104,7 @@ export default function PriceChart({ ticker }: { ticker: string }) {
                     </div>
                 ) : (
                     <ResponsiveContainer width="100%" height="100%">
-                        <AreaChart data={points} margin={{ top: 4, right: 4, left: 4, bottom: 0 }}>
+                        <ComposedChart data={chartData} margin={{ top: 4, right: 4, left: 4, bottom: 0 }}>
                             <defs>
                                 <linearGradient id="priceFill" x1="0" y1="0" x2="0" y2="1">
                                     <stop offset="0%" stopColor={isUp ? "#34d399" : "#f87171"} stopOpacity={0.35} />
@@ -80,10 +116,11 @@ export default function PriceChart({ ticker }: { ticker: string }) {
                             <Tooltip
                                 contentStyle={{ background: "#18181b", border: "1px solid #3f3f46", fontSize: 12 }}
                                 labelStyle={{ color: "#a1a1aa" }}
-                                formatter={(value) => {
+                                formatter={(value, name) => {
                                     const n = typeof value === "number" ? value : Number(value);
-                                    if (!Number.isFinite(n)) return ["—", "Close"];
-                                    return [`$${n.toFixed(2)}`, "Close"];
+                                    if (!Number.isFinite(n)) return ["—", name];
+                                    const label = name === "close" ? "Close" : name === "sma20" ? "SMA 20" : name === "ema9" ? "EMA 9" : name;
+                                    return [`$${n.toFixed(2)}`, label];
                                 }}
                             />
                             <Area
@@ -93,10 +130,26 @@ export default function PriceChart({ ticker }: { ticker: string }) {
                                 strokeWidth={1.5}
                                 fill="url(#priceFill)"
                             />
-                        </AreaChart>
+                            {hasEnoughForSma && (
+                                <Line type="monotone" dataKey="sma20" stroke="#60a5fa" strokeWidth={1} dot={false} connectNulls isAnimationActive={false} />
+                            )}
+                            {hasEnoughForEma && (
+                                <Line type="monotone" dataKey="ema9" stroke="#fbbf24" strokeWidth={1} dot={false} connectNulls isAnimationActive={false} />
+                            )}
+                            {(hasEnoughForSma || hasEnoughForEma) && (
+                                <Legend
+                                    wrapperStyle={{ fontSize: 10 }}
+                                    formatter={(value) => (value === "sma20" ? "SMA 20" : value === "ema9" ? "EMA 9" : value)}
+                                />
+                            )}
+                        </ComposedChart>
                     </ResponsiveContainer>
                 )}
             </div>
+
+            {!loading && available && points.length > 0 && !hasEnoughForSma && (
+                <p className="mt-1 text-[10px] text-zinc-600">SMA 20 needs at least 20 real data points — only {points.length} available for this range.</p>
+            )}
         </section>
     );
 }
