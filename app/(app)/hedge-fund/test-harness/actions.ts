@@ -197,7 +197,7 @@ export async function resumeTestHarness() {
 }
 
 export async function stopTestHarness(reason = "User stopped.") {
-    return transitionStatus("STOPPING", reason);
+    return transitionStatus("COMPLETED", reason);
 }
 
 export async function emergencyStopTestHarness(reason: string) {
