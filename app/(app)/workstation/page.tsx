@@ -5,6 +5,7 @@ import NewsRail from "@/components/workstation/panels/NewsRail";
 import MarketContext from "@/components/workstation/panels/MarketContext";
 import UpcomingEarnings from "@/components/workstation/panels/UpcomingEarnings";
 import WhileYouWereAwayHome from "@/components/workstation/panels/WhileYouWereAwayHome";
+import MarketMoversPanel from "@/components/workstation/panels/MarketMoversPanel";
 export default function WorkstationPage() {
     return (
         <div className="text-white">
@@ -39,6 +40,9 @@ export default function WorkstationPage() {
             </Link>
             <div className="mb-4">
                 <MarketContext />
+            </div>
+            <div className="mb-4">
+                <MarketMoversPanel />
             </div>
             <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,380px)_1fr] gap-4 items-start">
                 <div className="space-y-4">
