@@ -4,7 +4,6 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   LayoutDashboard,
-  Home,
   Rocket,
   BrainCircuit,
   Eye,
@@ -19,8 +18,7 @@ import {
 import { useProfile } from "@/hooks/useProfile";
 
 const links = [
-  { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
-  { label: "Workstation", href: "/workstation", icon: Home },
+  { label: "Dashboard", href: "/workstation", icon: LayoutDashboard },
   { label: "Market Pulse", href: "/education", icon: GraduationCap },
   { label: "IPO Calendar", href: "/calendar", icon: Rocket, comingSoon: true },
   { label: "AI Rankings", href: "/rankings", icon: BrainCircuit, comingSoon: true },
