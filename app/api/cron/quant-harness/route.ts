@@ -1,35 +1,9 @@
-import { NextRequest, NextResponse } from "next/server";
+﻿import { NextRequest, NextResponse } from "next/server";
 import { createServiceRoleClient, isServiceRoleConfigured } from "@/lib/supabase/serviceRole";
 import { runObservationCycle } from "@/engine/quant/orchestration/ObservationCycle";
 import { isMarketOpen } from "@/engine/quant/orchestration/MarketHours";
+import { scanForOpportunities } from "@/engine/quant/OpportunityScanner";
 
-/**
- * Real, narrow cron execution path for Round 115 -- the actual
- * unattended trigger for the Autonomous Quant Test Harness. Reuses
- * the exact same real auth pattern already established for
- * /api/cron/overnight-watch (CRON_SECRET, Bearer token), same real
- * env var, not a new secret.
- *
- * Real, deliberately narrow scope, per direct instruction: this
- * route can ONLY do one thing -- find the single real RUNNING+PAPER
- * test harness and execute exactly ONE real observation cycle. It
- * cannot accept arbitrary user/ticker/order/quantity parameters --
- * there is no request body it reads at all. Every real safety gate
- * inside runObservationCycle -> runAutonomousTradingSession ->
- * runBatchScan (Quant Control, RiskEngine, paper-only verification,
- * position/risk limits, contract validation, kill switch,
- * idempotency) remains fully active and untouched -- this route's
- * only real job is providing authenticated database access for a
- * trusted background process, per direct instruction: "I'm an
- * authorized background process. Give me access to the private
- * Quant database. It must not say: I'm a background process,
- * therefore I can trade regardless of the normal controls."
- *
- * Given this app is single-owner (round84's lockdown -- signups
- * closed, only one real user can ever exist), finding "the" real
- * active test harness across all users is safe and unambiguous, not
- * a real multi-tenant risk.
- */
 export async function GET(request: NextRequest) {
     const secret = process.env.CRON_SECRET;
 
@@ -52,7 +26,7 @@ export async function GET(request: NextRequest) {
 
     try {
         const supabase = createServiceRoleClient();
-        const { data: activeTest, error } = await supabase
+        let { data: activeTest, error } = await supabase
             .from("quant_test_harness")
             .select("id, user_id, watchlist, status, environment, observations_count, autonomous_decisions_count, completed_trade_cycles_count, target_observations, target_autonomous_runs, target_completed_trade_cycles, use_paper_validation_gates")
             .eq("status", "RUNNING")
@@ -62,14 +36,59 @@ export async function GET(request: NextRequest) {
         if (error) {
             return NextResponse.json({ success: false, error: `Real error finding active test: ${error.message}` }, { status: 500 });
         }
+
         if (!activeTest) {
-            return NextResponse.json({ success: true, skipped: true, reason: "No active RUNNING+PAPER test harness found." });
+            const { data: anyNonTerminal } = await supabase
+                .from("quant_test_harness")
+                .select("id")
+                .in("status", ["IDLE", "RUNNING", "PAUSED", "STOPPING"])
+                .limit(1)
+                .maybeSingle();
+
+            if (anyNonTerminal) {
+                return NextResponse.json({ success: true, skipped: true, reason: "A test exists but isn't currently RUNNING (paused/stopping) -- not auto-creating a duplicate." });
+            }
+
+            const { data: profileRow } = await supabase
+                .from("profiles")
+                .select("id")
+                .limit(1)
+                .maybeSingle();
+            const realUserId = profileRow?.id;
+
+            if (!realUserId) {
+                return NextResponse.json({ success: true, skipped: true, reason: "No real user found to auto-initialize a test for." });
+            }
+
+            const candidates = await scanForOpportunities(12, 20);
+            const watchlist = candidates.length > 0 ? candidates.map(c => c.ticker) : ["RIOT", "IREN", "RKLB", "KTOS", "CLSK"];
+
+            const { data: newTest, error: insertError } = await supabase
+                .from("quant_test_harness")
+                .insert({
+                    user_id: realUserId,
+                    name: "Auto-Initialized Validation Experiment",
+                    status: "RUNNING",
+                    target_observations: 500,
+                    target_autonomous_runs: 100,
+                    target_completed_trade_cycles: 25,
+                    observation_interval_seconds: 600,
+                    watchlist,
+                    use_paper_validation_gates: true,
+                    started_at: new Date().toISOString(),
+                })
+                .select("id, user_id, watchlist, status, environment, observations_count, autonomous_decisions_count, completed_trade_cycles_count, target_observations, target_autonomous_runs, target_completed_trade_cycles, use_paper_validation_gates")
+                .single();
+
+            if (insertError || !newTest) {
+                return NextResponse.json({ success: true, skipped: true, reason: `Auto-initialization attempted but failed: ${insertError?.message ?? "unknown error"}.` });
+            }
+
+            activeTest = newTest;
         }
 
         const result = await runObservationCycle(activeTest.user_id, activeTest.id, activeTest.watchlist, true, activeTest.use_paper_validation_gates);
 
-        // Real, honest completion check -- per the real, configured
-        // targets on this specific test, not a hardcoded 100.
         const observationsMet = activeTest.observations_count + 1 >= activeTest.target_observations;
         const decisionsMet = activeTest.autonomous_decisions_count + (result.newDecisionFormed ? 1 : 0) >= activeTest.target_autonomous_runs;
         const cyclesMet = activeTest.completed_trade_cycles_count >= activeTest.target_completed_trade_cycles;
