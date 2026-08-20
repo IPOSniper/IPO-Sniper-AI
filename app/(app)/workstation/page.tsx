@@ -4,7 +4,6 @@ import ResearchTarget from "@/components/workstation/panels/ResearchTarget/Resea
 import NewsRail from "@/components/workstation/panels/NewsRail";
 import MarketContext from "@/components/workstation/panels/MarketContext";
 import UpcomingEarnings from "@/components/workstation/panels/UpcomingEarnings";
-import WhileYouWereAwayHome from "@/components/workstation/panels/WhileYouWereAwayHome";
 export default function WorkstationPage() {
     return (
         <div className="text-white">
@@ -14,7 +13,6 @@ export default function WorkstationPage() {
             <p className="text-zinc-400 mb-6">
                 Enter a ticker to run a full AI research report.
             </p>
-            <WhileYouWereAwayHome />
             <Link
                 href="/education"
                 className="mb-4 flex items-center justify-between rounded-xl border border-violet-700/50 bg-gradient-to-r from-violet-950/40 via-zinc-900 to-zinc-950 p-4 shadow-[0_0_24px_-8px_rgba(139,92,246,0.35)] hover:border-violet-500 hover:shadow-[0_0_28px_-6px_rgba(139,92,246,0.5)] transition group"

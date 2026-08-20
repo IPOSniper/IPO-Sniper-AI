@@ -1,8 +1,9 @@
-"use client";
+﻿"use client";
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
+  LayoutDashboard,
   Home,
   Rocket,
   BrainCircuit,
@@ -18,7 +19,8 @@ import {
 import { useProfile } from "@/hooks/useProfile";
 
 const links = [
-  { label: "Workstation (Home)", href: "/workstation", icon: Home },
+  { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
+  { label: "Workstation", href: "/workstation", icon: Home },
   { label: "Market Pulse", href: "/education", icon: GraduationCap },
   { label: "IPO Calendar", href: "/calendar", icon: Rocket, comingSoon: true },
   { label: "AI Rankings", href: "/rankings", icon: BrainCircuit, comingSoon: true },
@@ -28,23 +30,6 @@ const links = [
   { label: "Settings", href: "/settings", icon: Settings },
 ];
 
-// Hedge Fund is real (app/(app)/hedge-fund/page.tsx) and gated
-// server-side by proxy.ts to hedge_admin/admin roles — this link is
-// an added convenience, not the security boundary. Only shown to
-// roles that would actually get past the gate, so retail accounts
-// don't see a link that 403s.
-
-/**
- * Shrunk from w-64 (256px) to w-20 (80px) — a real ~69% width
- * reduction, not a cosmetic tweak. Icon-only with a title attribute
- * for the native browser tooltip (no new dependency needed) --
- * matches the same pattern as a collapsed Slack/VS Code activity
- * bar. Frees real horizontal space for the main content column,
- * which is the actual point: "shrink this to make room for more
- * relevant information" only helps if the freed space goes
- * somewhere, and w-64 -> w-20 gives back 176px across every page,
- * not just this one.
- */
 export default function Sidebar() {
   const pathname = usePathname();
   const { profile } = useProfile();
