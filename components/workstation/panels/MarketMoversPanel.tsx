@@ -1,8 +1,18 @@
 ﻿import Link from "next/link";
-import { getGainersAndLosers } from "@/engine/evidence/providers/AlpacaMoversProvider";
+import { getGainersAndLosers, type PriceMover } from "@/engine/evidence/providers/AlpacaMoversProvider";
+
+function isLikelyWarrantOrUnit(symbol: string): boolean {
+    return /\.(WS|W)$/i.test(symbol) || /W$/.test(symbol) && symbol.length > 3 || symbol.includes(".");
+}
+
+function filterCommonStock(movers: PriceMover[]): PriceMover[] {
+    return movers.filter(m => !isLikelyWarrantOrUnit(m.symbol));
+}
 
 export default async function MarketMoversPanel() {
-    const { gainers, losers } = await getGainersAndLosers(6);
+    const { gainers: rawGainers, losers: rawLosers } = await getGainersAndLosers(20);
+    const gainers = filterCommonStock(rawGainers).slice(0, 6);
+    const losers = filterCommonStock(rawLosers).slice(0, 6);
 
     if (gainers.length === 0 && losers.length === 0) {
         return (
@@ -15,7 +25,10 @@ export default async function MarketMoversPanel() {
 
     return (
         <div className="rounded-xl border border-zinc-800 bg-zinc-950 p-4">
-            <h2 className="mb-3 text-sm font-semibold text-zinc-300">Market Movers</h2>
+            <div className="mb-3 flex items-center justify-between">
+                <h2 className="text-sm font-semibold text-zinc-300">Market Movers</h2>
+                <span className="text-[10px] text-zinc-600">Common stock — warrants/units filtered by symbol pattern, not verified security type</span>
+            </div>
             <div className="grid grid-cols-2 gap-4">
                 <div>
                     <p className="mb-1.5 text-[10px] uppercase tracking-wide text-emerald-500">Top Gainers</p>
@@ -26,6 +39,7 @@ export default async function MarketMoversPanel() {
                                 <span className="text-emerald-400">{m.percentChange !== null ? `+${m.percentChange.toFixed(2)}%` : "—"}</span>
                             </Link>
                         ))}
+                        {gainers.length === 0 && <p className="text-xs text-zinc-600">None after filtering.</p>}
                     </div>
                 </div>
                 <div>
@@ -37,6 +51,7 @@ export default async function MarketMoversPanel() {
                                 <span className="text-red-400">{m.percentChange !== null ? `${m.percentChange.toFixed(2)}%` : "—"}</span>
                             </Link>
                         ))}
+                        {losers.length === 0 && <p className="text-xs text-zinc-600">None after filtering.</p>}
                     </div>
                 </div>
             </div>

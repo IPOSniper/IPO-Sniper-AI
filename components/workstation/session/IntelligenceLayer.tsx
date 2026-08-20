@@ -1,4 +1,4 @@
-import { WorkstationPanelProps } from "../contracts/WorkstationPanelProps";
+﻿import { WorkstationPanelProps } from "../contracts/WorkstationPanelProps";
 
 import EvidenceSummaryGrid from "../panels/EvidenceSummaryGrid/EvidenceSummaryGrid";
 import ExecutiveSummaryPanel from "../panels/ExecutiveSummaryPanel";
@@ -6,6 +6,7 @@ import RecommendationPanel from "../panels/RecommendationPanel";
 import CommitteePanel from "../panels/CommitteePanel";
 import ConvictionRadar from "../panels/ConvictionRadar/ConvictionRadar";
 import InvestmentThesisPanel from "../panels/InvestmentThesisPanel";
+import InvestorDecisionCenter from "../panels/InvestorDecisionCenter";
 import FinancialOverviewChart from "../panels/FinancialOverviewChart/FinancialOverviewChart";
 import ValuationSummary from "../panels/ValuationSummary/ValuationSummary";
 import EvidencePanel from "../panels/EvidencePanel";
@@ -32,6 +33,7 @@ return(
 
 <CommitteePanel research={research} />
 <InvestmentThesisPanel research={research} />
+<InvestorDecisionCenter research={research} />
 <PortfolioIntelligence research={research} />
 
 <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
