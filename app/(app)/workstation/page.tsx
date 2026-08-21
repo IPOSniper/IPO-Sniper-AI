@@ -7,6 +7,7 @@ import UpcomingEarnings from "@/components/workstation/panels/UpcomingEarnings";
 import WhileYouWereAwayHome from "@/components/workstation/panels/WhileYouWereAwayHome";
 import MarketMoversPanel from "@/components/workstation/panels/MarketMoversPanel";
 import IPORadarPanel from "@/components/workstation/panels/IPORadarPanel";
+import IPOWatchPanel from "@/components/workstation/panels/IPOWatchPanel";
 import ContinueResearchPanel from "@/components/workstation/panels/ContinueResearchPanel";
 export default function WorkstationPage() {
     return (
@@ -33,10 +34,14 @@ export default function WorkstationPage() {
                 <ArrowRight size={16} className="text-violet-400 group-hover:text-white group-hover:translate-x-0.5 transition" />
             </Link>
 
-            <div className="mb-4 grid grid-cols-1 gap-4 lg:grid-cols-3">
+            <div className="mb-4 grid grid-cols-1 gap-4 lg:grid-cols-2">
                 <MarketContext />
                 <MarketMoversPanel />
+            </div>
+
+            <div className="mb-4 grid grid-cols-1 gap-4 lg:grid-cols-2">
                 <IPORadarPanel />
+                <IPOWatchPanel />
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,380px)_1fr] gap-4 items-start">
