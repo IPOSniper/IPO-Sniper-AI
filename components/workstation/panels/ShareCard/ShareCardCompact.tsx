@@ -1,6 +1,6 @@
-import { forwardRef } from "react";
+﻿import { forwardRef } from "react";
 import { WorkstationPanelProps } from "../../contracts/WorkstationPanelProps";
-import { excludeAnalysts, recommendationToRating } from "../../shared/scorePresentation";
+import { excludeAnalysts, recommendationToRating, recommendationToHeadline } from "../../shared/scorePresentation";
 import { buildCommitteePhotoAssignments } from "../committeeAvatars";
 
 const RATING_STYLE: Record<string, string> = {
@@ -57,6 +57,7 @@ const ShareCardCompact = forwardRef<HTMLDivElement, Props>(
         const excludedFromAggregate = ["News Analyst"]; // see config/shareCardDisclosure.ts -- same rule as the full card
         const safe = excludeAnalysts(committee, excludedFromAggregate);
         const rating = recommendationToRating(safe.recommendation);
+        const headline = recommendationToHeadline(safe.recommendation);
 
         // Real facts, same derivation as the full card -- added
         // because a "STRONG BEARISH" label with zero supporting
@@ -103,14 +104,14 @@ const ShareCardCompact = forwardRef<HTMLDivElement, Props>(
                         <div className="text-right">
                             <p className="text-lg font-bold text-white">${quote.price.value.toFixed(2)}</p>
                             <p className={quote.changePercent.value >= 0 ? "text-xs text-emerald-400" : "text-xs text-red-400"}>
-                                {quote.changePercent.value >= 0 ? "▲" : "▼"} {quote.changePercent.value >= 0 ? "+" : ""}{quote.changePercent.value.toFixed(2)}%
+                                {quote.changePercent.value >= 0 ? "â–²" : "â–¼"} {quote.changePercent.value >= 0 ? "+" : ""}{quote.changePercent.value.toFixed(2)}%
                             </p>
                         </div>
                     )}
                 </div>
 
                 <div className="rounded-xl border border-zinc-800 bg-[#0D111B] p-4 text-center">
-                    <p className={`text-2xl font-black tracking-tight ${RATING_STYLE[rating]}`}>{RATING_HEADLINE[rating]}</p>
+                    <p className={`text-2xl font-black tracking-tight ${RATING_STYLE[rating]}`}>{headline}</p>
                     <div className="mt-1.5 flex items-center justify-center gap-4 text-xs">
                         <span className="text-zinc-400"><span className="font-bold text-white">{safe.score}</span>/100 Conviction</span>
                         <span className="text-zinc-400"><span className="font-bold text-white">{safe.confidence}%</span> Confidence</span>
@@ -148,8 +149,8 @@ const ShareCardCompact = forwardRef<HTMLDivElement, Props>(
                     </div>
                     <p className="mt-1.5 text-center text-[10px] text-zinc-500">
                         <span className="text-emerald-400">{bullishAnalysts.length} bull</span>
-                        {" · "}<span className="text-zinc-400">{holdAnalysts} hold</span>
-                        {" · "}<span className="text-red-400">{bearishAnalysts.length} bear</span>
+                        {" Â· "}<span className="text-zinc-400">{holdAnalysts} hold</span>
+                        {" Â· "}<span className="text-red-400">{bearishAnalysts.length} bear</span>
                     </p>
                 </div>
 
@@ -158,12 +159,12 @@ const ShareCardCompact = forwardRef<HTMLDivElement, Props>(
                         <div className="rounded-lg border border-zinc-800 bg-[#0D111B] p-2">
                             <p className="text-[8px] text-zinc-500">Revenue growth (YoY)</p>
                             <p className="mt-0.5 text-xs font-semibold text-white">
-                                {revenueGrowthPct !== null ? `${revenueGrowthPct >= 0 ? "+" : ""}${revenueGrowthPct.toFixed(1)}%` : "—"}
+                                {revenueGrowthPct !== null ? `${revenueGrowthPct >= 0 ? "+" : ""}${revenueGrowthPct.toFixed(1)}%` : "â€”"}
                             </p>
                         </div>
                         <div className="rounded-lg border border-zinc-800 bg-[#0D111B] p-2">
                             <p className="text-[8px] text-zinc-500">Debt-to-equity</p>
-                            <p className="mt-0.5 text-xs font-semibold text-white">{debtToEquity !== null ? debtToEquity.toFixed(2) : "—"}</p>
+                            <p className="mt-0.5 text-xs font-semibold text-white">{debtToEquity !== null ? debtToEquity.toFixed(2) : "â€”"}</p>
                         </div>
                     </div>
                 )}
@@ -182,8 +183,8 @@ const ShareCardCompact = forwardRef<HTMLDivElement, Props>(
 
                 {(topBull || topBear) && (
                     <div className="space-y-1 rounded-lg border border-violet-900/40 bg-[#160B3D] p-3">
-                        {topBull && <p className="text-[11px] leading-snug text-emerald-300">✓ {topBull.thesis}</p>}
-                        {topBear && <p className="text-[11px] leading-snug text-red-300">✕ {topBear.thesis}</p>}
+                        {topBull && <p className="text-[11px] leading-snug text-emerald-300">âœ“ {topBull.thesis}</p>}
+                        {topBear && <p className="text-[11px] leading-snug text-red-300">âœ• {topBear.thesis}</p>}
                     </div>
                 )}
 

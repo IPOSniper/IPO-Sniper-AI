@@ -1,6 +1,6 @@
-import { forwardRef } from "react";
+﻿import { forwardRef } from "react";
 import { WorkstationPanelProps } from "../../contracts/WorkstationPanelProps";
-import { excludeAnalysts, recommendationToRating, strengthLabel } from "../../shared/scorePresentation";
+import { excludeAnalysts, recommendationToRating, recommendationToHeadline, strengthLabel } from "../../shared/scorePresentation";
 import { buildCommitteePhotoAssignments } from "../committeeAvatars";
 import { SHARE_CARD_DISCLOSURE } from "@/config/shareCardDisclosure";
 
@@ -64,7 +64,7 @@ const VOTE_COLOR: Record<string, string> = {
  * this card -- NewsAPI.org and Currents API free tiers both restrict
  * production/public use (confirmed directly from both providers'
  * own terms), and this card is specifically built for public sharing.
- * The disclosure is now in the footer with a small ⓘ marker rather
+ * The disclosure is now in the footer with a small â“˜ marker rather
  * than the top of the card, per direct feedback that developer-
  * facing language hurt the first impression -- but the substance
  * (recommendation is recomputed without News) is still stated
@@ -162,7 +162,7 @@ const ShareCard = forwardRef<HTMLDivElement, Props>(
                             <p className="text-[10px] uppercase tracking-wide text-zinc-500">Current Price</p>
                             <p className="text-xl font-bold text-white">${quote.price.value.toFixed(2)}</p>
                             <p className={quote.changePercent.value >= 0 ? "text-sm text-emerald-400" : "text-sm text-red-400"}>
-                                {quote.changePercent.value >= 0 ? "▲" : "▼"} {quote.changePercent.value >= 0 ? "+" : ""}{quote.changePercent.value.toFixed(2)}% Today
+                                {quote.changePercent.value >= 0 ? "â–²" : "â–¼"} {quote.changePercent.value >= 0 ? "+" : ""}{quote.changePercent.value.toFixed(2)}% Today
                             </p>
                         </div>
                     )}
@@ -171,7 +171,7 @@ const ShareCard = forwardRef<HTMLDivElement, Props>(
                 {/* Hero recommendation -- made impossible to miss, per direct feedback */}
                 <div className="rounded-xl border border-zinc-800 bg-[#0D111B] p-3.5 text-center">
                     <p className={`text-3xl font-black tracking-tight ${RATING_STYLE[rating]}`}>
-                        {RATING_HEADLINE[rating]}
+                        {recommendationToHeadline(safe.recommendation)}
                     </p>
                     <div className="mt-1.5 flex items-center justify-center gap-6 text-sm">
                         <span className="text-zinc-400">
@@ -219,9 +219,9 @@ const ShareCard = forwardRef<HTMLDivElement, Props>(
                     </div>
                     <p className="mt-1.5 text-center text-xs text-zinc-500">
                         <span className="text-emerald-400">{bullishAnalysts.length} bull</span>
-                        {" · "}
+                        {" Â· "}
                         <span className="text-zinc-400">{holdAnalysts} hold</span>
-                        {" · "}
+                        {" Â· "}
                         <span className="text-red-400">{bearishAnalysts.length} bear</span>
                     </p>
                 </div>
@@ -232,21 +232,21 @@ const ShareCard = forwardRef<HTMLDivElement, Props>(
                     <div className="grid grid-cols-4 gap-2">
                         <div className="rounded-lg border border-zinc-800 bg-[#0D111B] p-2.5">
                             <p className="text-[9px] text-zinc-500">Revenue growth (YoY)</p>
-                            <p className="mt-1 text-sm font-semibold text-white">{revenueGrowthPct !== null ? `${revenueGrowthPct >= 0 ? "+" : ""}${revenueGrowthPct.toFixed(1)}%` : "—"}</p>
+                            <p className="mt-1 text-sm font-semibold text-white">{revenueGrowthPct !== null ? `${revenueGrowthPct >= 0 ? "+" : ""}${revenueGrowthPct.toFixed(1)}%` : "â€”"}</p>
                         </div>
                         <div className="rounded-lg border border-zinc-800 bg-[#0D111B] p-2.5">
                             <p className="text-[9px] text-zinc-500">Gross margin</p>
-                            <p className="mt-1 text-sm font-semibold text-white">{grossMarginPct !== null ? `${grossMarginPct.toFixed(1)}%` : "—"}</p>
+                            <p className="mt-1 text-sm font-semibold text-white">{grossMarginPct !== null ? `${grossMarginPct.toFixed(1)}%` : "â€”"}</p>
                         </div>
                         <div className="rounded-lg border border-zinc-800 bg-[#0D111B] p-2.5">
                             <p className="text-[9px] text-zinc-500">Free cash flow</p>
                             <p className={`mt-1 text-sm font-semibold ${latest && latest.freeCashFlow < 0 ? "text-red-400" : "text-white"}`}>
-                                {latest ? `${latest.freeCashFlow < 0 ? "-" : ""}$${(Math.abs(latest.freeCashFlow) / 1_000_000).toFixed(1)}M` : "—"}
+                                {latest ? `${latest.freeCashFlow < 0 ? "-" : ""}$${(Math.abs(latest.freeCashFlow) / 1_000_000).toFixed(1)}M` : "â€”"}
                             </p>
                         </div>
                         <div className="rounded-lg border border-zinc-800 bg-[#0D111B] p-2.5">
                             <p className="text-[9px] text-zinc-500">Debt-to-equity</p>
-                            <p className="mt-1 text-sm font-semibold text-white">{debtToEquity !== null ? debtToEquity.toFixed(2) : "—"}</p>
+                            <p className="mt-1 text-sm font-semibold text-white">{debtToEquity !== null ? debtToEquity.toFixed(2) : "â€”"}</p>
                         </div>
                     </div>
                 </div>
@@ -256,7 +256,7 @@ const ShareCard = forwardRef<HTMLDivElement, Props>(
                     <div className="mb-1.5 flex items-center justify-between text-xs">
                         <span className="text-zinc-400">Evidence Quality</span>
                         <span className="font-semibold text-white">
-                            {avgEvidenceStrength !== null ? `${avgEvidenceStrength}% — ${strengthLabel(avgEvidenceStrength)} Confidence` : "Unavailable"}
+                            {avgEvidenceStrength !== null ? `${avgEvidenceStrength}% â€” ${strengthLabel(avgEvidenceStrength)} Confidence` : "Unavailable"}
                         </span>
                     </div>
                     {avgEvidenceStrength !== null && (
@@ -274,15 +274,15 @@ const ShareCard = forwardRef<HTMLDivElement, Props>(
                     <div className="flex gap-2 rounded-lg border border-zinc-800 bg-[#0D111B] p-3">
                         <div className="flex-1 rounded-md bg-emerald-950/30 p-2 text-center">
                             <p className="text-sm font-bold text-emerald-400">{scenarios.bull.probability}%</p>
-                            <p className="text-[9px] text-zinc-500">🐂 Bull</p>
+                            <p className="text-[9px] text-zinc-500">ðŸ‚ Bull</p>
                         </div>
                         <div className="flex-1 rounded-md bg-zinc-800/40 p-2 text-center">
                             <p className="text-sm font-bold text-zinc-300">{scenarios.base.probability}%</p>
-                            <p className="text-[9px] text-zinc-500">⚪ Neutral</p>
+                            <p className="text-[9px] text-zinc-500">âšª Neutral</p>
                         </div>
                         <div className="flex-1 rounded-md bg-red-950/30 p-2 text-center">
                             <p className="text-sm font-bold text-red-400">{scenarios.bear.probability}%</p>
-                            <p className="text-[9px] text-zinc-500">🐻 Bear</p>
+                            <p className="text-[9px] text-zinc-500">ðŸ» Bear</p>
                         </div>
                     </div>
                 )}
@@ -291,7 +291,7 @@ const ShareCard = forwardRef<HTMLDivElement, Props>(
                 {(bullishAnalysts.length > 0 || bearishAnalysts.length > 0) && (
                     <div className="grid grid-cols-2 gap-2.5">
                         <div className="rounded-lg border border-emerald-900/40 bg-[#0D111B] p-2.5">
-                            <p className="mb-1.5 text-[10px] font-semibold uppercase tracking-wide text-emerald-400">🐂 Bull case</p>
+                            <p className="mb-1.5 text-[10px] font-semibold uppercase tracking-wide text-emerald-400">ðŸ‚ Bull case</p>
                             {bullishAnalysts
                                 .filter(a => displayThesis(a.analyst, a.thesis) !== "")
                                 .slice(0, 3)
@@ -303,7 +303,7 @@ const ShareCard = forwardRef<HTMLDivElement, Props>(
                             {bullishAnalysts.length === 0 && <p className="text-[11px] text-zinc-600">No analysts currently bullish.</p>}
                         </div>
                         <div className="rounded-lg border border-red-900/40 bg-[#0D111B] p-2.5">
-                            <p className="mb-1.5 text-[10px] font-semibold uppercase tracking-wide text-red-400">🐻 Bear case</p>
+                            <p className="mb-1.5 text-[10px] font-semibold uppercase tracking-wide text-red-400">ðŸ» Bear case</p>
                             {bearishAnalysts
                                 .filter(a => displayThesis(a.analyst, a.thesis) !== "")
                                 .slice(0, 3)
@@ -325,15 +325,15 @@ const ShareCard = forwardRef<HTMLDivElement, Props>(
                     <p className="mb-1.5 text-[10px] font-semibold uppercase tracking-wide text-violet-300">Committee Conclusion</p>
                     <div className="space-y-1">
                         {bullishAnalysts.slice(0, 2).map(a => (
-                            <p key={a.analyst} className="text-xs leading-snug text-emerald-300">✓ {a.thesis}</p>
+                            <p key={a.analyst} className="text-xs leading-snug text-emerald-300">âœ“ {a.thesis}</p>
                         ))}
                         {bearishAnalysts.slice(0, 2).map(a => (
-                            <p key={a.analyst} className="text-xs leading-snug text-red-300">✕ {a.thesis}</p>
+                            <p key={a.analyst} className="text-xs leading-snug text-red-300">âœ• {a.thesis}</p>
                         ))}
                     </div>
                     <div className="mt-2 flex items-center justify-between border-t border-violet-900/40 pt-1.5">
                         <span className="text-[10px] uppercase tracking-wide text-zinc-500">Final Recommendation</span>
-                        <span className={`text-sm font-black ${RATING_STYLE[rating]}`}>{RATING_HEADLINE[rating]}</span>
+                        <span className={`text-sm font-black ${RATING_STYLE[rating]}`}>{recommendationToHeadline(safe.recommendation)}</span>
                     </div>
                 </div>
 
@@ -395,10 +395,10 @@ const ShareCard = forwardRef<HTMLDivElement, Props>(
                         )}
                     </div>
                     <p className="mb-1 text-[9px] font-medium uppercase tracking-wide text-zinc-500">Sources</p>
-                    <p className="text-[10px] text-zinc-500">✓ SEC EDGAR &nbsp; ✓ Exchange Data &nbsp; ✓ Financial Statements &nbsp; ✓ AI Reasoning Engine</p>
+                    <p className="text-[10px] text-zinc-500">âœ“ SEC EDGAR &nbsp; âœ“ Exchange Data &nbsp; âœ“ Financial Statements &nbsp; âœ“ AI Reasoning Engine</p>
                     <p className="mt-2 text-[9px] leading-relaxed text-zinc-700">
-                        AI-synthesized research, not investment advice. Data may be incomplete — verify independently before acting. IPO Sniper AI is not a registered investment advisor.
-                        {" "}ⓘ Public Research Snapshot — certain proprietary and licensed research inputs are omitted from this public report.
+                        AI-synthesized research, not investment advice. Data may be incomplete â€” verify independently before acting. IPO Sniper AI is not a registered investment advisor.
+                        {" "}â“˜ Public Research Snapshot â€” certain proprietary and licensed research inputs are omitted from this public report.
                     </p>
                 </div>
             </div>

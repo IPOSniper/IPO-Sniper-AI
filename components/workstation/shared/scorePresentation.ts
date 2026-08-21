@@ -1,16 +1,16 @@
-import type { CommitteeReport } from "@/engine/committee/contracts/CommitteeReport";
+﻿import type { CommitteeReport } from "@/engine/committee/contracts/CommitteeReport";
 import type { AnalystReport } from "@/engine/committee/contracts/AnalystReport";
 import type { Recommendation } from "@/engine/committee/contracts/types";
 
 /**
- * Recomputes a committee view EXCLUDING specific analysts — used by
+ * Recomputes a committee view EXCLUDING specific analysts â€” used by
  * the Share Card generator to exclude News Analyst (NewsAPI's free
  * tier ToS forbids any production/public use, see newsBuilder.ts)
  * without needing a second, real committee run. Deliberately
  * mirrors ChiefInvestmentOfficer's own aggregation logic exactly
  * (same average/determineRecommendation/calculateAgreement
  * thresholds) rather than inventing different math for the "safe"
- * view — the two numbers should only differ by which analysts are
+ * view â€” the two numbers should only differ by which analysts are
  * included, not by using a different formula.
  */
 export function excludeAnalysts(
@@ -56,10 +56,21 @@ export function recommendationToRating(recommendation: Recommendation): "Bullish
     return "Neutral";
 }
 
+export function recommendationToHeadline(recommendation: Recommendation): string {
+    const map: Record<Recommendation, string> = {
+        STRONG_BUY: "STRONG BULLISH",
+        BUY: "BULLISH",
+        HOLD: "NEUTRAL",
+        REDUCE: "BEARISH",
+        SELL: "STRONG BEARISH",
+    };
+    return map[recommendation];
+}
+
 /**
  * Buckets a 0-100 confidence/strength number into a plain-language
  * label. Thresholds are a presentation choice, not derived from
- * anything — documented here so they're easy to find and adjust.
+ * anything â€” documented here so they're easy to find and adjust.
  */
 export function strengthLabel(pct: number): "Low" | "Moderate" | "High" | "Strong" {
     if (pct >= 75) return "Strong";
