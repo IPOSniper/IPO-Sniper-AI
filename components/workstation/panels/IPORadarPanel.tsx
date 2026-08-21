@@ -55,7 +55,7 @@ export default async function IPORadarPanel() {
     return (
         <div className="rounded-xl border border-zinc-800 bg-zinc-950 p-4">
             <h2 className="mb-3 text-sm font-semibold text-zinc-300">🚀 IPO Radar</h2>
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            <div className="grid grid-cols-1 gap-3">
                 {enriched.map(ipo => (
                     <div
                         key={`${ipo.symbol}-${ipo.date}`}

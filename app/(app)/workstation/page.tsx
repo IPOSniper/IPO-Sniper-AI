@@ -21,35 +21,24 @@ export default function WorkstationPage() {
             <ContinueResearchPanel />
             <Link
                 href="/education"
-                className="mb-4 flex items-center justify-between rounded-xl border border-violet-700/50 bg-gradient-to-r from-violet-950/40 via-zinc-900 to-zinc-950 p-4 shadow-[0_0_24px_-8px_rgba(139,92,246,0.35)] hover:border-violet-500 hover:shadow-[0_0_28px_-6px_rgba(139,92,246,0.5)] transition group"
+                className="mb-4 flex items-center justify-between rounded-xl border border-violet-700/50 bg-gradient-to-r from-violet-950/40 via-zinc-900 to-zinc-950 px-4 py-2.5 hover:border-violet-500 transition group"
             >
                 <div className="flex items-center gap-3">
-                    <div className="rounded-lg bg-violet-500/20 p-2">
-                        <GraduationCap size={20} className="text-violet-300" />
-                    </div>
-                    <div>
-                        <p className="text-sm font-semibold text-white flex items-center gap-2">
-                            Market Pulse
-                            <span className="rounded-full bg-violet-500/20 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide text-violet-300">
-                                Dow · S&amp;P · Nasdaq · Gold · Bonds
-                            </span>
-                        </p>
-                        <p className="text-xs text-zinc-400">
-                            What&apos;s moving markets today, why, and what to watch — updated with real data.
-                        </p>
-                    </div>
+                    <GraduationCap size={18} className="text-violet-300" />
+                    <p className="text-sm font-semibold text-white">
+                        Market Pulse
+                        <span className="ml-2 text-xs font-normal text-zinc-400">Dow · S&amp;P · Nasdaq · Gold · Bonds — what's moving today</span>
+                    </p>
                 </div>
-                <ArrowRight size={18} className="text-violet-400 group-hover:text-white group-hover:translate-x-0.5 transition" />
+                <ArrowRight size={16} className="text-violet-400 group-hover:text-white group-hover:translate-x-0.5 transition" />
             </Link>
-            <div className="mb-4">
+
+            <div className="mb-4 grid grid-cols-1 gap-4 lg:grid-cols-3">
                 <MarketContext />
-            </div>
-            <div className="mb-4">
                 <MarketMoversPanel />
-            </div>
-            <div className="mb-4">
                 <IPORadarPanel />
             </div>
+
             <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,380px)_1fr] gap-4 items-start">
                 <div className="space-y-4">
                     <ResearchTarget />
