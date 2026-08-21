@@ -1,4 +1,4 @@
-"use client";
+ï»¿"use client";
 
 import { useEffect, useState } from "react";
 import type { IPOWatchCompany } from "@/app/api/ipo-watch/route";
@@ -45,9 +45,9 @@ export default function IPOWatchPanel() {
 
     return (
         <div className="rounded-xl border border-zinc-800 bg-zinc-950 p-4">
-            <h2 className="mb-3 text-sm font-semibold text-zinc-300">?? IPO Watch</h2>
+            <h2 className="mb-3 text-sm font-semibold text-zinc-300">IPO Watch</h2>
 
-            {loading && <p className="text-xs text-zinc-500">Loading…</p>}
+            {loading && <p className="text-xs text-zinc-500">Loading...</p>}
 
             {!loading && !available && (
                 <p className="text-xs text-zinc-500">{reason ?? "IPO Watch unavailable."}</p>
@@ -65,14 +65,13 @@ export default function IPOWatchPanel() {
                             </div>
                             {c.latest ? (
                                 
-                                <a
                                     href={c.latest.url}
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     className="mt-1 block text-[11px] text-zinc-400 hover:text-zinc-200"
                                 >
                                     <span className="line-clamp-2">{c.latest.headline}</span>
-                                    <span className="text-zinc-600">{c.latest.source} · {timeAgo(c.latest.publishedAt)}</span>
+                                    <span className="text-zinc-600">{c.latest.source} - {timeAgo(c.latest.publishedAt)}</span>
                                 </a>
                             ) : (
                                 <p className="mt-1 text-[11px] text-zinc-600">No recent IPO signal found.</p>
