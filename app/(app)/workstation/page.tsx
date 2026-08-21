@@ -10,43 +10,52 @@ import IPORadarPanel from "@/components/workstation/panels/IPORadarPanel";
 import IPOWatchPanel from "@/components/workstation/panels/IPOWatchPanel";
 import ContinueResearchPanel from "@/components/workstation/panels/ContinueResearchPanel";
 import LiveIntelligenceFeed from "@/components/workstation/panels/LiveIntelligenceFeed";
+
 export default function WorkstationPage() {
     return (
         <div className="text-white">
             <h1 className="text-2xl font-bold mb-1">
                 IPO Sniper AI
             </h1>
-            <p className="text-zinc-400 mb-6">
+            <p className="text-zinc-400 mb-4">
                 Enter a ticker to run a full AI research report.
             </p>
+
             <WhileYouWereAwayHome />
             <ContinueResearchPanel />
+
             <Link
                 href="/education"
-                className="mb-4 flex items-center justify-between rounded-xl border border-violet-700/50 bg-gradient-to-r from-violet-950/40 via-zinc-900 to-zinc-950 px-4 py-2.5 hover:border-violet-500 transition group"
+                className="mb-4 flex items-center justify-between rounded-xl border border-violet-700/50 bg-gradient-to-r from-violet-950/40 via-zinc-900 to-zinc-950 px-4 py-2 hover:border-violet-500 transition group"
             >
                 <div className="flex items-center gap-3">
-                    <GraduationCap size={18} className="text-violet-300" />
-                    <p className="text-sm font-semibold text-white">
+                    <GraduationCap size={16} className="text-violet-300" />
+                    <p className="text-xs font-semibold text-white">
                         Market Pulse
-                        <span className="ml-2 text-xs font-normal text-zinc-400">Dow · S&amp;P · Nasdaq · Gold · Bonds — what's moving today</span>
+                        <span className="ml-2 font-normal text-zinc-400">Dow · S&amp;P · Nasdaq · Gold · Bonds</span>
                     </p>
                 </div>
-                <ArrowRight size={16} className="text-violet-400 group-hover:text-white group-hover:translate-x-0.5 transition" />
+                <ArrowRight size={14} className="text-violet-400 group-hover:text-white group-hover:translate-x-0.5 transition" />
             </Link>
+
+            <div className="mb-4">
+                <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-violet-400">🚀 IPO Intelligence</p>
+                <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+                    <IPORadarPanel />
+                    <IPOWatchPanel />
+                </div>
+            </div>
 
             <div className="mb-4">
                 <LiveIntelligenceFeed />
             </div>
 
-            <div className="mb-4 grid grid-cols-1 gap-4 lg:grid-cols-2">
-                <MarketContext />
-                <MarketMoversPanel />
-            </div>
-
-            <div className="mb-4 grid grid-cols-1 gap-4 lg:grid-cols-2">
-                <IPORadarPanel />
-                <IPOWatchPanel />
+            <div className="mb-4">
+                <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-zinc-500">Market Intelligence</p>
+                <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+                    <MarketContext />
+                    <MarketMoversPanel />
+                </div>
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,380px)_1fr] gap-4 items-start">
