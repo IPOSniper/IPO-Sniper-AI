@@ -102,6 +102,12 @@ export default function PriceChart({ ticker }: { ticker: string }) {
                     <div className="h-full flex items-center justify-center text-xs text-zinc-600">
                         Price history unavailable — check FINNHUB_API_KEY / plan access to /stock/candle.
                     </div>
+                ) : points.length === 1 ? (
+                    <div className="h-full flex flex-col items-center justify-center gap-1 text-center">
+                        <p className="text-2xl font-bold text-white">${points[0].close.toFixed(2)}</p>
+                        <p className="text-xs text-zinc-500">New listing — 1 trading day of history available for this range</p>
+                        <p className="text-[10px] text-zinc-600">A real trend chart needs at least 2 data points</p>
+                    </div>
                 ) : (
                     <ResponsiveContainer width="100%" height="100%">
                         <ComposedChart data={chartData} margin={{ top: 4, right: 4, left: 4, bottom: 0 }}>
@@ -147,7 +153,7 @@ export default function PriceChart({ ticker }: { ticker: string }) {
                 )}
             </div>
 
-            {!loading && available && points.length > 0 && !hasEnoughForSma && (
+            {!loading && available && points.length > 1 && !hasEnoughForSma && (
                 <p className="mt-1 text-[10px] text-zinc-600">SMA 20 needs at least 20 real data points — only {points.length} available for this range.</p>
             )}
         </section>
