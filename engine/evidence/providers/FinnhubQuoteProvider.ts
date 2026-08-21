@@ -14,6 +14,11 @@ export interface Quote {
     change: number;
     changePercent: number;
     previousClose: number;
+    /** Unix timestamp (seconds) of this quote, per Finnhub's documented `t` field --
+     * added for the Session-Aware Multi-Asset Execution Bootstrap's quote-freshness
+     * check (RiskEngine). Not previously captured by this wrapper even though
+     * Finnhub's response includes it. */
+    timestampSeconds?: number | null;
 }
 
 export class FinnhubQuoteProvider {
@@ -49,6 +54,11 @@ export class FinnhubQuoteProvider {
             change: data.d,
             changePercent: data.dp,
             previousClose: data.pc,
+            // Finnhub returns 0 for `t` on some edge cases the same way it returns
+            // 0 for `c` on an invalid symbol -- treat 0/missing as "unknown", not
+            // as a real 1970 timestamp, so a freshness check can't be fooled into
+            // treating an unknown age as infinitely fresh.
+            timestampSeconds: data.t && data.t > 0 ? data.t : null,
         };
     }
 
