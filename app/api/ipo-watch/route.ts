@@ -17,7 +17,7 @@ export interface IPOWatchCompany {
 
 const WATCHLIST = ["OpenAI", "Anthropic"];
 
-const RECENT_WINDOW_DAYS = 60;
+const RECENT_WINDOW_DAYS = 30;
 
 export const revalidate = 3600;
 
@@ -28,12 +28,17 @@ interface NewsApiArticle {
     source?: { name?: string };
 }
 
-async function searchIpoNews(company: string, apiKey: string): Promise<IPOWatchItem[]> {
+interface SearchResult {
+    items: IPOWatchItem[];
+    error: string | null;
+}
+
+async function searchIpoNews(company: string, apiKey: string): Promise<SearchResult> {
     try {
         const from = new Date();
         from.setDate(from.getDate() - RECENT_WINDOW_DAYS);
 
-        const query = `${company} IPO`;
+        const query = `"${company}" AND (IPO OR "going public" OR "public offering" OR "confidential filing" OR "S-1" OR "public listing" OR "stock market debut")`;
         const params = new URLSearchParams({
             q: query,
             from: from.toISOString().slice(0, 10),
@@ -47,9 +52,12 @@ async function searchIpoNews(company: string, apiKey: string): Promise<IPOWatchI
             next: { revalidate },
         });
 
-        if (!response.ok) return [];
-
         const data = await response.json();
+
+        if (!response.ok) {
+            return { items: [], error: data.message ?? `NewsAPI request failed: ${response.status}` };
+        }
+
         const articles: NewsApiArticle[] = data.articles ?? [];
 
         const seen = new Set<string>();
@@ -65,9 +73,12 @@ async function searchIpoNews(company: string, apiKey: string): Promise<IPOWatchI
             });
         }
 
-        return deduped.sort((x, y) => new Date(y.publishedAt).getTime() - new Date(x.publishedAt).getTime());
-    } catch {
-        return [];
+        return {
+            items: deduped.sort((x, y) => new Date(y.publishedAt).getTime() - new Date(x.publishedAt).getTime()),
+            error: null,
+        };
+    } catch (err) {
+        return { items: [], error: err instanceof Error ? err.message : "Unknown error" };
     }
 }
 
@@ -86,14 +97,15 @@ export async function GET() {
     }
 
     const results = await Promise.all(
-        WATCHLIST.map(async (company): Promise<IPOWatchCompany> => {
-            const items = await searchIpoNews(company, apiKey);
+        WATCHLIST.map(async (company) => {
+            const { items, error } = await searchIpoNews(company, apiKey);
             return {
                 company,
                 status: deriveStatus(items.length),
                 articleCount: items.length,
                 latest: items[0] ?? null,
                 additional: items.slice(1),
+                error,
             };
         })
     );
