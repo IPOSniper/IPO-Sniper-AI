@@ -6,8 +6,7 @@ import MarketContext from "@/components/workstation/panels/MarketContext";
 import UpcomingEarnings from "@/components/workstation/panels/UpcomingEarnings";
 import WhileYouWereAwayHome from "@/components/workstation/panels/WhileYouWereAwayHome";
 import MarketMoversPanel from "@/components/workstation/panels/MarketMoversPanel";
-import IPORadarPanel from "@/components/workstation/panels/IPORadarPanel";
-import IPOWatchPanel from "@/components/workstation/panels/IPOWatchPanel";
+import IPOIntelligenceCenter from "@/components/workstation/panels/IPOIntelligenceCenter";
 import ContinueResearchPanel from "@/components/workstation/panels/ContinueResearchPanel";
 import LiveIntelligenceFeed from "@/components/workstation/panels/LiveIntelligenceFeed";
 
@@ -39,11 +38,7 @@ export default function WorkstationPage() {
             </Link>
 
             <div className="mb-4">
-                <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-violet-400">🚀 IPO Intelligence</p>
-                <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-                    <IPORadarPanel />
-                    <IPOWatchPanel />
-                </div>
+                <IPOIntelligenceCenter />
             </div>
 
             <div className="mb-4">
