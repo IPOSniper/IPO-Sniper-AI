@@ -1,6 +1,7 @@
 ﻿"use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import type { IPOWatchCompany } from "@/app/api/ipo-watch/route";
 
 const STATUS_LABEL: Record<IPOWatchCompany["status"], string> = {
@@ -64,7 +65,7 @@ export default function IPOWatchPanel() {
                                 </span>
                             </div>
                             {c.latest ? (
-                                
+                                <Link
                                     href={c.latest.url}
                                     target="_blank"
                                     rel="noopener noreferrer"
@@ -72,7 +73,7 @@ export default function IPOWatchPanel() {
                                 >
                                     <span className="line-clamp-2">{c.latest.headline}</span>
                                     <span className="text-zinc-600">{c.latest.source} - {timeAgo(c.latest.publishedAt)}</span>
-                                </a>
+                                </Link>
                             ) : (
                                 <p className="mt-1 text-[11px] text-zinc-600">No recent IPO signal found.</p>
                             )}
