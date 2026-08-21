@@ -1,4 +1,4 @@
-"use server";
+﻿"use server";
 
 import { createClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/client";
@@ -93,7 +93,7 @@ export async function runBatchScan(
                         suggestedQty = strategist.suggestQuantity(plan, selectedContract, accountEquity);
                     }
                 } catch {
-                    // Real chain fetch can fail independently — evaluate() handles a null selectedContract with a real reject reason.
+                    // Real chain fetch can fail independently â€” evaluate() handles a null selectedContract with a real reject reason.
                 }
             }
 
@@ -148,10 +148,12 @@ export async function runBatchScan(
 
             results.push({ ...evaluation, executed, orderStatus });
         } catch (err) {
+            const errorMessage = err instanceof Error ? err.message : "Research failed for this ticker.";
+            const isDataCoverageGap = /no finnhub profile/i.test(errorMessage);
             results.push({
                 ticker,
-                outcome: "reject",
-                reason: err instanceof Error ? err.message : "Research failed for this ticker.",
+                outcome: isDataCoverageGap ? "unavailable" : "reject",
+                reason: errorMessage,
                 plan: null,
                 selectedContract: null,
                 suggestedQty: null,

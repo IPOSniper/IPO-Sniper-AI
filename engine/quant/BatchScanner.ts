@@ -1,4 +1,4 @@
-import type { CommitteeReport } from "../committee/contracts/CommitteeReport";
+﻿import type { CommitteeReport } from "../committee/contracts/CommitteeReport";
 import { QuantStrategist, type TradePlan } from "./QuantStrategist";
 import type { OptionContract } from "../trading/providers/AlpacaOptionsProvider";
 
@@ -25,7 +25,7 @@ import type { OptionContract } from "../trading/providers/AlpacaOptionsProvider"
  *
  * 2. THIS IS A MANUAL, SINGLE-INVOCATION BATCH RUN, NOT A
  *    PERSISTENT BACKGROUND PROCESS. No scheduler is deployed (see
- *    System Status — Continuous/Scheduled Operation: Not built).
+ *    System Status â€” Continuous/Scheduled Operation: Not built).
  *    "Max trades" and "max daily risk" here are real parameters
  *    enforced WITHIN one manual run, not limits tracked across a
  *    trading day nobody is actively running this during.
@@ -38,7 +38,7 @@ export interface AutoExecutionGates {
     maxOpenPositions: number;
     maxPortfolioRiskPercentPerTrade: number;
     maxBidAskSpreadPercent: number;
-    /** Hard cap enforced regardless of how many tickers pass every other gate — the real "kill switch" for a single run. */
+    /** Hard cap enforced regardless of how many tickers pass every other gate â€” the real "kill switch" for a single run. */
     maxAutoExecutionsThisRun: number;
 }
 
@@ -78,7 +78,7 @@ export const PAPER_VALIDATION_EXECUTION_GATES: AutoExecutionGates = {
     minCommitteeConfidence: 60,
 };
 
-export type BatchOutcome = "execute" | "skip" | "reject" | "wait";
+export type BatchOutcome = "execute" | "skip" | "reject" | "wait" | "unavailable";
 
 export interface BatchResult {
     ticker: string;
@@ -100,7 +100,7 @@ export class BatchScanner {
 
     /**
      * Evaluates ONE ticker's already-built plan against the stricter
-     * auto-execution gates. Does not fetch anything itself — the
+     * auto-execution gates. Does not fetch anything itself â€” the
      * caller (a real server action, since this needs real committee/
      * options/account data) supplies the real plan, real selected
      * contract, real current open-position count, and real account
@@ -142,7 +142,7 @@ export class BatchScanner {
 
         const spread = spreadPercent(selectedContract);
         if (spread === null) {
-            return { ...base, outcome: "reject", reason: "Real bid/ask not available for the selected contract — can't verify spread." };
+            return { ...base, outcome: "reject", reason: "Real bid/ask not available for the selected contract â€” can't verify spread." };
         }
         if (spread > gates.maxBidAskSpreadPercent) {
             return { ...base, outcome: "reject", reason: `Bid/ask spread (${spread.toFixed(1)}%) exceeds the ${gates.maxBidAskSpreadPercent}% max.` };
