@@ -9,6 +9,7 @@ import MarketMoversPanel from "@/components/workstation/panels/MarketMoversPanel
 import IPORadarPanel from "@/components/workstation/panels/IPORadarPanel";
 import IPOWatchPanel from "@/components/workstation/panels/IPOWatchPanel";
 import ContinueResearchPanel from "@/components/workstation/panels/ContinueResearchPanel";
+import LiveIntelligenceFeed from "@/components/workstation/panels/LiveIntelligenceFeed";
 export default function WorkstationPage() {
     return (
         <div className="text-white">
@@ -33,6 +34,10 @@ export default function WorkstationPage() {
                 </div>
                 <ArrowRight size={16} className="text-violet-400 group-hover:text-white group-hover:translate-x-0.5 transition" />
             </Link>
+
+            <div className="mb-4">
+                <LiveIntelligenceFeed />
+            </div>
 
             <div className="mb-4 grid grid-cols-1 gap-4 lg:grid-cols-2">
                 <MarketContext />
