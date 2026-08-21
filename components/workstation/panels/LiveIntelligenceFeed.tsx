@@ -15,7 +15,7 @@ const CATEGORY_ICON: Record<FeedCategory, string> = {
 };
 
 const IMPORTANCE_COLOR: Record<string, string> = {
-    high: "text-amber-400 border-amber-900 bg-amber-950/40",
+    high: "text-slate-300 border-slate-600 bg-slate-700/40",
     med: "text-zinc-500 border-zinc-800 bg-zinc-900",
 };
 
@@ -62,6 +62,7 @@ export default function LiveIntelligenceFeed() {
                 <h2 className="text-sm font-semibold text-zinc-300">Live Intelligence</h2>
                 {fetchedAt && <span className="text-[10px] text-zinc-600">Updated {timeAgo(fetchedAt)}</span>}
             </div>
+            <p className="mb-3 text-[10px] text-zinc-600">% Change: price change from previous/reference close. Attention: feed priority, not an investment recommendation.</p>
 
             {loading && <p className="text-xs text-zinc-500">Loading...</p>}
 

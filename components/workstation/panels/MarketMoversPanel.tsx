@@ -75,12 +75,13 @@ export default async function MarketMoversPanel() {
 
     return (
         <div className="rounded-xl border border-zinc-800 bg-zinc-950 p-4">
-            <div className="mb-3 flex items-center justify-between">
+            <div className="mb-1 flex items-center justify-between">
                 <h2 className="text-sm font-semibold text-zinc-300">Market Movers</h2>
                 <span className="text-[10px] text-zinc-600">
                     {filteredByAsset ? "Common stock -- filtered via Alpaca asset name" : "Filtering unavailable this load"}
                 </span>
             </div>
+            <p className="mb-3 text-[10px] text-zinc-600">1D Price Change: price change from the provider's previous/reference close. Not an investment forecast.</p>
             <div className="grid grid-cols-2 gap-4">
                 <div>
                     <p className="mb-1.5 text-[10px] uppercase tracking-wide text-emerald-500">Top Gainers</p>
