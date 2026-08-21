@@ -33,7 +33,7 @@ async function searchIpoNews(company: string, apiKey: string): Promise<IPOWatchI
         const from = new Date();
         from.setDate(from.getDate() - RECENT_WINDOW_DAYS);
 
-        const query = `"${company}" AND (IPO OR "going public" OR "public offering" OR "confidential filing" OR "S-1" OR "public listing" OR "stock market debut")`;
+        const query = `${company} IPO`;
         const params = new URLSearchParams({
             q: query,
             from: from.toISOString().slice(0, 10),
