@@ -15,6 +15,10 @@ async function getFilteredMovers(): Promise<{ gainers: PriceMover[]; losers: Pri
     }
 }
 
+function isLikelyWarrantOrUnit(symbol: string): boolean {
+    return /\.(WS|W)$/i.test(symbol) || /W$/.test(symbol) && symbol.length > 3 || symbol.includes(".");
+}
+
 function formatPrice(n: number | null): string {
     if (n === null) return "--";
     return `$${n.toFixed(2)}`;
@@ -39,10 +43,14 @@ export default async function MarketMoversPanel() {
 
     function renderRow(m: PriceMover, positive: boolean) {
         const prevClose = previousClose(m.price, m.change);
-        return (
-            <Link key={m.symbol} href={`/research/${m.symbol}`} className="block rounded-md px-1.5 py-1 hover:bg-zinc-900">
+        const isWarrant = isLikelyWarrantOrUnit(m.symbol);
+
+        const content = (
+            <div className="rounded-md px-1.5 py-1 hover:bg-zinc-900">
                 <div className="flex items-center justify-between text-xs">
-                    <span className="font-medium text-white">{m.symbol}</span>
+                    <span className="font-medium text-white">
+                        {m.symbol}{isWarrant ? <span className="ml-1 text-[9px] text-zinc-600">(warrant/unit)</span> : null}
+                    </span>
                     <span className={positive ? "text-emerald-400" : "text-red-400"}>
                         {m.percentChange !== null ? `${positive ? "+" : ""}${m.percentChange.toFixed(2)}%` : "--"}
                     </span>
@@ -52,6 +60,15 @@ export default async function MarketMoversPanel() {
                     <span>{m.change !== null ? `${positive ? "+" : ""}$${m.change.toFixed(2)}` : ""}</span>
                     <span>Prev: {formatPrice(prevClose)}</span>
                 </div>
+            </div>
+        );
+
+        if (isWarrant) {
+            return <div key={m.symbol}>{content}</div>;
+        }
+        return (
+            <Link key={m.symbol} href={`/research/${m.symbol}`} className="block">
+                {content}
             </Link>
         );
     }

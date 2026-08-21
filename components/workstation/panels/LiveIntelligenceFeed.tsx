@@ -63,7 +63,7 @@ export default function LiveIntelligenceFeed() {
                 {fetchedAt && <span className="text-[10px] text-zinc-600">Updated {timeAgo(fetchedAt)}</span>}
             </div>
 
-            {loading && <p className="text-xs text-zinc-500">Loading…</p>}
+            {loading && <p className="text-xs text-zinc-500">Loading...</p>}
 
             {!loading && events.length === 0 && (
                 <p className="text-xs text-zinc-600">No new high-impact events right now.</p>
@@ -78,8 +78,11 @@ export default function LiveIntelligenceFeed() {
                                 <span className="shrink-0">{CATEGORY_ICON[event.category]}</span>
                                 {event.ticker && <span className="shrink-0 text-xs font-semibold text-zinc-300">{event.ticker}</span>}
                                 <span className="min-w-0 flex-1 truncate text-xs text-zinc-400">{event.headline}</span>
-                                <span className={`shrink-0 rounded border px-1.5 py-0.5 text-[9px] font-medium uppercase ${IMPORTANCE_COLOR[event.importance]}`}>
-                                    {event.importance}
+                                <span
+                                    className={`shrink-0 rounded border px-1.5 py-0.5 text-[9px] font-medium uppercase ${IMPORTANCE_COLOR[event.importance]}`}
+                                    title="Attention reflects feed priority based on event characteristics. It is not an investment recommendation."
+                                >
+                                    {event.importance === "high" ? "High Attention" : "Med Attention"}
                                 </span>
                             </div>
                         );
