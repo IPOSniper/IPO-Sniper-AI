@@ -15,7 +15,7 @@ export interface IPOWatchCompany {
     additional: IPOWatchItem[];
 }
 
-const WATCHLIST = ["OpenAI", "Anthropic", "SpaceX"];
+const WATCHLIST = ["OpenAI", "Anthropic"];
 
 const RECENT_WINDOW_DAYS = 30;
 
