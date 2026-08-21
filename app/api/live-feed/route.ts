@@ -1,6 +1,7 @@
 ﻿import { NextResponse } from "next/server";
 import { getGainersAndLosers } from "@/engine/evidence/providers/AlpacaMoversProvider";
 import { FinnhubIPOProvider } from "@/engine/evidence/providers/FinnhubIPOProvider";
+import { fetchSecFilings } from "@/lib/secFilingsFeed";
 
 export type FeedCategory = "news" | "sec" | "mover_up" | "mover_down" | "ipo_watch" | "ipo_radar" | "earnings";
 export type FeedImportance = "high" | "med";
@@ -20,26 +21,53 @@ export interface FeedEvent {
 
 const MOVER_HIGH_THRESHOLD_PERCENT = 20;
 
-async function buildNewsEvents(): Promise<FeedEvent[]> {
+async function fetchFinnhubMarketNews(): Promise<Array<{ headline: string; summary: string; source: string; url: string; datetime: number }>> {
+    const apiKey = process.env.FINNHUB_API_KEY;
+    if (!apiKey) return [];
     try {
-        const base = process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "http://localhost:3000";
-        const response = await fetch(`${base}/api/market-news`, { cache: "no-store" });
+        const response = await fetch(`https://finnhub.io/api/v1/news?category=general&token=${apiKey}`, { cache: "no-store" });
         if (!response.ok) return [];
         const data = await response.json();
-        const items: Array<{ id: string; category: string; headline: string; snippet: string | null; source: string; url: string; publishedAt: string }> = data.items ?? [];
+        return Array.isArray(data) ? data.slice(0, 12) : [];
+    } catch {
+        return [];
+    }
+}
 
-        return items.map(item => ({
+async function buildNewsEvents(): Promise<FeedEvent[]> {
+    try {
+        const [secItems, newsItems] = await Promise.all([
+            fetchSecFilings(120),
+            fetchFinnhubMarketNews(),
+        ]);
+
+        const secEvents: FeedEvent[] = secItems.map(item => ({
             id: `news-${item.id}`,
             timestamp: item.publishedAt,
             ticker: null,
-            category: (item.category === "sec" ? "sec" : "news") as FeedCategory,
+            category: "sec" as FeedCategory,
             headline: item.headline,
             summary: item.snippet,
-            importance: item.category === "sec" ? "high" : "med" as FeedImportance,
+            importance: "high" as FeedImportance,
             source: item.source,
             sourceUrl: item.url,
             researchUrl: null,
         }));
+
+        const newsEvents: FeedEvent[] = newsItems.map((item, i) => ({
+            id: `news-finnhub-${i}-${item.datetime}`,
+            timestamp: new Date(item.datetime * 1000).toISOString(),
+            ticker: null,
+            category: "news" as FeedCategory,
+            headline: item.headline,
+            summary: item.summary || null,
+            importance: "med" as FeedImportance,
+            source: item.source,
+            sourceUrl: item.url,
+            researchUrl: null,
+        }));
+
+        return [...secEvents, ...newsEvents];
     } catch {
         return [];
     }

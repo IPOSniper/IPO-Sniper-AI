@@ -1,4 +1,5 @@
 ﻿import { NextResponse } from "next/server";
+import { fetchSecFilings } from "@/lib/secFilingsFeed";
 
 interface FiledItem {
     company: string;
@@ -13,29 +14,27 @@ function parseSecHeadline(headline: string): { formType: string; company: string
     return { formType: match[1], company: match[2].trim() };
 }
 
+export const revalidate = 120;
+
 export async function GET() {
-    try {
-        const base = process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "http://localhost:3000";
-        const response = await fetch(`${base}/api/market-news`, { cache: "no-store" });
-        if (!response.ok) return NextResponse.json({ items: [] });
-
-        const data = await response.json();
-        const items: Array<{ category: string; headline: string; url: string; publishedAt: string }> = data.items ?? [];
-
-        const filed: FiledItem[] = items
-            .filter(item => item.category === "sec" && /^S-1(\/A)?\s*-/.test(item.headline))
-            .map(item => {
-                const parsed = parseSecHeadline(item.headline);
-                return {
-                    company: parsed?.company ?? item.headline,
-                    formType: parsed?.formType ?? "S-1",
-                    filedAt: item.publishedAt,
-                    secUrl: item.url,
-                };
-            });
-
-        return NextResponse.json({ items: filed });
-    } catch {
-        return NextResponse.json({ items: [] });
+    const userAgent = process.env.SEC_EDGAR_USER_AGENT;
+    if (!userAgent) {
+        return NextResponse.json({ items: [], available: false, reason: "SEC_EDGAR_USER_AGENT not configured." });
     }
+
+    const items = await fetchSecFilings(revalidate);
+
+    const filed: FiledItem[] = items
+        .filter(item => /^S-1(\/A)?\s*-/.test(item.headline))
+        .map(item => {
+            const parsed = parseSecHeadline(item.headline);
+            return {
+                company: parsed?.company ?? item.headline,
+                formType: parsed?.formType ?? "S-1",
+                filedAt: item.publishedAt,
+                secUrl: item.url,
+            };
+        });
+
+    return NextResponse.json({ items: filed, available: true });
 }

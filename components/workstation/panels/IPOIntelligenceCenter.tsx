@@ -42,17 +42,19 @@ export default function IPOIntelligenceCenter() {
     const [tab, setTab] = useState<Tab>("scheduled");
     const [scheduled, setScheduled] = useState<ScheduledItem[]>([]);
     const [filed, setFiled] = useState<FiledItem[]>([]);
+    const [filedAvailable, setFiledAvailable] = useState(true);
     const [watch, setWatch] = useState<WatchItem[]>([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         Promise.all([
             fetch("/api/ipo-radar-data").then(r => r.json()).catch(() => ({ items: [] })),
-            fetch("/api/ipo-filed").then(r => r.json()).catch(() => ({ items: [] })),
+            fetch("/api/ipo-filed").then(r => r.json()).catch(() => ({ items: [], available: false })),
             fetch("/api/ipo-watch").then(r => r.json()).catch(() => ({ companies: [] })),
         ]).then(([radarData, filedData, watchData]) => {
             setScheduled(radarData.items ?? []);
             setFiled(filedData.items ?? []);
+            setFiledAvailable(filedData.available !== false);
             setWatch(watchData.companies ?? []);
             setLoading(false);
         });
@@ -77,7 +79,7 @@ export default function IPOIntelligenceCenter() {
                         onClick={() => setTab("filed")}
                         className={`rounded-full px-2.5 py-1 text-[11px] font-medium transition ${tab === "filed" ? "bg-violet-600 text-white" : "text-zinc-500 hover:text-zinc-300"}`}
                     >
-                        Filed {filedCount}
+                        Filed {filedAvailable ? filedCount : "?"}
                     </button>
                     <button
                         onClick={() => setTab("watch")}
@@ -118,7 +120,9 @@ export default function IPOIntelligenceCenter() {
             )}
 
             {!loading && tab === "filed" && (
-                filed.length === 0 ? (
+                !filedAvailable ? (
+                    <p className="text-xs text-amber-500">Filed data source temporarily unavailable - not necessarily zero real filings.</p>
+                ) : filed.length === 0 ? (
                     <p className="text-xs text-zinc-600">No recent S-1 filings detected.</p>
                 ) : (
                     <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
