@@ -45,23 +45,30 @@ async function buildNewsEvents(): Promise<FeedEvent[]> {
     }
 }
 
+function isLikelyWarrantOrUnit(symbol: string): boolean {
+    return /\.(WS|W)$/i.test(symbol) || /W$/.test(symbol) && symbol.length > 3 || symbol.includes(".");
+}
+
 async function buildMoverEvents(): Promise<FeedEvent[]> {
     try {
         const { gainers, losers } = await getGainersAndLosers(6);
         const now = new Date().toISOString();
 
-        const toEvent = (m: { symbol: string; percentChange: number | null; price: number | null }, isGainer: boolean): FeedEvent => ({
-            id: `mover-${m.symbol}-${isGainer ? "up" : "down"}`,
-            timestamp: now,
-            ticker: m.symbol,
-            category: isGainer ? "mover_up" : "mover_down",
-            headline: `${m.symbol} ${isGainer ? "+" : ""}${m.percentChange?.toFixed(2) ?? "--"}%`,
-            summary: m.price !== null ? `Now at $${m.price.toFixed(2)}` : null,
-            importance: m.percentChange !== null && Math.abs(m.percentChange) >= MOVER_HIGH_THRESHOLD_PERCENT ? "high" : "med",
-            source: "Alpaca",
-            sourceUrl: null,
-            researchUrl: `/research/${m.symbol}`,
-        });
+        const toEvent = (m: { symbol: string; percentChange: number | null; price: number | null }, isGainer: boolean): FeedEvent => {
+            const isWarrant = isLikelyWarrantOrUnit(m.symbol);
+            return {
+                id: `mover-${m.symbol}-${isGainer ? "up" : "down"}`,
+                timestamp: now,
+                ticker: m.symbol,
+                category: isGainer ? "mover_up" : "mover_down",
+                headline: `${m.symbol}${isWarrant ? " (warrant/unit)" : ""} ${isGainer ? "+" : ""}${m.percentChange?.toFixed(2) ?? "--"}%`,
+                summary: m.price !== null ? `Now at $${m.price.toFixed(2)}` : null,
+                importance: m.percentChange !== null && Math.abs(m.percentChange) >= MOVER_HIGH_THRESHOLD_PERCENT ? "high" : "med",
+                source: "Alpaca",
+                sourceUrl: null,
+                researchUrl: isWarrant ? null : `/research/${m.symbol}`,
+            };
+        };
 
         return [...gainers.map(m => toEvent(m, true)), ...losers.map(m => toEvent(m, false))];
     } catch {
