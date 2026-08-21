@@ -1,8 +1,8 @@
-﻿import { NextRequest, NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { createServiceRoleClient, isServiceRoleConfigured } from "@/lib/supabase/serviceRole";
 import { runObservationCycle } from "@/engine/quant/orchestration/ObservationCycle";
 import { isMarketOpen } from "@/engine/quant/orchestration/MarketHours";
-import { scanForOpportunities } from "@/engine/quant/OpportunityScanner";
+import { buildAutonomousCandidateSet } from "@/engine/quant/OpportunityAdapter";
 
 export async function GET(request: NextRequest) {
     const secret = process.env.CRON_SECRET;
@@ -60,8 +60,14 @@ export async function GET(request: NextRequest) {
                 return NextResponse.json({ success: true, skipped: true, reason: "No real user found to auto-initialize a test for." });
             }
 
-            const candidates = await scanForOpportunities(12, 20);
-            const watchlist = candidates.length > 0 ? candidates.map(c => c.ticker) : ["RIOT", "IREN", "RKLB", "KTOS", "CLSK"];
+            const candidateSet = await buildAutonomousCandidateSet(12, ["RIOT", "IREN", "RKLB", "KTOS", "CLSK"]);
+            const watchlist = candidateSet.tickers;
+
+            console.log(
+                candidateSet.discoverySource === "opportunity_engine"
+                    ? `Discovery source: Opportunity Engine | Status: ${candidateSet.providerStatus.toUpperCase()} | Candidates: ${candidateSet.tickers.length}${candidateSet.failedProviders.length > 0 ? ` | Failed providers: ${candidateSet.failedProviders.join(", ")}` : ""}`
+                    : `Discovery source: Legacy fallback | Reason: Opportunity Engine returned no usable candidates | Candidates: ${candidateSet.tickers.length} | Failed providers: ${candidateSet.failedProviders.join(", ")}`
+            );
 
             const { data: newTest, error: insertError } = await supabase
                 .from("quant_test_harness")
