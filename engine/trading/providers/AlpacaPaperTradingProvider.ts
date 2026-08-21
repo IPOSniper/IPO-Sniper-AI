@@ -23,6 +23,13 @@ import type {
     PortfolioHistoryPoint,
 } from "../contracts/TradeOrder";
 
+/** Result of a real per-symbol Alpaca asset eligibility check (Phase 2). */
+export interface AssetEligibility {
+    tradable: boolean;
+    overnightTradable: boolean;
+    overnightHalted: boolean;
+}
+
 const DEFAULT_BASE_URL = "https://paper-api.alpaca.markets";
 
 export class AlpacaPaperTradingProvider {
@@ -105,6 +112,39 @@ export class AlpacaPaperTradingProvider {
     }
 
     /**
+     * Real per-symbol asset eligibility from Alpaca's Assets API
+     * (Session-Aware Multi-Asset Execution Bootstrap, Phase 2).
+     * Returns null on any failure or unknown symbol -- callers must
+     * treat null as "cannot confirm eligible," never as "assume
+     * eligible." Alpaca documents eligibility as changeable at any
+     * time (corporate actions, risk controls), so this should be
+     * checked fresh per order, not cached.
+     */
+    async getAssetEligibility(ticker: string): Promise<AssetEligibility | null> {
+
+        const response = await fetch(`${this.baseUrl}/v2/assets/${ticker}`, {
+            headers: this.headers(),
+            cache: "no-store",
+        });
+
+        if (!response.ok) {
+            return null;
+        }
+
+        const data = await response.json();
+
+        return {
+            tradable: Boolean(data.tradable),
+            // Alpaca's documented field for 24/5 overnight-session eligibility.
+            // Absent/undefined is treated as "not confirmed eligible," matching
+            // the method's overall null-on-uncertainty contract.
+            overnightTradable: data.overnight_tradable === true,
+            // Real corporate-action/risk-control halt flag, if Alpaca is
+            // currently reporting one for this symbol.
+            overnightHalted: data.overnight_halted === true,
+        };
+    }
+    /**
      * Places a market, day-duration order. No limit/stop/bracket
      * support yet — see contracts/TradeOrder.ts for why this stage
      * is deliberately narrow. Caller (the order route) is
@@ -113,6 +153,7 @@ export class AlpacaPaperTradingProvider {
      * it must never be called directly from anywhere that skips the
      * risk gate.
      */
+
     async placeOrder(order: TradeOrderRequest): Promise<TradeOrderResult> {
 
         const response = await fetch(`${this.baseUrl}/v2/orders`, {
