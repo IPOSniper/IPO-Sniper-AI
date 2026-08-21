@@ -99,3 +99,36 @@ export async function getGainersAndLosers(top = 10): Promise<{ gainers: PriceMov
         return empty;
     }
 }
+
+export interface AssetInfo {
+    symbol: string;
+    name: string | null;
+    isLikelyCommonStock: boolean;
+}
+
+async function fetchAssetInfo(symbol: string): Promise<AssetInfo> {
+    try {
+        const response = await fetch(`https://api.alpaca.markets/v2/assets/${encodeURIComponent(symbol)}`, {
+            headers: headers(),
+            cache: "no-store",
+        });
+
+        if (!response.ok) {
+            return { symbol, name: null, isLikelyCommonStock: true };
+        }
+
+        const data = await response.json();
+        const name: string | null = typeof data.name === "string" ? data.name : null;
+
+        const isLikelyCommonStock = !name || !/\b(warrant|unit|right)s?\b/i.test(name);
+
+        return { symbol, name, isLikelyCommonStock };
+    } catch {
+        return { symbol, name: null, isLikelyCommonStock: true };
+    }
+}
+
+export async function fetchAssetInfoBatch(symbols: string[]): Promise<Map<string, AssetInfo>> {
+    const results = await Promise.all(symbols.map(fetchAssetInfo));
+    return new Map(results.map(r => [r.symbol, r]));
+}
