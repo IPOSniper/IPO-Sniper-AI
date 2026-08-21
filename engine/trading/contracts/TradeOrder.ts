@@ -25,6 +25,20 @@ export interface TradeOrderRequest {
     assetType?: "equity" | "option";
     /** Free-text link back to the research/conviction that produced this order, for the audit log. */
     reasoning?: string;
+
+    // --- Session-Aware Multi-Asset Execution Bootstrap, Phase 3 ---
+    // All optional and undefined by default, so every existing caller's
+    // behavior (market + day, current AlpacaPaperTradingProvider.placeOrder()
+    // body) is completely unchanged unless a caller explicitly opts in.
+
+    /** Defaults to "market" when omitted -- preserves current behavior exactly. Extended-hours equity execution REQUIRES "limit" per Alpaca's rules; the provider will reject at the type level if extendedHours is true and orderType is not "limit". */
+    orderType?: "market" | "limit";
+    /** Required when orderType is "limit". Derived from the fresh quote (ask for buys, bid for sells) plus the configured entry tolerance -- see RiskEngine's market-quality checks. Never hardcode this from a stale or estimated price without going through that derivation. */
+    limitPrice?: number;
+    /** True to submit with Alpaca's extended_hours flag. Only meaningful for equities -- Alpaca's options API does not support extended hours at all, and this must never be set true for an option order. */
+    extendedHours?: boolean;
+    /** Defaults to "day" when omitted. "gtc" requires an explicit strategy-level decision, not a default -- see bootstrap doc's Phase 4 default rationale (avoiding a stale order lingering into a materially different market regime). */
+    timeInForce?: "day" | "gtc";
 }
 
 /** Alpaca account snapshot, the fields the risk engine and UI need. */
