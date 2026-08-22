@@ -27,6 +27,17 @@ interface WatchItem {
     error: string | null;
 }
 
+interface StrategicSignal {
+    company: string;
+    status: "reported" | "no_signal" | "unavailable" | "quota_exhausted";
+    headline: string | null;
+    source: string | null;
+    url: string | null;
+    publishedAt: string | null;
+    evidenceCount: number;
+    error: string | null;
+}
+
 interface IpoRow {
     key: string;
     company: string;
@@ -73,17 +84,20 @@ export default function IPOIntelligenceCenter() {
     const [filedAvailable, setFiledAvailable] = useState(true);
     const [watch, setWatch] = useState<WatchItem[]>([]);
     const [loading, setLoading] = useState(true);
+    const [strategicSignals, setStrategicSignals] = useState<StrategicSignal[]>([]);
 
     useEffect(() => {
         Promise.all([
             fetch("/api/ipo-radar-data").then(r => r.json()).catch(() => ({ items: [] })),
             fetch("/api/ipo-filed").then(r => r.json()).catch(() => ({ items: [], available: false })),
             fetch("/api/ipo-watch").then(r => r.json()).catch(() => ({ companies: [] })),
-        ]).then(([radarData, filedData, watchData]) => {
+            fetch("/api/ipo-strategic-signals").then(r => r.json()).catch(() => ({ companies: [] })),
+        ]).then(([radarData, filedData, watchData, strategicData]) => {
             setScheduled(radarData.items ?? []);
             setFiled(filedData.items ?? []);
             setFiledAvailable(filedData.available !== false);
             setWatch(watchData.companies ?? []);
+            setStrategicSignals(strategicData.companies ?? []);
             setLoading(false);
         });
     }, []);
@@ -275,6 +289,39 @@ export default function IPOIntelligenceCenter() {
                     </span>
                 ))}
             </div>
+
+            {!loading && strategicSignals.length > 0 && (
+                <div className="mt-3">
+                    <p className="mb-2 text-[10px] font-semibold uppercase tracking-wide text-zinc-500">Strategic Signals (GDELT)</p>
+                    <div className="space-y-2">
+                        {strategicSignals.map(s => (
+                            <div key={s.company} className="rounded-lg border border-zinc-800 bg-zinc-900/60 p-2.5">
+                                {s.status === "reported" ? (
+                                    <>
+                                        <div className="flex items-center gap-2">
+                                            <span className="rounded bg-amber-600/20 px-1.5 py-0.5 text-[9px] font-semibold uppercase text-amber-300">Reported</span>
+                                            <span className="text-xs font-semibold text-zinc-300">{s.company}</span>
+                                            <span className="text-[10px] text-zinc-600">{s.evidenceCount} related report{s.evidenceCount === 1 ? "" : "s"}</span>
+                                        </div>
+                                        <a href={s.url ?? "#"} target="_blank" rel="noopener noreferrer" className="mt-1 block text-xs text-zinc-400 hover:text-zinc-200">
+                                            {s.headline}
+                                        </a>
+                                        <p className="mt-0.5 text-[10px] text-zinc-600">
+                                            Source: {s.source} - Provider: GDELT
+                                        </p>
+                                    </>
+                                ) : s.status === "no_signal" ? (
+                                    <p className="text-[11px] text-zinc-600">{s.company}: No matching strategic signal detected.</p>
+                                ) : (
+                                    <p className="text-[11px] text-amber-500">
+                                        {s.company}: {s.status === "quota_exhausted" ? "Provider quota exhausted" : "Provider unavailable"} - not necessarily zero real signal.
+                                    </p>
+                                )}
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            )}
         </section>
     );
 }

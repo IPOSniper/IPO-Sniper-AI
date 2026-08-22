@@ -141,3 +141,14 @@ export async function searchGdelt(
 export function buildIpoRelevanceQuery(company: string): string {
     return `"${company}" (IPO OR "going public" OR "public offering" OR "S-1" OR "confidential filing" OR "stock market debut") sourcelang:english`;
 }
+
+/**
+ * Second, clearly separate query family (Step 2 of IPO Intelligence
+ * enrichment) -- strategic/institutional/financing signal terms, NOT
+ * IPO-relevance terms. Results from this query must always be labeled
+ * REPORTED/DEVELOPING in the UI, never "confirmed" -- GDELT surfaces
+ * that a report exists, not that the underlying activity is verified.
+ */
+export function buildStrategicSignalQuery(company: string): string {
+    return `"${company}" ("strategic investment" OR financing OR partnership OR contract OR acquisition OR "institutional investment" OR valuation) sourcelang:english`;
+}
