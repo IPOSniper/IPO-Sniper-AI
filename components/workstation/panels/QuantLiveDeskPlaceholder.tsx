@@ -1,78 +1,117 @@
-const FUNNEL_STEPS = ["Discovery", "Decisions", "Plans", "Risk Approved", "Orders", "Filled", "Completed"];
-const SUMMARY_METRICS = [
-    { label: "Discovery", barWidth: "w-full" },
-    { label: "Decisions", barWidth: "w-full" },
-    { label: "Plans", barWidth: "w-2/3" },
-    { label: "Auto Gates", barWidth: "w-1/4" },
-];
+"use client";
+
+import { useEffect, useState } from "react";
+import { getQuantFunnelSummary, type QuantFunnelSummary } from "@/app/(app)/hedge-fund/quant-funnel-summary";
+import { getActivityFeed, type ActivityEvent } from "@/app/(app)/hedge-fund/activity-feed/actions";
+import { getRejectionBreakdown, type RejectionBreakdown } from "@/app/(app)/hedge-fund/rejection-breakdown/actions";
+
+const REJECTION_LABELS: Record<string, string> = {
+    no_committee_direction: "No committee direction",
+    low_confidence: "Confidence below gate",
+    low_agreement: "Agreement below gate",
+    low_evidence_quality: "Evidence quality below gate",
+    other: "Other",
+};
+
+function timeLabel(iso: string): string {
+    try {
+        return new Date(iso).toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" });
+    } catch {
+        return "--:--";
+    }
+}
+
+function MetricBox({ label, value }: { label: string; value: number | null }) {
+    return (
+        <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-3">
+            <p className="text-[10px] uppercase tracking-wide text-zinc-500">{label}</p>
+            <p className="mt-1 text-lg font-semibold text-white">
+                {value === null ? <span className="text-sm font-normal text-zinc-600">Unavailable</span> : value}
+            </p>
+        </div>
+    );
+}
 
 export default function QuantLiveDeskPlaceholder() {
+    const [summary, setSummary] = useState<QuantFunnelSummary | null>(null);
+    const [activity, setActivity] = useState<ActivityEvent[]>([]);
+    const [rejections, setRejections] = useState<RejectionBreakdown | null>(null);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        Promise.all([
+            getQuantFunnelSummary(),
+            getActivityFeed(6),
+            getRejectionBreakdown(),
+        ])
+            .then(([s, a, r]) => {
+                setSummary(s);
+                setActivity(a);
+                setRejections(r);
+            })
+            .finally(() => setLoading(false));
+    }, []);
+
     return (
         <div className="mb-4">
             <div className="mb-2 flex items-center justify-between">
                 <p className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Quant Live Desk</p>
-                <span className="text-[10px] text-zinc-600">Autonomous -- Layer 2 pending</span>
+                <span className="text-[10px] text-zinc-600">Autonomous</span>
             </div>
-            <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-                {SUMMARY_METRICS.map(m => (
-                    <div key={m.label} className="rounded-lg border border-zinc-800 bg-zinc-900 p-3">
-                        <p className="text-[10px] uppercase tracking-wide text-zinc-500">{m.label}</p>
-                        <div className="mt-2 h-2 rounded bg-zinc-800">
-                            <div className={`h-2 rounded bg-zinc-700 ${m.barWidth}`} />
-                        </div>
+
+            {loading || !summary ? (
+                <p className="px-1 text-sm text-zinc-600">Loading...</p>
+            ) : (
+                <>
+                    <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+                        <MetricBox label="Discovery" value={summary.discovery} />
+                        <MetricBox label="Decisions" value={summary.decisions} />
+                        <MetricBox label="Plans" value={summary.plans} />
+                        <MetricBox label="Risk Approved" value={summary.riskApproved} />
                     </div>
-                ))}
-            </div>
-            <div className="mt-3 grid grid-cols-1 gap-3 lg:grid-cols-2">
-                <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-3">
-                    <p className="mb-2 text-xs text-zinc-500">Funnel</p>
-                    <div className="space-y-2">
-                        {FUNNEL_STEPS.map((step, i) => (
-                            <div key={step} className="flex items-center gap-2 text-sm">
-                                <span className="w-24 shrink-0 text-zinc-400">{step}</span>
-                                <div className="h-2 flex-1 rounded bg-zinc-800">
-                                    <div
-                                        className="h-2 rounded bg-zinc-600"
-                                        style={{ width: `${Math.max(100 - i * 14, 8)}%` }}
-                                    />
-                                </div>
+                    <div className="mt-3 grid grid-cols-3 gap-3">
+                        <MetricBox label="Orders" value={summary.orders} />
+                        <MetricBox label="Filled" value={summary.filled} />
+                        <MetricBox label="Completed" value={summary.completed} />
+                    </div>
+
+                    <div className="mt-3 rounded-lg border border-zinc-800 bg-zinc-900 p-3">
+                        <p className="mb-2 text-xs text-zinc-500">Why Quant Is Not Trading</p>
+                        {rejections === null || rejections.total === 0 ? (
+                            <p className="text-sm text-zinc-600">No rejection data in the selected window.</p>
+                        ) : (
+                            <div className="space-y-1.5">
+                                {(Object.entries(rejections.counts) as [string, number][])
+                                    .filter(([, count]) => count > 0)
+                                    .sort(([, a], [, b]) => b - a)
+                                    .map(([category, count]) => (
+                                        <div key={category} className="flex items-center gap-2 text-sm">
+                                            <span className="w-10 shrink-0 text-right text-zinc-400">{count}</span>
+                                            <span className="text-zinc-500">{REJECTION_LABELS[category] ?? category}</span>
+                                        </div>
+                                    ))}
                             </div>
-                        ))}
+                        )}
                     </div>
-                </div>
-                <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-3">
-                    <p className="mb-2 text-xs text-zinc-500">Latest Opportunities</p>
-                    <table className="w-full text-left text-sm">
-                        <thead>
-                            <tr className="text-[10px] uppercase text-zinc-600">
-                                <th className="pb-1 font-medium">Ticker</th>
-                                <th className="pb-1 font-medium">Score</th>
-                                <th className="pb-1 font-medium">Catalyst</th>
-                            </tr>
-                        </thead>
-                        <tbody className="text-zinc-700">
-                            {["ADSK", "AFRM", "BBY", "RFAI"].map(t => (
-                                <tr key={t} className="border-t border-zinc-800">
-                                    <td className="py-1 text-zinc-500">{t}</td>
-                                    <td className="py-1">--</td>
-                                    <td className="py-1">--</td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-            <div className="mt-3 rounded-lg border border-zinc-800 bg-zinc-900 p-3">
-                <p className="mb-2 text-xs text-zinc-500">Quant Activity</p>
-                <div className="space-y-1.5">
-                    {[1, 2, 3].map(i => (
-                        <div key={i} className="flex items-center gap-2 text-sm text-zinc-700">
-                            <span className="w-12 shrink-0 text-zinc-600">--:--</span>
-                            <div className="h-1.5 flex-1 max-w-xs rounded bg-zinc-800" />
-                        </div>
-                    ))}
-                </div>
-            </div>
+
+                    <div className="mt-3 rounded-lg border border-zinc-800 bg-zinc-900 p-3">
+                        <p className="mb-2 text-xs text-zinc-500">Quant Activity</p>
+                        {activity.length === 0 ? (
+                            <p className="text-sm text-zinc-600">No recent Quant activity.</p>
+                        ) : (
+                            <div className="space-y-1.5">
+                                {activity.map(event => (
+                                    <div key={event.id} className="flex items-center gap-2 text-sm">
+                                        <span className="w-12 shrink-0 text-[10px] text-zinc-600">{timeLabel(event.timestamp)}</span>
+                                        <span className="w-14 shrink-0 font-semibold text-zinc-400">{event.ticker}</span>
+                                        <span className="text-zinc-500">{event.label}</span>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+                </>
+            )}
         </div>
     );
 }
