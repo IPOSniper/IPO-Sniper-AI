@@ -3,6 +3,7 @@ import { getGainersAndLosers } from "@/engine/evidence/providers/AlpacaMoversPro
 import { FinnhubIPOProvider } from "@/engine/evidence/providers/FinnhubIPOProvider";
 import { fetchSecFilings } from "@/lib/secFilingsFeed";
 import { buildIpoWatchCompanies } from "@/engine/intelligence/buildIpoWatchCompanies";
+import { buildEarningsCalendar } from "@/engine/intelligence/buildEarningsCalendar";
 
 export type FeedCategory = "news" | "sec" | "mover_up" | "mover_down" | "ipo_watch" | "ipo_radar" | "earnings";
 export type FeedImportance = "high" | "med";
@@ -194,11 +195,10 @@ async function buildIpoRadarEvents(): Promise<FeedEvent[]> {
 
 async function buildEarningsEvents(): Promise<FeedEvent[]> {
     try {
-        const base = process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "http://localhost:3000";
-        const response = await fetch(`${base}/api/earnings/calendar?days=2`, { cache: "no-store" });
-        if (!response.ok) return [];
-        const data = await response.json();
-        const items: Array<{ symbol: string; reportDate: string; session: string; epsEstimate: number | null }> = data.items ?? [];
+        // Direct in-process call -- no HTTP, no auth dependency. Previously
+        // fetch(`${base}/api/earnings/calendar?days=2`) was blocked by
+        // Vercel Deployment Protection, silently returning [].
+        const { items } = await buildEarningsCalendar(2);
 
         const today = new Date().toISOString().slice(0, 10);
 
