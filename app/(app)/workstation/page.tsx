@@ -38,7 +38,7 @@ export default function WorkstationPage() {
                     <GraduationCap size={16} className="text-violet-300" />
                     <p className="text-xs font-semibold text-white">
                         Market Pulse
-                        <span className="ml-2 font-normal text-zinc-400">Dow · S&amp;P · Nasdaq · Gold · Bonds</span>
+                        <span className="ml-2 font-normal text-zinc-400">Dow Â· S&amp;P Â· Nasdaq Â· Gold Â· Bonds</span>
                     </p>
                 </div>
                 <ArrowRight size={14} className="text-violet-400 group-hover:text-white group-hover:translate-x-0.5 transition" />
@@ -68,11 +68,12 @@ export default function WorkstationPage() {
                 <LiveIntelligenceFeed />
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,380px)_1fr] gap-4 items-start">
-                <div className="space-y-4">
-                    <ResearchTarget />
-                    <UpcomingEarnings />
-                </div>
+            <div className="mb-2">
+                <p className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Supporting Intelligence</p>
+            </div>
+            <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
+                <ResearchTarget />
+                <UpcomingEarnings />
                 <NewsRail />
             </div>
         </div>
