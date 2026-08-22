@@ -219,6 +219,15 @@ export default function IPOIntelligenceCenter() {
             {!loading && !filedAvailable && (
                 <p className="mt-2 text-[11px] text-amber-500">Filed data source temporarily unavailable - not necessarily zero real filings.</p>
             )}
+
+            <div className="mt-3 flex items-center justify-center gap-1 overflow-x-auto rounded-lg border border-zinc-800 bg-zinc-900/60 px-3 py-2 text-[10px] uppercase tracking-wide text-zinc-500">
+                {["Emerging", "Watch", "Filed", "Scheduled", "Priced", "Post-IPO", "Lock-Up"].map((stage, i, arr) => (
+                    <span key={stage} className="flex items-center gap-1">
+                        <span className="whitespace-nowrap">{stage}</span>
+                        {i < arr.length - 1 && <span className="text-zinc-700">&rarr;</span>}
+                    </span>
+                ))}
+            </div>
         </section>
     );
 }
