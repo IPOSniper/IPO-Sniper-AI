@@ -1,4 +1,4 @@
-import Link from "next/link";
+﻿import Link from "next/link";
 import { GraduationCap, ArrowRight } from "lucide-react";
 import ResearchTarget from "@/components/workstation/panels/ResearchTarget/ResearchTarget";
 import NewsRail from "@/components/workstation/panels/NewsRail";
@@ -9,11 +9,6 @@ import MarketMoversPanel from "@/components/workstation/panels/MarketMoversPanel
 import IPOIntelligenceCenter from "@/components/workstation/panels/IPOIntelligenceCenter";
 import ContinueResearchPanel from "@/components/workstation/panels/ContinueResearchPanel";
 import LiveIntelligenceFeed from "@/components/workstation/panels/LiveIntelligenceFeed";
-import SystemStatusBar from "@/components/workstation/panels/SystemStatusBar";
-import WhatMattersNow from "@/components/workstation/panels/WhatMattersNow";
-import QuantLiveDeskPlaceholder from "@/components/workstation/panels/QuantLiveDeskPlaceholder";
-import PortfolioExecutionPlaceholder from "@/components/workstation/panels/PortfolioExecutionPlaceholder";
-import ResearchSpotlightPlaceholder from "@/components/workstation/panels/ResearchSpotlightPlaceholder";
 
 export default function WorkstationPage() {
     return (
@@ -24,8 +19,6 @@ export default function WorkstationPage() {
             <p className="text-zinc-400 mb-4">
                 Enter a ticker to run a full AI research report.
             </p>
-
-            <SystemStatusBar />
 
             <WhileYouWereAwayHome />
             <ContinueResearchPanel />
@@ -44,10 +37,12 @@ export default function WorkstationPage() {
                 <ArrowRight size={14} className="text-violet-400 group-hover:text-white group-hover:translate-x-0.5 transition" />
             </Link>
 
-            <WhatMattersNow />
-
             <div className="mb-4">
                 <IPOIntelligenceCenter />
+            </div>
+
+            <div className="mb-4">
+                <LiveIntelligenceFeed />
             </div>
 
             <div className="mb-4">
@@ -56,16 +51,6 @@ export default function WorkstationPage() {
                     <MarketContext />
                     <MarketMoversPanel />
                 </div>
-            </div>
-
-            <QuantLiveDeskPlaceholder />
-
-            <PortfolioExecutionPlaceholder />
-
-            <ResearchSpotlightPlaceholder />
-
-            <div className="mb-4">
-                <LiveIntelligenceFeed />
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,380px)_1fr] gap-4 items-start">
