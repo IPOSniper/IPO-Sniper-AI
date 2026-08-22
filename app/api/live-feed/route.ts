@@ -4,6 +4,7 @@ import { FinnhubIPOProvider } from "@/engine/evidence/providers/FinnhubIPOProvid
 import { fetchSecFilings } from "@/lib/secFilingsFeed";
 import { buildIpoWatchCompanies } from "@/engine/intelligence/buildIpoWatchCompanies";
 import { buildEarningsCalendar } from "@/engine/intelligence/buildEarningsCalendar";
+import { searchGdelt, buildIpoRelevanceQuery } from "@/engine/evidence/providers/GDELTProvider";
 
 export type FeedCategory = "news" | "sec" | "mover_up" | "mover_down" | "ipo_watch" | "ipo_radar" | "earnings";
 export type FeedImportance = "high" | "med";
@@ -219,16 +220,69 @@ async function buildEarningsEvents(): Promise<FeedEvent[]> {
     }
 }
 
+// Same seed watchlist as buildIpoWatchCompanies.ts for this first pass --
+// Phase D (dynamic IPO discovery) will unify these into one shared list.
+const GDELT_IPO_WATCHLIST = ["OpenAI", "Anthropic"];
+
+async function buildGdeltEvents(): Promise<FeedEvent[]> {
+    const events: FeedEvent[] = [];
+
+    for (const company of GDELT_IPO_WATCHLIST) {
+        const result = await searchGdelt(buildIpoRelevanceQuery(company));
+
+        if (result.status === "error") {
+            events.push({
+                id: `gdelt-unavailable-${company}`,
+                timestamp: new Date().toISOString(),
+                ticker: null,
+                category: "ipo_watch" as FeedCategory,
+                headline: `IPO Watch (GDELT): ${company} unavailable (${result.error ?? "unknown error"})`,
+                summary: null,
+                importance: "med" as FeedImportance,
+                source: "IPO Sniper AI",
+                sourceUrl: null,
+                researchUrl: null,
+                provider: "GDELT",
+                providerStatus: "error",
+            });
+            continue;
+        }
+
+        if (result.articles.length === 0) {
+            continue; // genuine no_signal -- no event, same discipline as buildIpoWatchEvents()
+        }
+
+        const latest = result.articles[0];
+        events.push({
+            id: `gdelt-${company}`,
+            timestamp: latest.publishedAt,
+            ticker: null,
+            category: "ipo_watch" as FeedCategory,
+            headline: `${company} (via GDELT): ${latest.title}`,
+            summary: null,
+            importance: result.articles.length >= 3 ? "high" : "med" as FeedImportance,
+            source: latest.domain,
+            sourceUrl: latest.url,
+            researchUrl: null,
+            provider: "GDELT",
+            providerStatus: "ok",
+        });
+    }
+
+    return events;
+}
+
 export async function GET() {
-    const [news, movers, ipoWatch, ipoRadar, earnings] = await Promise.all([
+    const [news, movers, ipoWatch, ipoRadar, earnings, gdelt] = await Promise.all([
         buildNewsEvents(),
         buildMoverEvents(),
         buildIpoWatchEvents(),
         buildIpoRadarEvents(),
         buildEarningsEvents(),
+        buildGdeltEvents(),
     ]);
 
-    const events = [...news, ...movers, ...ipoWatch, ...ipoRadar, ...earnings]
+    const events = [...news, ...movers, ...ipoWatch, ...ipoRadar, ...earnings, ...gdelt]
         .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
         .slice(0, 40);
 
