@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getGainersAndLosers } from "@/engine/evidence/providers/AlpacaMoversProvider";
 import { FinnhubIPOProvider } from "@/engine/evidence/providers/FinnhubIPOProvider";
 import { fetchSecFilings } from "@/lib/secFilingsFeed";
+import { buildIpoWatchCompanies } from "@/engine/intelligence/buildIpoWatchCompanies";
 
 export type FeedCategory = "news" | "sec" | "mover_up" | "mover_down" | "ipo_watch" | "ipo_radar" | "earnings";
 export type FeedImportance = "high" | "med";
@@ -120,11 +121,10 @@ async function buildMoverEvents(): Promise<FeedEvent[]> {
 
 async function buildIpoWatchEvents(): Promise<FeedEvent[]> {
     try {
-        const base = process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "http://localhost:3000";
-        const response = await fetch(`${base}/api/ipo-watch`, { cache: "no-store" });
-        if (!response.ok) return [];
-        const data = await response.json();
-        const companies: Array<{ company: string; status: string; latest: { headline: string; source: string; url: string; publishedAt: string } | null; error: string | null }> = data.companies ?? [];
+        // Direct in-process call -- no HTTP, no auth dependency. Previously
+        // fetch(`${base}/api/ipo-watch`) was blocked by Vercel Deployment
+        // Protection on server-to-server requests, silently returning [].
+        const { companies } = await buildIpoWatchCompanies();
 
         const events: FeedEvent[] = [];
 
@@ -145,10 +145,6 @@ async function buildIpoWatchEvents(): Promise<FeedEvent[]> {
                     providerStatus: "ok",
                 });
             } else if (c.status === "unavailable" && c.error) {
-                // Real per-company provider failure (e.g. NewsAPI quota exhaustion) --
-                // surfaced as a distinct, lower-priority status event instead of being
-                // silently dropped, so Live Intelligence can't misreport this as
-                // "nothing happening" when the provider actually failed.
                 const isQuota = /quota|too many requests|rate limit/i.test(c.error);
                 events.push({
                     id: `ipowatch-unavailable-${c.company}`,
@@ -165,9 +161,6 @@ async function buildIpoWatchEvents(): Promise<FeedEvent[]> {
                     providerStatus: isQuota ? "quota_exhausted" : "error",
                 });
             }
-            // c.status === "no_signal": genuinely checked, found nothing -- no event,
-            // matching honest "nothing to report" behavior. Never silently conflated
-            // with the unavailable case above.
         }
 
         return events;
