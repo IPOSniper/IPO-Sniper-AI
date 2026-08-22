@@ -1,4 +1,4 @@
-﻿import { NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 
 export interface IPOWatchItem {
     headline: string;
@@ -9,10 +9,15 @@ export interface IPOWatchItem {
 
 export interface IPOWatchCompany {
     company: string;
-    status: "developing" | "reported" | "speculative" | "no_signal";
+    /** "unavailable" means the provider call itself failed (rate limit, network,
+     * etc.) -- distinct from "no_signal", which means the call succeeded and
+     * genuinely found nothing. Conflating these was the root cause of the
+     * dashboard silently showing 0 during a real NewsAPI quota exhaustion. */
+    status: "developing" | "reported" | "speculative" | "no_signal" | "unavailable";
     articleCount: number;
     latest: IPOWatchItem | null;
     additional: IPOWatchItem[];
+    error: string | null;
 }
 
 const WATCHLIST = ["OpenAI", "Anthropic"];
@@ -82,7 +87,8 @@ async function searchIpoNews(company: string, apiKey: string): Promise<SearchRes
     }
 }
 
-function deriveStatus(articleCount: number): IPOWatchCompany["status"] {
+function deriveStatus(articleCount: number, hasError: boolean): IPOWatchCompany["status"] {
+    if (hasError) return "unavailable";
     if (articleCount === 0) return "no_signal";
     if (articleCount >= 3) return "developing";
     if (articleCount >= 1) return "reported";
@@ -101,7 +107,7 @@ export async function GET() {
             const { items, error } = await searchIpoNews(company, apiKey);
             return {
                 company,
-                status: deriveStatus(items.length),
+                status: deriveStatus(items.length, error !== null),
                 articleCount: items.length,
                 latest: items[0] ?? null,
                 additional: items.slice(1),

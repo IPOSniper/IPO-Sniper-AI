@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
@@ -24,6 +24,7 @@ interface WatchItem {
     status: string;
     latest: { headline: string; source: string; url: string; publishedAt: string } | null;
     additional: unknown[];
+    error: string | null;
 }
 
 type Tab = "scheduled" | "filed" | "watch";
@@ -154,6 +155,10 @@ export default function IPOIntelligenceCenter() {
                                 <Link href={c.latest.url} target="_blank" rel="noopener noreferrer" className="mt-1 block text-[11px] text-zinc-400 hover:text-zinc-200">
                                     <span className="line-clamp-2">{c.latest.headline}</span>
                                 </Link>
+                            ) : c.status === "unavailable" ? (
+                                <p className="mt-1 text-[11px] text-amber-500">
+                                    Watch unavailable - news provider temporarily unreachable{c.error && /quota|too many requests|rate limit/i.test(c.error) ? " (quota exhausted)" : ""}. Not necessarily zero real signal.
+                                </p>
                             ) : (
                                 <p className="mt-1 text-[11px] text-zinc-600">No recent verified IPO-watch signal.</p>
                             )}
