@@ -1,10 +1,17 @@
-﻿import { NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { getGainersAndLosers } from "@/engine/evidence/providers/AlpacaMoversProvider";
 import { FinnhubIPOProvider } from "@/engine/evidence/providers/FinnhubIPOProvider";
 import { fetchSecFilings } from "@/lib/secFilingsFeed";
 
 export type FeedCategory = "news" | "sec" | "mover_up" | "mover_down" | "ipo_watch" | "ipo_radar" | "earnings";
 export type FeedImportance = "high" | "med";
+
+/** Shared Intelligence Bootstrap, Phase A: distinguishes a genuine empty
+ * result (ok, nothing found) from a provider that actually failed, so a
+ * quota exhaustion or outage is never rendered identically to "no signal."
+ * Optional/undefined on existing events -- every current builder keeps
+ * behaving exactly as before unless it explicitly sets this. */
+export type FeedProviderStatus = "ok" | "partial" | "unavailable" | "quota_exhausted" | "error";
 
 export interface FeedEvent {
     id: string;
@@ -17,6 +24,13 @@ export interface FeedEvent {
     source: string;
     sourceUrl: string | null;
     researchUrl: string | null;
+    /** Which underlying data provider produced this event (e.g. "GDELT",
+     * "NewsAPI", "Finnhub") -- distinct from `source`, which is the actual
+     * outlet/publication (e.g. "Reuters"). Undefined for existing builders
+     * that don't yet distinguish the two. */
+    provider?: string;
+    /** Undefined means "ok" for backward compatibility with existing builders. */
+    providerStatus?: FeedProviderStatus;
 }
 
 const MOVER_HIGH_THRESHOLD_PERCENT = 20;
