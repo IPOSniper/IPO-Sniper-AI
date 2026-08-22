@@ -63,7 +63,10 @@ export default function IPOIntelligenceCenter() {
 
     const scheduledCount = scheduled.length;
     const filedCount = filed.length;
-    const watchCount = watch.filter(w => w.latest !== null).length;
+    const watchSignalCount = watch.filter(w => w.latest !== null).length;
+    const watchUnavailableCount = watch.filter(
+        w => w.status === "unavailable" || w.error || w.status === "quota_exhausted"
+    ).length;
 
     return (
         <section className="rounded-xl border border-violet-800/40 bg-gradient-to-b from-violet-950/20 to-zinc-950 p-4">
@@ -86,7 +89,7 @@ export default function IPOIntelligenceCenter() {
                         onClick={() => setTab("watch")}
                         className={`rounded-full px-2.5 py-1 text-[11px] font-medium transition ${tab === "watch" ? "bg-violet-600 text-white" : "text-zinc-500 hover:text-zinc-300"}`}
                     >
-                        Watch {watchCount}
+                        Watch {watchSignalCount}{watchUnavailableCount > 0 ? ` · ${watchUnavailableCount} unavailable` : ""}
                     </button>
                 </div>
             </div>
