@@ -23,7 +23,7 @@ interface WatchItem {
     company: string;
     status: string;
     latest: { headline: string; source: string; url: string; publishedAt: string } | null;
-    additional: unknown[];
+    additional: { headline: string; source: string; url: string; publishedAt: string }[];
     error: string | null;
 }
 
@@ -37,6 +37,15 @@ interface IpoRow {
     evidenceUrl: string | null;
     researchUrl: string | null;
     sortTime: number;
+    /** Real count of sources already fetched for this row (SEC=1, or 1+additional.length
+     * for Watch rows) -- not a new data source, just surfacing what buildIpoWatchCompanies()
+     * already retrieves but previously discarded. */
+    evidenceCount: number;
+    /** Real source labels already available -- domain/outlet names, not fabricated. */
+    sources: string[];
+    /** Short, honest explanation derived only from real fields already present on this row
+     * (lifecycle + evidence count) -- never a claim about data we don't have. */
+    whySurfaced: string;
 }
 
 function timeLabel(iso: string): string {
@@ -89,6 +98,9 @@ export default function IPOIntelligenceCenter() {
         evidenceUrl: item.secFilingUrl,
         researchUrl: `/research/${item.symbol}`,
         sortTime: new Date(item.date).getTime() || 0,
+        evidenceCount: item.secFilingUrl ? 1 : 0,
+        sources: item.secFilingUrl ? ["SEC EDGAR"] : [],
+        whySurfaced: "SEC-confirmed IPO scheduling activity.",
     }));
 
     const filedRows: IpoRow[] = filed.map((item, i) => ({
@@ -101,11 +113,16 @@ export default function IPOIntelligenceCenter() {
         evidenceUrl: item.secUrl,
         researchUrl: null,
         sortTime: new Date(item.filedAt).getTime() || 0,
+        evidenceCount: 1,
+        sources: ["SEC EDGAR"],
+        whySurfaced: `SEC filing (${item.formType}) confirms real registration activity.`,
     }));
 
     const watchRows: IpoRow[] = watch.map(c => {
         if (c.latest) {
             const lifecycle: IpoRow["lifecycle"] = c.status === "developing" ? "Developing" : "Reported";
+            const allSources = [c.latest.source, ...c.additional.map(a => a.source)];
+            const evidenceCount = 1 + c.additional.length;
             return {
                 key: `watch-${c.company}`,
                 company: c.company,
@@ -116,6 +133,11 @@ export default function IPOIntelligenceCenter() {
                 evidenceUrl: c.latest.url,
                 researchUrl: null,
                 sortTime: new Date(c.latest.publishedAt).getTime() || 0,
+                evidenceCount,
+                sources: allSources,
+                whySurfaced: evidenceCount > 1
+                    ? `${evidenceCount} related news sources detected in the last 30 days.`
+                    : "Single news source detected -- not yet independently corroborated.",
             };
         }
         if (c.status === "unavailable") {
@@ -131,6 +153,9 @@ export default function IPOIntelligenceCenter() {
                 evidenceUrl: null,
                 researchUrl: null,
                 sortTime: 0,
+                evidenceCount: 0,
+                sources: [],
+                whySurfaced: "Provider could not be reached -- not necessarily zero real signal.",
             };
         }
         return {
@@ -143,6 +168,9 @@ export default function IPOIntelligenceCenter() {
             evidenceUrl: null,
             researchUrl: null,
             sortTime: 0,
+            evidenceCount: 0,
+            sources: [],
+            whySurfaced: "Checked -- no qualifying developments found in the last 30 days.",
         };
     });
 
@@ -187,29 +215,45 @@ export default function IPOIntelligenceCenter() {
                         </thead>
                         <tbody>
                             {allRows.map(row => (
-                                <tr key={row.key} className="border-b border-zinc-900 hover:bg-zinc-900/40">
-                                    <td className="py-1.5 pr-3 font-semibold text-white">
-                                        {row.researchUrl ? (
-                                            <Link href={row.researchUrl} className="hover:text-violet-300">{row.company}</Link>
-                                        ) : row.company}
-                                    </td>
-                                    <td className="py-1.5 pr-3">
-                                        <span className={`rounded px-1.5 py-0.5 text-[10px] uppercase ${lifecycleBadgeClass(row.lifecycle)}`}>
-                                            {row.lifecycle}
-                                        </span>
-                                    </td>
-                                    <td className="py-1.5 pr-3 text-zinc-400">{row.date}</td>
-                                    <td className="py-1.5 pr-3 text-zinc-300 line-clamp-1 max-w-md">{row.signal}</td>
-                                    <td className="py-1.5 pr-3">
-                                        {row.evidenceUrl ? (
-                                            <Link href={row.evidenceUrl} target="_blank" rel="noopener noreferrer" className="text-zinc-400 hover:text-zinc-200">
-                                                {row.evidenceLabel}
-                                            </Link>
-                                        ) : (
-                                            <span className="text-zinc-600">{row.evidenceLabel}</span>
-                                        )}
-                                    </td>
-                                </tr>
+                                <>
+                                    <tr key={row.key} className="border-b border-zinc-900 hover:bg-zinc-900/40">
+                                        <td className="py-1.5 pr-3 font-semibold text-white">
+                                            {row.researchUrl ? (
+                                                <Link href={row.researchUrl} className="hover:text-violet-300">{row.company}</Link>
+                                            ) : row.company}
+                                        </td>
+                                        <td className="py-1.5 pr-3">
+                                            <span className={`rounded px-1.5 py-0.5 text-[10px] uppercase ${lifecycleBadgeClass(row.lifecycle)}`}>
+                                                {row.lifecycle}
+                                            </span>
+                                        </td>
+                                        <td className="py-1.5 pr-3 text-zinc-400">{row.date}</td>
+                                        <td className="py-1.5 pr-3 text-zinc-300 line-clamp-1 max-w-md">{row.signal}</td>
+                                        <td className="py-1.5 pr-3">
+                                            {row.evidenceUrl ? (
+                                                <Link href={row.evidenceUrl} target="_blank" rel="noopener noreferrer" className="text-zinc-400 hover:text-zinc-200">
+                                                    {row.evidenceCount > 0 ? `${row.evidenceLabel} (${row.evidenceCount})` : row.evidenceLabel}
+                                                </Link>
+                                            ) : (
+                                                <span className="text-zinc-600">
+                                                    {row.evidenceCount > 0 ? `${row.evidenceLabel} (${row.evidenceCount})` : row.evidenceLabel}
+                                                </span>
+                                            )}
+                                        </td>
+                                    </tr>
+                                    {row.whySurfaced && (
+                                        <tr key={`${row.key}-why`} className="border-b border-zinc-900">
+                                            <td colSpan={5} className="px-3 pb-1.5 pt-0">
+                                                <p className="text-[10px] text-zinc-600">
+                                                    {row.whySurfaced}
+                                                    {row.sources.length > 1 && (
+                                                        <span className="ml-2 text-zinc-700">Sources: {row.sources.join(", ")}</span>
+                                                    )}
+                                                </p>
+                                            </td>
+                                        </tr>
+                                    )}
+                                </>
                             ))}
                         </tbody>
                     </table>
