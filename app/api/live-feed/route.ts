@@ -124,22 +124,53 @@ async function buildIpoWatchEvents(): Promise<FeedEvent[]> {
         const response = await fetch(`${base}/api/ipo-watch`, { cache: "no-store" });
         if (!response.ok) return [];
         const data = await response.json();
-        const companies: Array<{ company: string; status: string; latest: { headline: string; source: string; url: string; publishedAt: string } | null }> = data.companies ?? [];
+        const companies: Array<{ company: string; status: string; latest: { headline: string; source: string; url: string; publishedAt: string } | null; error: string | null }> = data.companies ?? [];
 
-        return companies
-            .filter(c => c.latest !== null)
-            .map(c => ({
-                id: `ipowatch-${c.company}`,
-                timestamp: c.latest!.publishedAt,
-                ticker: null,
-                category: "ipo_watch" as FeedCategory,
-                headline: `${c.company}: ${c.latest!.headline}`,
-                summary: null,
-                importance: c.status === "developing" ? "high" : "med" as FeedImportance,
-                source: c.latest!.source,
-                sourceUrl: c.latest!.url,
-                researchUrl: null,
-            }));
+        const events: FeedEvent[] = [];
+
+        for (const c of companies) {
+            if (c.latest !== null) {
+                events.push({
+                    id: `ipowatch-${c.company}`,
+                    timestamp: c.latest.publishedAt,
+                    ticker: null,
+                    category: "ipo_watch" as FeedCategory,
+                    headline: `${c.company}: ${c.latest.headline}`,
+                    summary: null,
+                    importance: c.status === "developing" ? "high" : "med" as FeedImportance,
+                    source: c.latest.source,
+                    sourceUrl: c.latest.url,
+                    researchUrl: null,
+                    provider: "NewsAPI",
+                    providerStatus: "ok",
+                });
+            } else if (c.status === "unavailable" && c.error) {
+                // Real per-company provider failure (e.g. NewsAPI quota exhaustion) --
+                // surfaced as a distinct, lower-priority status event instead of being
+                // silently dropped, so Live Intelligence can't misreport this as
+                // "nothing happening" when the provider actually failed.
+                const isQuota = /quota|too many requests|rate limit/i.test(c.error);
+                events.push({
+                    id: `ipowatch-unavailable-${c.company}`,
+                    timestamp: new Date().toISOString(),
+                    ticker: null,
+                    category: "ipo_watch" as FeedCategory,
+                    headline: `IPO Watch: ${c.company} unavailable (news provider ${isQuota ? "quota exhausted" : "error"})`,
+                    summary: null,
+                    importance: "med" as FeedImportance,
+                    source: "IPO Sniper AI",
+                    sourceUrl: null,
+                    researchUrl: null,
+                    provider: "NewsAPI",
+                    providerStatus: isQuota ? "quota_exhausted" : "error",
+                });
+            }
+            // c.status === "no_signal": genuinely checked, found nothing -- no event,
+            // matching honest "nothing to report" behavior. Never silently conflated
+            // with the unavailable case above.
+        }
+
+        return events;
     } catch {
         return [];
     }
