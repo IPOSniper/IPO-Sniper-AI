@@ -220,11 +220,14 @@ export default function IPOIntelligenceCenter() {
                 <p className="mt-2 text-[11px] text-amber-500">Filed data source temporarily unavailable - not necessarily zero real filings.</p>
             )}
 
-            <div className="mt-3 flex items-center justify-center gap-1 overflow-x-auto rounded-lg border border-zinc-800 bg-zinc-900/60 px-3 py-2 text-[10px] uppercase tracking-wide text-zinc-500">
-                {["Emerging", "Watch", "Filed", "Scheduled", "Priced", "Post-IPO", "Lock-Up"].map((stage, i, arr) => (
-                    <span key={stage} className="flex items-center gap-1">
-                        <span className="whitespace-nowrap">{stage}</span>
-                        {i < arr.length - 1 && <span className="text-zinc-700">&rarr;</span>}
+            <div className="mt-3 flex items-center justify-center gap-2 overflow-x-auto rounded-lg border border-zinc-800 bg-zinc-900/60 px-4 py-3">
+                {["Emerging", "Watch", "Filed", "Scheduled", "Priced", "IPO", "Post-IPO", "Lock-Up"].map((stage, i, arr) => (
+                    <span key={stage} className="flex items-center gap-2">
+                        <span className="flex items-center gap-1.5 whitespace-nowrap rounded-full border border-zinc-700 bg-zinc-800 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide text-zinc-300">
+                            <span className="h-1.5 w-1.5 rounded-full bg-zinc-600" />
+                            {stage}
+                        </span>
+                        {i < arr.length - 1 && <span className="text-sm text-zinc-600">&rarr;</span>}
                     </span>
                 ))}
             </div>

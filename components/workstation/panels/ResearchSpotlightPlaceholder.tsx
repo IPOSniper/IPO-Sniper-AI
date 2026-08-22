@@ -9,6 +9,7 @@ export default function ResearchSpotlightPlaceholder() {
                             <th className="pb-1 font-medium">Ticker</th>
                             <th className="pb-1 font-medium">Recommendation</th>
                             <th className="pb-1 font-medium">Confidence</th>
+                            <th className="pb-1 font-medium">Agreement</th>
                             <th className="pb-1 font-medium">Evidence</th>
                             <th className="pb-1 font-medium">Risk</th>
                         </tr>
@@ -16,6 +17,7 @@ export default function ResearchSpotlightPlaceholder() {
                     <tbody>
                         <tr className="border-t border-zinc-800 text-zinc-700">
                             <td className="py-1.5 font-semibold text-zinc-600">----</td>
+                            <td className="py-1.5">--</td>
                             <td className="py-1.5">--</td>
                             <td className="py-1.5">--</td>
                             <td className="py-1.5">--</td>

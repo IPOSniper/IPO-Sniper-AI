@@ -1,4 +1,4 @@
-const FUNNEL_STEPS = ["Discovery", "Decisions", "Plans", "Risk", "Orders", "Fills"];
+const FUNNEL_STEPS = ["Discovery", "Decisions", "Plans", "Risk Approved", "Orders", "Filled", "Completed"];
 const SUMMARY_METRICS = [
     { label: "Discovery", barWidth: "w-full" },
     { label: "Decisions", barWidth: "w-full" },
@@ -26,14 +26,14 @@ export default function QuantLiveDeskPlaceholder() {
             <div className="mt-3 grid grid-cols-1 gap-3 lg:grid-cols-2">
                 <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-3">
                     <p className="mb-2 text-xs text-zinc-500">Funnel</p>
-                    <div className="space-y-1.5">
+                    <div className="space-y-2">
                         {FUNNEL_STEPS.map((step, i) => (
                             <div key={step} className="flex items-center gap-2 text-sm">
-                                <span className="w-20 shrink-0 text-zinc-400">{step}</span>
-                                <div className="h-1.5 flex-1 rounded bg-zinc-800">
+                                <span className="w-24 shrink-0 text-zinc-400">{step}</span>
+                                <div className="h-2 flex-1 rounded bg-zinc-800">
                                     <div
-                                        className="h-1.5 rounded bg-zinc-700"
-                                        style={{ width: `${100 - i * 12}%` }}
+                                        className="h-2 rounded bg-zinc-600"
+                                        style={{ width: `${Math.max(100 - i * 14, 8)}%` }}
                                     />
                                 </div>
                             </div>

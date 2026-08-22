@@ -4,21 +4,17 @@ import UnverifiedCard from "../../shared/UnverifiedCard";
 /**
  * Ticker-independent, so unlike every other panel here it doesn't
  * take `research` as a prop -- it fetches its own real index quotes.
- * Async Server Component: Next.js renders this by awaiting it
- * directly, no client-side fetch needed.
+ * Async Server Component.
  *
- * VIX is quoted on Finnhub as ^VIX in some plans and not available
- * on others depending on subscription tier -- if it fails, it fails
- * independently of SPY/QQQ (Promise.allSettled), not all-or-nothing.
- *
- * "Regime" is intentionally left as a placeholder label, not a
- * computed value -- there is no regime-detection logic in this
- * codebase yet. Never fabricate a Risk-On/Risk-Off label without
- * real logic behind it.
+ * "Regime" and "Breadth" are intentionally left as placeholder labels,
+ * not computed values -- there is no regime-detection or market-breadth
+ * (advancers/decliners) logic in this codebase yet. Never fabricate
+ * these without real logic behind them.
  */
 const INDICES = [
     { symbol: "SPY", label: "SPY" },
     { symbol: "QQQ", label: "QQQ" },
+    { symbol: "IWM", label: "IWM" },
 ];
 const VOLATILITY_SYMBOL = { symbol: "^VIX", label: "VIX" };
 
@@ -39,7 +35,7 @@ export default async function MarketContext() {
     return (
         <div className="rounded-xl border border-zinc-800 bg-zinc-950 p-3">
             <h2 className="mb-2 text-sm font-semibold uppercase tracking-wide text-zinc-500">Market Context</h2>
-            <div className="grid grid-cols-3 gap-3 text-sm">
+            <div className="grid grid-cols-2 gap-3 text-sm sm:grid-cols-4">
                 <div>
                     <p className="mb-1 text-[10px] uppercase tracking-wide text-zinc-600">Regime</p>
                     <p className="text-zinc-700">Not yet computed</p>
@@ -79,6 +75,10 @@ export default async function MarketContext() {
                             <span className="text-zinc-500">{volResult.value.price.toFixed(2)}</span>
                         </div>
                     )}
+                </div>
+                <div>
+                    <p className="mb-1 text-[10px] uppercase tracking-wide text-zinc-600">Breadth</p>
+                    <p className="text-zinc-700">Not yet computed</p>
                 </div>
             </div>
         </div>

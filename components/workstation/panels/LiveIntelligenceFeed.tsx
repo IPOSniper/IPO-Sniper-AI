@@ -107,7 +107,7 @@ export default function LiveIntelligenceFeed() {
                 <div className="thin-scrollbar h-[340px] space-y-0.5 overflow-y-auto pr-1">
                     {filteredEvents.map(event => {
                         const RowInner = (
-                            <div className="flex items-center gap-2.5 rounded-lg px-2 py-1.5 hover:bg-zinc-900">
+                            <div className="flex items-center gap-2.5 rounded px-2 py-1 hover:bg-zinc-900">
                                 <span className="w-12 shrink-0 text-[10px] text-zinc-600">{timeLabel(event.timestamp)}</span>
                                 <span className="shrink-0">{CATEGORY_ICON[event.category]}</span>
                                 {event.ticker && <span className="shrink-0 text-xs font-semibold text-zinc-300">{event.ticker}</span>}
