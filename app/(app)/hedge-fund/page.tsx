@@ -8,6 +8,7 @@ import PaperTradingPanel from "@/components/hedge-fund/PaperTradingPanel";
 import SystemStatusPanel from "@/components/hedge-fund/SystemStatusPanel";
 import QuantStrategistPanel from "@/components/hedge-fund/QuantStrategistPanel";
 import BatchScannerPanel from "@/components/hedge-fund/BatchScannerPanel";
+import CurrentOpportunitiesPanel from "@/components/hedge-fund/CurrentOpportunitiesPanel";
 import EquityCurvePanel from "@/components/hedge-fund/EquityCurvePanel";
 import QuantControlPanel from "@/components/hedge-fund/QuantControlPanel";
 import QuantActivityPanel from "@/components/hedge-fund/QuantActivityPanel";
@@ -27,12 +28,12 @@ import TradeTimeline from "@/components/hedge-fund/TradeTimeline";
 
 /**
  * Gated by proxy.ts (hedge_admin/admin roles) via the HEDGE_FUND_PREFIX
- * match on "/hedge-fund" Ã¢â‚¬â€ this route group is (app), so the URL is
+ * match on "/hedge-fund" ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â this route group is (app), so the URL is
  * still /hedge-fund even though the folder lives under app/(app)/.
  *
  * As of this pass: real research-based position tracking (unchanged),
  * PLUS a real live Alpaca paper-trading connection and an honest
- * system-status panel Ã¢â‚¬â€ see SystemStatusPanel.tsx's docstring for why
+ * system-status panel ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â see SystemStatusPanel.tsx's docstring for why
  * that panel shows real live/not-built status instead of a simulated
  * "Running" animation. See docs/HEDGE_FUND_ARCHITECTURE.md and
  * docs/MIGRATION_MATRIX.md for the full staging rationale.
@@ -74,7 +75,7 @@ export default async function HedgeFundPage() {
                 <p className="mb-2 text-[10px] text-zinc-700">Placement provisional -- BatchScannerPanel content not directly confirmed; verify after deploy.</p>
             </div>
             <div className="mb-6">
-                <BatchScannerPanel />
+                <CurrentOpportunitiesPanel />
             </div>
 
             <div className="mb-2">
