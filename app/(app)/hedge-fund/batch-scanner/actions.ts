@@ -1,4 +1,4 @@
-﻿"use server";
+"use server";
 
 import { createClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/client";
@@ -88,6 +88,7 @@ export async function runBatchScan(
             if (plan.direction !== "none") {
                 try {
                     const chain = await new AlpacaOptionsProvider().getOptionChain(ticker);
+                    console.log(`[DIAG] ${ticker} chain length: ${chain.length}`, chain[0] ? JSON.stringify({ delta: chain[0].delta, iv: chain[0].impliedVolatility, symbol: chain[0].symbol }) : "no contracts");
                     selectedContract = strategist.selectContract(plan, chain);
                     if (selectedContract) {
                         suggestedQty = strategist.suggestQuantity(plan, selectedContract, accountEquity);
