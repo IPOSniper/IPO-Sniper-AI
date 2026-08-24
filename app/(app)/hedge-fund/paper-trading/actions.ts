@@ -1,4 +1,4 @@
-"use server";
+﻿"use server";
 
 import { createClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/client";
@@ -22,7 +22,7 @@ export interface AccountResult {
 
 /**
  * Alpaca is the source of truth for account/position state (see
- * AlpacaPaperTradingProvider.ts) — this reads live from Alpaca on
+ * AlpacaPaperTradingProvider.ts) â€” this reads live from Alpaca on
  * every call rather than caching in Supabase, so it's never stale
  * relative to fills/dividends/etc. that happen outside this app.
  */
@@ -56,9 +56,53 @@ export interface OrderHistoryResult {
     orders?: TradeOrderResult[];
 }
 
+async function reconcilePaperTradeOrders(orders: TradeOrderResult[], overrideUserId?: string): Promise<void> {
+    if (!isSupabaseConfigured()) {
+        return;
+    }
+
+    try {
+        let userId: string;
+        let supabase;
+
+        if (overrideUserId) {
+            if (!isServiceRoleConfigured()) return;
+            userId = overrideUserId;
+            supabase = createServiceRoleClient();
+        } else {
+            supabase = await createClient();
+            const { data: { user } } = await supabase.auth.getUser();
+            if (!user) return;
+            userId = user.id;
+        }
+
+        for (const order of orders) {
+            if (!order.brokerOrderId) continue;
+
+            const { error } = await supabase
+                .from("paper_trade_orders")
+                .update({
+                    status: order.status,
+                    filled_qty: order.filledQty,
+                    filled_avg_price: order.filledAvgPrice,
+                    filled_at: order.filledAt,
+                })
+                .eq("broker_order_id", order.brokerOrderId)
+                .eq("user_id", userId);
+
+            if (error) {
+                console.error(`reconcilePaperTradeOrders: update failed for ${order.brokerOrderId}:`, error.message);
+            }
+        }
+    } catch (err) {
+        console.error("reconcilePaperTradeOrders threw:", err instanceof Error ? err.message : err);
+    }
+}
+
 export async function getOrderHistory(): Promise<OrderHistoryResult> {
     try {
         const orders = await provider.listOrders(20);
+        await reconcilePaperTradeOrders(orders);
         return { success: true, orders };
     } catch (err) {
         return { success: false, error: err instanceof Error ? err.message : "Failed to load Alpaca order history." };
@@ -168,7 +212,7 @@ export async function placeOrder(
             estimatedPrice = quote.price;
         } catch {
             // Sell orders can proceed without a fresh quote (see
-            // RiskEngine.check) — buys cannot, and RiskEngine will
+            // RiskEngine.check) â€” buys cannot, and RiskEngine will
             // reject with a clear reason when estimatedPrice is null.
         }
     }
@@ -222,7 +266,7 @@ export async function placeOrder(
 
         // Risk engine said yes but the broker itself rejected it
         // (e.g. insufficient buying power Alpaca calculates
-        // differently, market closed, symbol not tradable) — still
+        // differently, market closed, symbol not tradable) â€” still
         // logged, so the audit trail shows the broker-level failure
         // distinctly from a risk-engine block.
         await logOrderAttempt({
@@ -243,7 +287,7 @@ export async function placeOrder(
 }
 
 /**
- * Independent kill switch — cancels every open order regardless of
+ * Independent kill switch â€” cancels every open order regardless of
  * what placed them. Reachable even if the risk engine or a
  * scheduled loop is misbehaving, per
  * docs/HEDGE_FUND_ARCHITECTURE.md's requirement that the kill
@@ -268,7 +312,7 @@ interface LogOrderAttemptParams {
     riskAllowed: boolean;
     riskBlockedReason: string | null;
     reasoning?: string;
-    /** Real fill data from Alpaca's actual response — often null immediately after submission (fills take a moment); see TradeOrderResult's docstring. */
+    /** Real fill data from Alpaca's actual response â€” often null immediately after submission (fills take a moment); see TradeOrderResult's docstring. */
     filledAvgPrice?: number | null;
     filledQty?: number | null;
     filledAt?: string | null;
@@ -278,7 +322,7 @@ interface LogOrderAttemptParams {
 
 /**
  * Best-effort audit log. Deliberately does not throw or block the
- * order flow if Supabase isn't configured or the insert fails —
+ * order flow if Supabase isn't configured or the insert fails â€”
  * losing an audit-log row is bad, but blocking a risk-approved
  * order (or a risk-blocked notice) because logging failed would be
  * worse. Matches the "empty and can't-check look the same" pattern
