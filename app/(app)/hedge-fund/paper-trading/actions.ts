@@ -79,7 +79,7 @@ async function reconcilePaperTradeOrders(orders: TradeOrderResult[], overrideUse
         for (const order of orders) {
             if (!order.brokerOrderId) continue;
 
-            const { error } = await supabase
+            const { data: updatedRows, error } = await supabase
                 .from("paper_trade_orders")
                 .update({
                     status: order.status,
@@ -88,11 +88,16 @@ async function reconcilePaperTradeOrders(orders: TradeOrderResult[], overrideUse
                     filled_at: order.filledAt,
                 })
                 .eq("broker_order_id", order.brokerOrderId)
-                .eq("user_id", userId);
+                .eq("user_id", userId)
+                .select("id, broker_order_id, status");
 
-            if (error) {
-                console.error(`reconcilePaperTradeOrders: update failed for ${order.brokerOrderId}:`, error.message);
-            }
+            console.log(
+                "reconcilePaperTradeOrders:",
+                order.brokerOrderId,
+                "brokerStatus=", order.status,
+                "updatedRows=", updatedRows?.length ?? 0,
+                "error=", error?.message ?? null
+            );
         }
     } catch (err) {
         console.error("reconcilePaperTradeOrders threw:", err instanceof Error ? err.message : err);
