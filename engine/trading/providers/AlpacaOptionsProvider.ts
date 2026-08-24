@@ -119,86 +119,65 @@ export class AlpacaOptionsProvider {
      * underlyings.
      */
     async getOptionChain(underlyingSymbol: string, expirationDate?: string): Promise<OptionContract[]> {
-        const params = new URLSearchParams();
-        if (expirationDate) params.set("expiration_date", expirationDate);
-
-        const url = `${this.dataBaseUrl}/v1beta1/options/snapshots/${underlyingSymbol}${params.toString() ? `?${params}` : ""}`;
-
-        const response = await fetch(url, { headers: this.headers(), cache: "no-store" });
-
-        if (!response.ok) {
-            throw new Error(`Alpaca options chain request failed: ${response.status}`);
-        }
-
-        const data: RawOptionChainResponse = await response.json();
-
-const snapshotEntries =
-    data?.snapshots && typeof data.snapshots === "object"
-        ? Object.entries(data.snapshots)
-        : [];
-
-const diagContracts = snapshotEntries.slice(0, 5).map(([symbol, snapshot]) => {
-    const s = snapshot as Record<string, unknown>;
-    const contract = (s.contract ?? {}) as Record<string, unknown>;
-    const greeks = (s.greeks ?? {}) as Record<string, unknown>;
-
-    return {
-        symbol,
-        expiration:
-            contract.expiration_date ??
-            contract.expiration ??
-            s.expiration_date ??
-            null,
-        delta: greeks.delta ?? s.delta ?? null,
-        iv:
-            greeks.implied_volatility ??
-            s.implied_volatility ??
-            null,
-    };
-});
-
-const diagExpirations = Array.from(
-    new Set(
-        diagContracts
-            .map((c) => c.expiration)
-            .filter((x): x is string => typeof x === "string")
-    )
-);
-
-console.log(
-    "[CHAIN_DIAG]",
-    JSON.stringify({
-        status: response.status,
-        snapshotCount: snapshotEntries.length,
-        nextPageToken: data?.next_page_token ?? null,
-        sampleExpirationCount: diagExpirations.length,
-        sampleExpirations: diagExpirations,
-        samples: diagContracts,
-    })
-);
-
         const contracts: OptionContract[] = [];
-        for (const [occSymbol, snapshot] of Object.entries(data.snapshots ?? {})) {
-            const parsed = parseOccSymbol(occSymbol, underlyingSymbol);
-            if (!parsed) continue; // fails closed -- skip anything that doesn't match the expected OCC format, don't guess
+        let pageToken: string | undefined = undefined;
+        let pagesFetched = 0;
+        const maxPages = 10; // safety cap -- real chains can be large; this bounds worst-case latency
 
-            contracts.push({
-                symbol: occSymbol,
-                underlyingSymbol,
-                strikePrice: parsed.strikePrice,
-                expirationDate: parsed.expirationDate,
-                type: parsed.type,
-                bidPrice: snapshot.latestQuote?.bp ?? null,
-                askPrice: snapshot.latestQuote?.ap ?? null,
-                lastPrice: snapshot.latestTrade?.p ?? null,
-                impliedVolatility: snapshot.impliedVolatility ?? null,
-                delta: snapshot.greeks?.delta ?? null,
-                gamma: snapshot.greeks?.gamma ?? null,
-                theta: snapshot.greeks?.theta ?? null,
-                vega: snapshot.greeks?.vega ?? null,
-                openInterest: null, // Alpaca serves OI via a separate per-contract endpoint, not this snapshot -- honestly null here rather than guessed
-            });
-        }
+        do {
+            const params = new URLSearchParams();
+            if (expirationDate) {
+                params.set("expiration_date", expirationDate);
+            } else {
+                // Real fix: without an explicit expiration_date, the
+                // endpoint was defaulting to effectively the nearest
+                // expiration only. Request a real forward-looking
+                // window so contracts at typical target DTEs (e.g.
+                // 35-45 days) are actually retrievable.
+                const today = new Date();
+                const gte = today.toISOString().slice(0, 10);
+                const future = new Date(today);
+                future.setDate(future.getDate() + 60);
+                const lte = future.toISOString().slice(0, 10);
+                params.set("expiration_date_gte", gte);
+                params.set("expiration_date_lte", lte);
+            }
+            params.set("limit", "1000");
+            if (pageToken) params.set("page_token", pageToken);
+
+            const url = `${this.dataBaseUrl}/v1beta1/options/snapshots/${underlyingSymbol}?${params.toString()}`;
+            const response = await fetch(url, { headers: this.headers(), cache: "no-store" });
+            if (!response.ok) {
+                throw new Error(`Alpaca options chain request failed: ${response.status}`);
+            }
+            const data: RawOptionChainResponse = await response.json();
+
+            for (const [occSymbol, snapshot] of Object.entries(data.snapshots ?? {})) {
+                const parsed = parseOccSymbol(occSymbol, underlyingSymbol);
+                if (!parsed) continue; // fails closed -- skip anything that doesn't match the expected OCC format, don't guess
+                contracts.push({
+                    symbol: occSymbol,
+                    underlyingSymbol,
+                    strikePrice: parsed.strikePrice,
+                    expirationDate: parsed.expirationDate,
+                    type: parsed.type,
+                    bidPrice: snapshot.latestQuote?.bp ?? null,
+                    askPrice: snapshot.latestQuote?.ap ?? null,
+                    lastPrice: snapshot.latestTrade?.p ?? null,
+                    impliedVolatility: snapshot.impliedVolatility ?? null,
+                    delta: snapshot.greeks?.delta ?? null,
+                    gamma: snapshot.greeks?.gamma ?? null,
+                    theta: snapshot.greeks?.theta ?? null,
+                    vega: snapshot.greeks?.vega ?? null,
+                    openInterest: null, // Alpaca serves OI via a separate per-contract endpoint, not this snapshot -- honestly null here rather than guessed
+                });
+            }
+
+            pageToken = data.next_page_token ?? undefined;
+            pagesFetched++;
+        } while (pageToken && pagesFetched < maxPages);
+
+        console.log(`[CHAIN_FETCH] ${underlyingSymbol}: ${contracts.length} contracts across ${pagesFetched} page(s)`);
 
         return contracts;
     }
