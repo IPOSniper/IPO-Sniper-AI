@@ -132,6 +132,51 @@ export class AlpacaOptionsProvider {
 
         const data: RawOptionChainResponse = await response.json();
 
+const snapshotEntries =
+    data?.snapshots && typeof data.snapshots === "object"
+        ? Object.entries(data.snapshots)
+        : [];
+
+const diagContracts = snapshotEntries.slice(0, 5).map(([symbol, snapshot]) => {
+    const s = snapshot as Record<string, unknown>;
+    const contract = (s.contract ?? {}) as Record<string, unknown>;
+    const greeks = (s.greeks ?? {}) as Record<string, unknown>;
+
+    return {
+        symbol,
+        expiration:
+            contract.expiration_date ??
+            contract.expiration ??
+            s.expiration_date ??
+            null,
+        delta: greeks.delta ?? s.delta ?? null,
+        iv:
+            greeks.implied_volatility ??
+            s.implied_volatility ??
+            null,
+    };
+});
+
+const diagExpirations = Array.from(
+    new Set(
+        diagContracts
+            .map((c) => c.expiration)
+            .filter((x): x is string => typeof x === "string")
+    )
+);
+
+console.log(
+    "[CHAIN_DIAG]",
+    JSON.stringify({
+        status: response.status,
+        snapshotCount: snapshotEntries.length,
+        nextPageToken: data?.next_page_token ?? null,
+        sampleExpirationCount: diagExpirations.length,
+        sampleExpirations: diagExpirations,
+        samples: diagContracts,
+    })
+);
+
         const contracts: OptionContract[] = [];
         for (const [occSymbol, snapshot] of Object.entries(data.snapshots ?? {})) {
             const parsed = parseOccSymbol(occSymbol, underlyingSymbol);
