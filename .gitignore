@@ -55,3 +55,4 @@ node_modules/
 *.tsbuildinfo
 
 .hedge-fund-layer2/
+.env*
