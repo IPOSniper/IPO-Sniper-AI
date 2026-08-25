@@ -201,8 +201,19 @@ export class AlpacaOptionsProvider {
                     sample_symbol: JSON.stringify(insertResult.error).slice(0, 500),
                 });
             }
-        } catch {
+        } catch (outerErr) {
             // Best-effort diagnostic only -- never block a real contract search over a logging failure.
+            try {
+                const fallback = createServiceRoleClient();
+                await fallback.from("chain_fetch_debug").insert({
+                    ticker: underlyingSymbol + "_OUTER_ERROR",
+                    contract_count: contracts.length,
+                    pages_fetched: pagesFetched,
+                    sample_symbol: String(outerErr).slice(0, 500),
+                });
+            } catch {
+                // If even this fails, we truly have nothing to go on -- give up silently.
+            }
         }
 
         return contracts;
