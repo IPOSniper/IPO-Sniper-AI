@@ -184,7 +184,7 @@ export class AlpacaOptionsProvider {
             const expirations = contracts.map((c) => c.expirationDate).filter(Boolean).sort();
             const sample = contracts.find((c) => c.delta !== null) ?? contracts[0];
             const supabase = createServiceRoleClient();
-            await supabase.from("chain_fetch_debug").insert({
+            const insertResult = await supabase.from("chain_fetch_debug").insert({
                 ticker: underlyingSymbol,
                 contract_count: contracts.length,
                 pages_fetched: pagesFetched,
@@ -193,6 +193,14 @@ export class AlpacaOptionsProvider {
                 sample_delta: sample?.delta ?? null,
                 sample_symbol: sample?.symbol ?? null,
             });
+            if (insertResult.error) {
+                await supabase.from("chain_fetch_debug").insert({
+                    ticker: underlyingSymbol + "_ERROR",
+                    contract_count: contracts.length,
+                    pages_fetched: pagesFetched,
+                    sample_symbol: JSON.stringify(insertResult.error).slice(0, 500),
+                });
+            }
         } catch {
             // Best-effort diagnostic only -- never block a real contract search over a logging failure.
         }
