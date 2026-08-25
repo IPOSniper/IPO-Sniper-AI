@@ -28,12 +28,12 @@ import TradeTimeline from "@/components/hedge-fund/TradeTimeline";
 
 /**
  * Gated by proxy.ts (hedge_admin/admin roles) via the HEDGE_FUND_PREFIX
- * match on "/hedge-fund" ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â this route group is (app), so the URL is
+ * match on "/hedge-fund" ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â this route group is (app), so the URL is
  * still /hedge-fund even though the folder lives under app/(app)/.
  *
  * As of this pass: real research-based position tracking (unchanged),
  * PLUS a real live Alpaca paper-trading connection and an honest
- * system-status panel ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â see SystemStatusPanel.tsx's docstring for why
+ * system-status panel ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â see SystemStatusPanel.tsx's docstring for why
  * that panel shows real live/not-built status instead of a simulated
  * "Running" animation. See docs/HEDGE_FUND_ARCHITECTURE.md and
  * docs/MIGRATION_MATRIX.md for the full staging rationale.
@@ -71,6 +71,12 @@ export default async function HedgeFundPage() {
             <MomentumRadarPlaceholder />
 
             <div className="mb-2">
+                <div className="mb-2">
+                    <p className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Daily AI Trading Session</p>
+                </div>
+                <div className="mb-6">
+                    <BatchScannerPanel />
+                </div>
                 <p className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Current Opportunities</p>
                 <p className="mb-2 text-[10px] text-zinc-700">Placement provisional -- BatchScannerPanel content not directly confirmed; verify after deploy.</p>
             </div>
