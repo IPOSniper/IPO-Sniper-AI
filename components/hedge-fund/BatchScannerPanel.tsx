@@ -3,13 +3,14 @@
 import { useState, useEffect } from "react";
 import { runBatchScan, getDailySummary, getMarketRegime, type BatchRunResult, type DailySummary } from "@/app/(app)/hedge-fund/batch-scanner/actions";
 import { DEFAULT_AUTO_EXECUTION_GATES } from "@/engine/quant/BatchScanner";
+import { getCurrentOpportunities } from "@/app/(app)/hedge-fund/opportunities/actions";
 import type { MarketRegime } from "@/engine/market/marketRegime";
 
 const OUTCOME_STYLE: Record<string, { label: string; color: string }> = {
-    execute: { label: "✅ Execute", color: "text-emerald-400" },
-    skip: { label: "⏸ Skip", color: "text-zinc-400" },
-    reject: { label: "❌ Reject", color: "text-red-400" },
-    wait: { label: "⏳ Wait", color: "text-amber-400" },
+    execute: { label: "âœ… Execute", color: "text-emerald-400" },
+    skip: { label: "â¸ Skip", color: "text-zinc-400" },
+    reject: { label: "âŒ Reject", color: "text-red-400" },
+    wait: { label: "â³ Wait", color: "text-amber-400" },
 };
 
 const DEFAULT_WATCHLIST = "RIOT, IREN, RKLB, KTOS, CLSK";
@@ -52,6 +53,7 @@ export default function BatchScannerPanel() {
     const [results, setResults] = useState<BatchRunResult[] | null>(null);
     const [summary, setSummary] = useState<DailySummary | null>(null);
     const [regime, setRegime] = useState<MarketRegime | null>(null);
+    const [loadingOpportunities, setLoadingOpportunities] = useState(false);
 
     useEffect(() => {
         getMarketRegime().then(setRegime);
@@ -102,26 +104,26 @@ export default function BatchScannerPanel() {
         <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-4">
             <div className="mb-1 flex items-center justify-between">
                 <h2 className="text-lg font-semibold text-white">Daily AI Trading Session</h2>
-                <span className="text-xs text-violet-400">Phase 2A — Autonomous Batch Paper Trading</span>
+                <span className="text-xs text-violet-400">Phase 2A â€” Autonomous Batch Paper Trading</span>
             </div>
             <p className="mb-3 text-xs text-zinc-500">
-                Real trade plans built for every ticker below, evaluated against stricter auto-execution gates (real committee/evidence thresholds, real open-position count, real bid/ask spread, real portfolio-risk %). Only what clears every gate gets a real paper order — up to the run limit. This is a manual run, triggered by this click — not a background process (no scheduler is deployed; see System Status).
+                Real trade plans built for every ticker below, evaluated against stricter auto-execution gates (real committee/evidence thresholds, real open-position count, real bid/ask spread, real portfolio-risk %). Only what clears every gate gets a real paper order â€” up to the run limit. This is a manual run, triggered by this click â€” not a background process (no scheduler is deployed; see System Status).
             </p>
             <p className="mb-3 text-[10px] text-amber-500">
-                Real gaps, not hidden: no open interest or trading volume data exists anywhere in this app yet — only bid/ask spread is checked. And this scans a fixed watchlist, not "the entire market" — real market-wide screening would need real infrastructure this app doesn&apos;t have yet.
+                Real gaps, not hidden: no open interest or trading volume data exists anywhere in this app yet â€” only bid/ask spread is checked. And this scans a fixed watchlist, not "the entire market" â€” real market-wide screening would need real infrastructure this app doesn&apos;t have yet.
             </p>
 
             {regime && (
                 <div className="mb-3 flex flex-wrap items-center gap-2 rounded-md border border-zinc-800 bg-zinc-950 px-3 py-1.5 text-xs">
                     <span className="text-zinc-500">Market Regime</span>
                     <span className="font-semibold" style={{ color: regime.color }}>{regime.label}</span>
-                    <span className="text-zinc-700">·</span>
+                    <span className="text-zinc-700">Â·</span>
                     <span className="text-zinc-500">Breadth {regime.breadthUp}/{regime.breadthTotal} up</span>
-                    <span className="text-zinc-700">·</span>
+                    <span className="text-zinc-700">Â·</span>
                     <span className="text-zinc-500">Equities {regime.avgEquityChange >= 0 ? "+" : ""}{regime.avgEquityChange.toFixed(2)}%</span>
                     {regime.goldChange !== null && (
                         <>
-                            <span className="text-zinc-700">·</span>
+                            <span className="text-zinc-700">Â·</span>
                             <span className="text-zinc-500">Gold {regime.goldChange >= 0 ? "+" : ""}{regime.goldChange.toFixed(2)}%</span>
                         </>
                     )}
@@ -131,7 +133,31 @@ export default function BatchScannerPanel() {
 
             <div className="mb-4 space-y-2">
                 <div>
-                    <label className="mb-1 block text-xs text-zinc-500">Watchlist (comma-separated)</label>
+                    <div className="mb-1 flex items-center justify-between">
+                        <label className="block text-xs text-zinc-500">Watchlist (comma-separated)</label>
+                        <button
+                            type="button"
+                            disabled={loadingOpportunities}
+                            onClick={async () => {
+                                setLoadingOpportunities(true);
+                                try {
+                                    const opportunities = await getCurrentOpportunities();
+                                    const top = [...opportunities]
+                                        .sort((a, b) => b.score - a.score)
+                                        .slice(0, 15)
+                                        .map(o => o.ticker);
+                                    if (top.length > 0) {
+                                        setWatchlist(top.join(", "));
+                                    }
+                                } finally {
+                                    setLoadingOpportunities(false);
+                                }
+                            }}
+                            className="rounded-md border border-purple-700 px-2 py-0.5 text-[10px] text-purple-300 hover:bg-purple-950 disabled:opacity-50"
+                        >
+                            {loadingOpportunities ? "Loading..." : "Load from Current Opportunities"}
+                        </button>
+                    </div>
                     <input
                         value={watchlist}
                         onChange={e => setWatchlist(e.target.value)}
@@ -155,12 +181,12 @@ export default function BatchScannerPanel() {
                     disabled={status === "running" || cooldownSeconds > 0}
                     className="rounded-md bg-violet-600 px-4 py-1.5 text-sm font-medium text-white hover:bg-violet-500 disabled:opacity-50"
                 >
-                    {status === "running" ? "Scanning…" : cooldownSeconds > 0 ? `Cooldown (${cooldownSeconds}s)` : "Run Trading Session"}
+                    {status === "running" ? "Scanningâ€¦" : cooldownSeconds > 0 ? `Cooldown (${cooldownSeconds}s)` : "Run Trading Session"}
                 </button>
             </div>
             {cooldownSeconds > 0 && (
                 <p className="mb-4 text-[10px] text-zinc-600">
-                    Real cooldown after a run — each ticker triggers several real Finnhub calls, and running repeatedly in quick succession can hit Finnhub's real rate limit (confirmed in production).
+                    Real cooldown after a run â€” each ticker triggers several real Finnhub calls, and running repeatedly in quick succession can hit Finnhub's real rate limit (confirmed in production).
                 </p>
             )}
 
@@ -170,8 +196,8 @@ export default function BatchScannerPanel() {
                 <div className="space-y-3">
                     <div className="rounded-lg border border-zinc-800 bg-zinc-950 p-3">
                         <p className="text-xs text-zinc-400">
-                            {executedCount} executed · {results.filter(r => r.outcome === "reject").length} rejected · {results.filter(r => r.outcome === "skip").length} skipped
-                            {results.filter(r => r.outcome === "execute" && !r.executed).length > 0 && ` · ${results.filter(r => r.outcome === "execute" && !r.executed).length} passed gates but hit the run limit`}
+                            {executedCount} executed Â· {results.filter(r => r.outcome === "reject").length} rejected Â· {results.filter(r => r.outcome === "skip").length} skipped
+                            {results.filter(r => r.outcome === "execute" && !r.executed).length > 0 && ` Â· ${results.filter(r => r.outcome === "execute" && !r.executed).length} passed gates but hit the run limit`}
                         </p>
                     </div>
 
@@ -190,9 +216,9 @@ export default function BatchScannerPanel() {
                                 <tr key={r.ticker} className="border-b border-zinc-900">
                                     <td className="py-2 text-zinc-500">{i + 1}</td>
                                     <td className="py-2 font-medium text-white">{r.ticker}</td>
-                                    <td className="py-2 text-zinc-400">{r.plan ? `${r.plan.tradeQualityScore}/100` : "—"}</td>
+                                    <td className="py-2 text-zinc-400">{r.plan ? `${r.plan.tradeQualityScore}/100` : "â€”"}</td>
                                     <td className={`py-2 font-medium ${OUTCOME_STYLE[r.outcome].color}`}>
-                                        {r.executed ? "✅ Executed" : OUTCOME_STYLE[r.outcome].label}
+                                        {r.executed ? "âœ… Executed" : OUTCOME_STYLE[r.outcome].label}
                                     </td>
                                     <td className="py-2 text-zinc-400">{r.orderStatus ?? r.reason}</td>
                                 </tr>
