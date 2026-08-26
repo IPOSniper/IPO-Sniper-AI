@@ -1,4 +1,3 @@
-import { createServiceRoleClient } from "@/lib/supabase/serviceRole";
 /**
  * Real Alpaca options chain data -- strikes, expirations, bid/ask,
  * implied volatility, and Greeks (delta, gamma, theta, vega). Uses
@@ -179,42 +178,6 @@ export class AlpacaOptionsProvider {
         } while (pageToken && pagesFetched < maxPages);
 
         console.log(`[CHAIN_FETCH] ${underlyingSymbol}: ${contracts.length} contracts across ${pagesFetched} page(s)`);
-
-        try {
-            const expirations = contracts.map((c) => c.expirationDate).filter(Boolean).sort();
-            const sample = contracts.find((c) => c.delta !== null) ?? contracts[0];
-            const supabase = createServiceRoleClient();
-            const insertResult = await supabase.from("chain_fetch_debug").insert({
-                ticker: underlyingSymbol,
-                contract_count: contracts.length,
-                pages_fetched: pagesFetched,
-                min_expiration: expirations[0] ?? null,
-                max_expiration: expirations[expirations.length - 1] ?? null,
-                sample_delta: sample?.delta ?? null,
-                sample_symbol: sample?.symbol ?? null,
-            });
-            if (insertResult.error) {
-                await supabase.from("chain_fetch_debug").insert({
-                    ticker: underlyingSymbol + "_ERROR",
-                    contract_count: contracts.length,
-                    pages_fetched: pagesFetched,
-                    sample_symbol: JSON.stringify(insertResult.error).slice(0, 500),
-                });
-            }
-        } catch (outerErr) {
-            // Best-effort diagnostic only -- never block a real contract search over a logging failure.
-            try {
-                const fallback = createServiceRoleClient();
-                await fallback.from("chain_fetch_debug").insert({
-                    ticker: underlyingSymbol + "_OUTER_ERROR",
-                    contract_count: contracts.length,
-                    pages_fetched: pagesFetched,
-                    sample_symbol: String(outerErr).slice(0, 500),
-                });
-            } catch {
-                // If even this fails, we truly have nothing to go on -- give up silently.
-            }
-        }
 
         return contracts;
     }
