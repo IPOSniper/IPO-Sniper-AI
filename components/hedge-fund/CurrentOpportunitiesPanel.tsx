@@ -49,7 +49,7 @@ export default function CurrentOpportunitiesPanel() {
         <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-4">
             <div className="mb-3 flex items-center justify-between">
                 <h3 className="text-sm font-medium text-zinc-300">Current Opportunities</h3>
-                <span className="text-[10px] text-emerald-400">LIVE Ã¢â€”Â</span>
+                <span className="text-[10px] text-emerald-400">LIVE</span>
             </div>
 
             <div className="mb-3 flex flex-wrap gap-1">
