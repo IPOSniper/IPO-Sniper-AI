@@ -1,0 +1,36 @@
+# Real, persistent external trigger for Opportunity Discovery --
+# calls the real /api/cron/quant-opportunities route on a schedule.
+# The scheduler itself contains zero discovery logic -- it is
+# purely "invoke this real endpoint periodically," nothing more.
+#
+# Real, honest prerequisite, not assumed: this file only does
+# anything once committed to a real GitHub repository with Actions
+# enabled, AND the existing repository secret QUANT_CRON_SECRET
+# (already configured for quant-harness.yml) matches the real
+# CRON_SECRET value in Vercel production. No new secret is needed --
+# both cron routes check the same CRON_SECRET env var.
+#
+# Real, deliberate interval: every 30 minutes, not 10 -- this route
+# does discovery/scoring against earnings and catalyst data, not a
+# time-sensitive trading decision, and this app has already shown
+# real Finnhub 429 pressure under frequent calls. 30 minutes gives
+# Current Opportunities real, bounded freshness (previously it had
+# NO schedule at all and was only ever triggered manually, which is
+# the confirmed root cause of "STALE 73h ago" opportunities). GitHub
+# Actions schedule triggers are not guaranteed to run at the exact
+# minute specified -- this is an upper bound on frequency, not a
+# precise clock.
+name: Quant Opportunities Discovery Cron
+"on":
+  schedule:
+    - cron: "*/30 * * * *"
+  workflow_dispatch: {}
+jobs:
+  trigger-discovery:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Call the real opportunity discovery endpoint
+        run: |
+          curl -sf -X GET \
+            -H "Authorization: Bearer ${{ secrets.QUANT_CRON_SECRET }}" \
+            "https://ipo-sniper-ai.vercel.app/api/cron/quant-opportunities"
