@@ -6,6 +6,8 @@ import { createServiceRoleClient, isServiceRoleConfigured } from "@/lib/supabase
 import { ResearchService } from "@/engine/services/ResearchService";
 import { QuantStrategist } from "@/engine/quant/QuantStrategist";
 import { BatchScanner, DEFAULT_AUTO_EXECUTION_GATES, type AutoExecutionGates, type BatchResult } from "@/engine/quant/BatchScanner";
+import { recordDecisionLayers } from "@/engine/quant/decisionMatrix/recordLayer";
+import { notEvaluated, type DecisionLayerRecord } from "@/engine/quant/decisionMatrix/types";
 import { AlpacaOptionsProvider } from "@/engine/trading/providers/AlpacaOptionsProvider";
 import { AlpacaPaperTradingProvider } from "@/engine/trading/providers/AlpacaPaperTradingProvider";
 import { placeOrder } from "@/app/(app)/hedge-fund/paper-trading/actions";
@@ -94,7 +96,7 @@ export async function runBatchScan(
                         suggestedQty = strategist.suggestQuantity(plan, selectedContract, accountEquity);
                     }
                 } catch {
-                    // Real chain fetch can fail independently â€” evaluate() handles a null selectedContract with a real reject reason.
+                    // Real chain fetch can fail independently Ã¢â‚¬â€ evaluate() handles a null selectedContract with a real reject reason.
                 }
             }
 
@@ -288,6 +290,74 @@ async function logBatchDecision(
 
         if (error) {
             console.error("quant_trade_decisions insert failed:", error.message);
+        }
+
+        // Decision Matrix v1 -- observation only. Recording these
+        // records has zero effect on the real gates above; this is
+        // purely for future measurement, per the non-negotiable rule
+        // in decisionMatrix/types.ts. Never blocks the real pipeline
+        // (recordDecisionLayers is itself best-effort/non-throwing).
+        try {
+            const hasDirection = plan.direction !== "none";
+            const layerRecords: DecisionLayerRecord[] = [
+                {
+                    runId, decisionId: null, ticker, layer: "universe",
+                    decision: ticker, confidence: null, status: "PASS",
+                    reasonCode: "EVALUATED", evidenceRefs: null, modelVersion: "v1",
+                },
+                notEvaluated(runId, ticker, "opportunity"),
+                {
+                    runId, decisionId: null, ticker, layer: "edge",
+                    decision: plan.direction, confidence: plan.confidence,
+                    status: hasDirection ? "PASS" : "FAIL",
+                    reasonCode: hasDirection ? "DIRECTIONAL_EDGE_FORMED" : "NO_DIRECTIONAL_EDGE",
+                    evidenceRefs: { agreement: plan.agreement, evidenceQuality: plan.evidenceQuality },
+                    modelVersion: "v1",
+                },
+                hasDirection
+                    ? {
+                        runId, decisionId: null, ticker, layer: "strategy",
+                        decision: "directional_options", confidence: plan.confidence,
+                        status: "PASS", reasonCode: "ONLY_STRATEGY_IMPLEMENTED",
+                        evidenceRefs: null, modelVersion: "v1",
+                    }
+                    : notEvaluated(runId, ticker, "strategy"),
+                hasDirection
+                    ? {
+                        runId, decisionId: null, ticker, layer: "instrument",
+                        decision: "option", confidence: null,
+                        status: "PASS", reasonCode: "ONLY_INSTRUMENT_IMPLEMENTED",
+                        evidenceRefs: null, modelVersion: "v1",
+                    }
+                    : notEvaluated(runId, ticker, "instrument"),
+                {
+                    runId, decisionId: null, ticker, layer: "contract",
+                    decision: selectedContract?.symbol ?? null, confidence: null,
+                    status: selectedContract ? "PASS" : (hasDirection ? "FAIL" : "SKIP"),
+                    reasonCode: selectedContract ? "CONTRACT_MATCHED" : "NO_CONTRACT_MATCHED",
+                    evidenceRefs: selectedContract ? { delta: selectedContract.delta, iv: selectedContract.impliedVolatility } : null,
+                    modelVersion: "v1",
+                },
+                notEvaluated(runId, ticker, "timing"),
+                {
+                    runId, decisionId: null, ticker, layer: "risk",
+                    decision: evaluation.outcome, confidence: null,
+                    status: evaluation.outcome === "reject" ? "FAIL" : (evaluation.outcome === "skip" ? "SKIP" : "PASS"),
+                    reasonCode: evaluation.outcome.toUpperCase(),
+                    evidenceRefs: { reason: evaluation.reason },
+                    modelVersion: "v1",
+                },
+                {
+                    runId, decisionId: null, ticker, layer: "execution",
+                    decision: executed ? "executed" : "not_executed", confidence: null,
+                    status: executed ? "EXECUTE" : (evaluation.outcome === "skip" ? "SKIP" : "FAIL"),
+                    reasonCode: executed ? "AUTONOMOUS_EXECUTE" : "NOT_EXECUTED",
+                    evidenceRefs: null, modelVersion: "v1",
+                },
+            ];
+            await recordDecisionLayers(layerRecords);
+        } catch {
+            // Decision Matrix recording must never affect the real pipeline.
         }
     } catch (err) {
         console.error("logBatchDecision threw:", err instanceof Error ? err.message : err);
