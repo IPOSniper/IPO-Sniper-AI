@@ -17,6 +17,7 @@ export type DecisionLayerName =
     | "universe"
     | "opportunity"
     | "edge"
+    | "volatility"
     | "strategy"
     | "instrument"
     | "contract"

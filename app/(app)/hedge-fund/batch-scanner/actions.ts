@@ -8,6 +8,7 @@ import { QuantStrategist } from "@/engine/quant/QuantStrategist";
 import { BatchScanner, DEFAULT_AUTO_EXECUTION_GATES, type AutoExecutionGates, type BatchResult } from "@/engine/quant/BatchScanner";
 import { recordDecisionLayers } from "@/engine/quant/decisionMatrix/recordLayer";
 import { notEvaluated, type DecisionLayerRecord } from "@/engine/quant/decisionMatrix/types";
+import { detectVolatilityEdge } from "@/engine/quant/decisionMatrix/volatilityEdge";
 import { AlpacaOptionsProvider } from "@/engine/trading/providers/AlpacaOptionsProvider";
 import { AlpacaPaperTradingProvider } from "@/engine/trading/providers/AlpacaPaperTradingProvider";
 import { placeOrder } from "@/app/(app)/hedge-fund/paper-trading/actions";
@@ -96,7 +97,7 @@ export async function runBatchScan(
                         suggestedQty = strategist.suggestQuantity(plan, selectedContract, accountEquity);
                     }
                 } catch {
-                    // Real chain fetch can fail independently Ã¢â‚¬â€ evaluate() handles a null selectedContract with a real reject reason.
+                    // Real chain fetch can fail independently ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â evaluate() handles a null selectedContract with a real reject reason.
                 }
             }
 
@@ -306,6 +307,21 @@ async function logBatchDecision(
                     reasonCode: "EVALUATED", evidenceRefs: null, modelVersion: "v1",
                 },
                 notEvaluated(runId, ticker, "opportunity"),
+                await (async () => {
+                    const volResult = await detectVolatilityEdge(ticker);
+                    return {
+                        runId, decisionId: null, ticker, layer: "volatility",
+                        decision: volResult.decision, confidence: null,
+                        status: volResult.status,
+                        reasonCode: volResult.reasonCode,
+                        evidenceRefs: {
+                            realizedVolPercent: volResult.realizedVolPercent,
+                            impliedVolPercent: volResult.impliedVolPercent,
+                            gapPercent: volResult.gapPercent,
+                        },
+                        modelVersion: "v1",
+                    } as DecisionLayerRecord;
+                })(),
                 {
                     runId, decisionId: null, ticker, layer: "edge",
                     decision: plan.direction, confidence: plan.confidence,
