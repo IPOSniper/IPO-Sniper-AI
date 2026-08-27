@@ -6,9 +6,10 @@ import { createServiceRoleClient, isServiceRoleConfigured } from "@/lib/supabase
 import { ResearchService } from "@/engine/services/ResearchService";
 import { QuantStrategist } from "@/engine/quant/QuantStrategist";
 import { BatchScanner, DEFAULT_AUTO_EXECUTION_GATES, type AutoExecutionGates, type BatchResult } from "@/engine/quant/BatchScanner";
-import { recordDecisionLayers } from "@/engine/quant/decisionMatrix/recordLayer";
+import { recordDecisionLayer, recordDecisionLayers } from "@/engine/quant/decisionMatrix/recordLayer";
 import { notEvaluated, type DecisionLayerRecord } from "@/engine/quant/decisionMatrix/types";
 import { detectVolatilityEdge } from "@/engine/quant/decisionMatrix/volatilityEdge";
+import { checkDataFreshness } from "@/engine/quant/decisionMatrix/dataQuality";
 import { AlpacaOptionsProvider } from "@/engine/trading/providers/AlpacaOptionsProvider";
 import { AlpacaPaperTradingProvider } from "@/engine/trading/providers/AlpacaPaperTradingProvider";
 import { placeOrder } from "@/app/(app)/hedge-fund/paper-trading/actions";
@@ -67,6 +68,17 @@ export async function runBatchScan(
     const strategist = new QuantStrategist();
     const scanner = new BatchScanner();
     const results: BatchRunResult[] = [];
+
+    // Data Quality Gate v1 needs a Supabase client to look up each
+    // ticker's real last_seen_at -- same client-selection pattern as
+    // logBatchDecision() below: service role for the autonomous/cron
+    // path, the real session client for a manual UI-triggered run.
+    let dataQualitySupabase;
+    if (overrideUserId) {
+        dataQualitySupabase = createServiceRoleClient();
+    } else {
+        dataQualitySupabase = await createClient();
+    }
     let executionsThisRun = 0;
 
     try {
@@ -75,6 +87,50 @@ export async function runBatchScan(
         if (!ticker) continue;
 
         try {
+            // Data Quality Gate v1 -- hard prerequisite, evaluated
+            // before anything else. A manually-typed ticker with no
+            // opportunities row has no real last_seen_at -- that's a
+            // genuine DATA_UNAVAILABLE, not an error, per the same
+            // honesty discipline used everywhere else in this app.
+            const oppLookup = await dataQualitySupabase
+                .from("opportunities")
+                .select("last_seen_at")
+                .eq("ticker", ticker)
+                .order("last_seen_at", { ascending: false })
+                .limit(1)
+                .maybeSingle();
+            const dataQuality = checkDataFreshness(oppLookup.data?.last_seen_at ?? null);
+
+            await recordDecisionLayer({
+                runId, decisionId: null, ticker, layer: "data_quality",
+                decision: dataQuality.reasonCode, confidence: null,
+                status: dataQuality.status === "SKIP" ? "SKIP" : "PASS",
+                reasonCode: dataQuality.reasonCode,
+                evidenceRefs: {
+                    dataAgeMinutes: dataQuality.dataAgeMinutes,
+                    thresholdMinutes: dataQuality.thresholdMinutes,
+                    lastSeenAt: dataQuality.lastSeenAt,
+                },
+                modelVersion: "v1",
+            });
+
+            if (dataQuality.status === "SKIP") {
+                for (const layer of ["universe", "opportunity", "edge", "volatility", "strategy", "instrument", "contract", "risk", "execution"] as const) {
+                    await recordDecisionLayer(notEvaluated(runId, ticker, layer));
+                }
+                results.push({
+                    ticker,
+                    outcome: "unavailable",
+                    reason: `Data quality gate: ${dataQuality.reasonCode} (age: ${dataQuality.dataAgeMinutes ?? "unknown"} min)`,
+                    plan: null,
+                    selectedContract: null,
+                    suggestedQty: null,
+                    executed: false,
+                    orderStatus: null,
+                });
+                continue;
+            }
+
             const research = await new ResearchService().load(ticker);
             const plan = strategist.buildTradePlan(research.committee);
 
@@ -97,7 +153,7 @@ export async function runBatchScan(
                         suggestedQty = strategist.suggestQuantity(plan, selectedContract, accountEquity);
                     }
                 } catch {
-                    // Real chain fetch can fail independently ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â evaluate() handles a null selectedContract with a real reject reason.
+                    // Real chain fetch can fail independently ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â evaluate() handles a null selectedContract with a real reject reason.
                 }
             }
 

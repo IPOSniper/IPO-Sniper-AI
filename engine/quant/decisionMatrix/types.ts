@@ -14,6 +14,7 @@
  */
 
 export type DecisionLayerName =
+    | "data_quality"
     | "universe"
     | "opportunity"
     | "edge"
