@@ -20,6 +20,7 @@ export default function WorkstationShell({ research, ticker }: Props) {
 
         <div className="space-y-4 text-white">
 
+            <h1 className="text-2xl font-bold mb-1">Workstation</h1>
             <CommandBar research={research} />
             <PriceChart ticker={research.company.ticker} />
             <ProcessStepper research={research} />
