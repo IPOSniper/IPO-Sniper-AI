@@ -84,16 +84,16 @@ const INSTRUMENT_LABELS: Record<string, string> = {
 };
 
 // What each instrument actually represents, and why its move matters
-// today — shown when a card is expanded, so clicking an index teaches
+// today ... shown when a card is expanded, so clicking an index teaches
 // something instead of just restating the number already on the card.
 const INSTRUMENT_BLURBS: Record<string, string> = {
     DIA: "A real ETF tracking the Dow Jones Industrial Average at roughly 1/100th its level (Dow ~53,800 -> DIA ~$538) -- the price shown is the real ETF price, not the raw index level. 30 large industrial-era blue-chip stocks, price-weighted (not market-cap weighted), so it can move differently than SPY/QQQ on the same day.",
     SPY: "A real ETF tracking the S&P 500 at roughly 1/10th its level (S&P ~7,700 -> SPY ~$770) -- the price shown is the real ETF price, not the raw index level. The 500 largest U.S. companies, the most common single \"the market\" proxy professionals quote.",
     QQQ: "A real ETF tracking the Nasdaq-100 specifically -- the 100 largest non-financial companies on the Nasdaq, NOT the same as the broader \"Nasdaq Composite\" index (~3,000+ companies) you may see quoted elsewhere. The two are different baskets, not the same index at a different scale, so there's no simple multiplier between QQQ's price and a Nasdaq Composite headline number. Heavily weighted toward large tech, so it tends to swing harder than SPY on rate and growth-outlook news.",
     IWM: "A real ETF tracking the Russell 2000 at roughly 1/10th its level (Russell ~3,030 -> IWM ~$303) -- the price shown is the real ETF price, not the raw index level. Small-cap U.S. stocks, more sensitive to domestic economic conditions and borrowing costs, so IWM is often read as a gauge of risk appetite.",
-    VIX: "The \"fear gauge\" — the market's expectation of S&P 500 volatility over the next 30 days, derived from options prices. Rises when investors pay up for downside protection.",
-    GLD: "Tracks the price of gold — a traditional safe-haven asset investors rotate into during uncertainty, inflation concern, or when they distrust currencies/bonds.",
-    TLT: "Tracks long-term (20+ year) U.S. Treasury bonds. Prices move opposite to interest-rate expectations — TLT tends to rise when investors expect rates to fall or when they want a safe, government-backed asset.",
+    VIX: "The \"fear gauge\" ... the market's expectation of S&P 500 volatility over the next 30 days, derived from options prices. Rises when investors pay up for downside protection.",
+    GLD: "Tracks the price of gold ... a traditional safe-haven asset investors rotate into during uncertainty, inflation concern, or when they distrust currencies/bonds.",
+    TLT: "Tracks long-term (20+ year) U.S. Treasury bonds. Prices move opposite to interest-rate expectations ... TLT tends to rise when investors expect rates to fall or when they want a safe, government-backed asset.",
 };
 
 function QASection({ title, children }: { title: string; children: React.ReactNode }) {
@@ -117,7 +117,7 @@ function BulletList({ items }: { items?: string[] }) {
 /**
  * Deterministic, no-AI-required read on the day's cross-asset pattern.
  * Renders even when ANTHROPIC_API_KEY isn't configured, so the page
- * isn't blank/unexplained just because the AI layer is off — it's a
+ * isn't blank/unexplained just because the AI layer is off ... it's a
  * plain-language description of the shape of the data itself, not an
  * interpretation of *why*.
  */
@@ -134,10 +134,10 @@ function describePattern(quotes: Record<string, Quote>): string | null {
     const bondsUp = bonds ? bonds.changePercent > 0.1 : false;
 
     if (equitiesDown && (goldUp || bondsUp)) {
-        return "Stocks are down today while gold and/or long bonds are up — a pattern often described as \"risk-off,\" where money rotates out of equities and into assets seen as safer.";
+        return "Stocks are down today while gold and/or long bonds are up ... a pattern often described as \"risk-off,\" where money rotates out of equities and into assets seen as safer.";
     }
     if (equitiesUp && !goldUp) {
-        return "Stocks are broadly higher today with safe-haven assets like gold flat or lower — a \"risk-on\" pattern, where investors are more willing to hold riskier assets.";
+        return "Stocks are broadly higher today with safe-haven assets like gold flat or lower ... a \"risk-on\" pattern, where investors are more willing to hold riskier assets.";
     }
     if (equitiesDown) {
         return "Equity indexes are down today. Safe-haven assets (gold, long bonds) aren't showing a clear offsetting move, so this doesn't read as a strong flight-to-safety day.";
@@ -147,7 +147,7 @@ function describePattern(quotes: Record<string, Quote>): string | null {
 
 /**
  * Real, computed directly from the same quotes already fetched for
- * the index row above — % of tracked instruments up vs down today.
+ * the index row above ... % of tracked instruments up vs down today.
  * Zero new API calls, zero interpretation layered on top.
  */
 function marketBreadth(quotes: Record<string, Quote>): { upCount: number; downCount: number; upPercent: number } | null {
@@ -161,16 +161,16 @@ function marketBreadth(quotes: Record<string, Quote>): { upCount: number; downCo
 /**
  * Short sentiment label + a 0-100 gauge position, derived from the
  * EXACT same branching logic as describePattern() so the gauge and
- * the paragraph can never contradict each other — this is one
+ * the paragraph can never contradict each other ... this is one
  * classification computed once, presented two ways.
  */
 const CONCEPT_LIBRARY: Array<{ term: string; definition: string }> = [
     { term: "Risk-on / Risk-off", definition: "Shorthand for whether investors are broadly seeking riskier assets (stocks, small-caps) or rotating into safer ones (gold, long bonds, cash)." },
-    { term: "Basis point (bp)", definition: "1/100th of a percentage point. A move from 4.00% to 4.25% is \"25 basis points\" — more precise than percentages for small rate changes." },
-    { term: "Market breadth", definition: "How many individual instruments are participating in a move, not just the headline index number — a rally on narrow breadth reads differently than one where almost everything is up." },
+    { term: "Basis point (bp)", definition: "1/100th of a percentage point. A move from 4.00% to 4.25% is \"25 basis points\" ... more precise than percentages for small rate changes." },
+    { term: "Market breadth", definition: "How many individual instruments are participating in a move, not just the headline index number ... a rally on narrow breadth reads differently than one where almost everything is up." },
     { term: "Volatility (VIX)", definition: "The market's expectation of how much the S&P 500 will swing over the next 30 days, priced from options. Often called the \"fear gauge.\"" },
-    { term: "Safe haven", definition: "An asset investors rotate into during uncertainty because it's expected to hold value — gold and long-dated government bonds are the classic examples." },
-    { term: "Yield", definition: "The return an investor earns on a bond. Yields rise when bond prices fall, and vice versa — they move in opposite directions." },
+    { term: "Safe haven", definition: "An asset investors rotate into during uncertainty because it's expected to hold value ... gold and long-dated government bonds are the classic examples." },
+    { term: "Yield", definition: "The return an investor earns on a bond. Yields rise when bond prices fall, and vice versa ... they move in opposite directions." },
 ];
 
 export default function MarketPulseSection() {
@@ -208,29 +208,29 @@ export default function MarketPulseSection() {
     return (
         <div className="space-y-5">
 
-            {/* Purpose banner — states plainly what this page is and isn't for */}
+            {/* Purpose banner ... states plainly what this page is and isn't for */}
             <div className="rounded-xl border border-zinc-800 bg-zinc-900/60 p-4">
                 <p className="text-sm text-zinc-300">
                     <span className="font-semibold text-white">What this page is for: </span>
-                    understanding what moved markets today, why, and how confident that explanation actually is —
+                    understanding what moved markets today, why, and how confident that explanation actually is ...
                     not a signal to act on. Click any index below to learn what it tracks and why its move matters.
                 </p>
             </div>
 
-            {/* Static disclaimer — always shown regardless of AI output */}
+            {/* Static disclaimer ... always shown regardless of AI output */}
             <div className="flex items-start gap-2 rounded-lg border border-amber-900/50 bg-amber-950/20 p-3 text-xs text-amber-400">
                 <AlertTriangle size={14} className="mt-0.5 shrink-0" />
                 <span>
-                    Educational content only — not financial or investment advice. IPO Sniper AI is not a
+                    Educational content only ... not financial or investment advice. IPO Sniper AI is not a
                     registered investment adviser. Nothing here is a recommendation to buy, sell, or hold any
                     security.
                 </span>
             </div>
 
-            {/* Sentiment gauge + market breadth — both computed directly
+            {/* Sentiment gauge + market breadth ... both computed directly
                 from the same quotes fetched for the index row below,
                 no new data source, no AI call. Real numbers, not the
-                mockup's decorative arc — a plain bar and a percentage. */}
+                mockup's decorative arc ... a plain bar and a percentage. */}
             {!loading && data && Object.keys(data.quotes).length > 0 && (
                 <div className="grid gap-3 sm:grid-cols-2">
                     {classifyMarketRegime(data.quotes) && (
@@ -260,13 +260,13 @@ export default function MarketPulseSection() {
 
             {loading && (
                 <div className="rounded-xl border border-zinc-800 bg-zinc-900 p-8 text-center text-sm text-zinc-500">
-                    Loading market pulse…
+                    Loading your market pulse...
                 </div>
             )}
 
             {!loading && data && Object.keys(data.quotes).length > 0 && (
                 <>
-                    {/* Instrument row — click a card to expand what it means and why it moved */}
+                    {/* Instrument row ... click a card to expand what it means and why it moved */}
                     <div ref={containerRef} className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3">
                         {Object.entries(data.quotes).map(([symbol, q]) => {
                             const up = q.changePercent >= 0;
@@ -285,7 +285,7 @@ export default function MarketPulseSection() {
                                     <p className="mt-1 text-lg font-semibold text-white">{q.price.toFixed(2)}</p>
                                     {INDEX_DIVISOR[symbol] && (
                                         <p className="text-[10px] text-zinc-600">
-                                            ≈{(q.price * INDEX_DIVISOR[symbol]!).toLocaleString(undefined, { maximumFractionDigits: 0 })} index-equiv. (derived)
+                                            ...{(q.price * INDEX_DIVISOR[symbol]!).toLocaleString(undefined, { maximumFractionDigits: 0 })} index-equiv. (derived)
                                         </p>
                                     )}
                                     <p className={`flex items-center gap-1 text-xs mt-0.5 font-medium ${up ? "text-emerald-400" : "text-red-400"}`}>
@@ -297,7 +297,7 @@ export default function MarketPulseSection() {
                                         <div className="mt-3 border-t border-zinc-800 pt-3 text-sm text-zinc-300">
                                             <p>{INSTRUMENT_BLURBS[symbol] ?? "No description available."}</p>
                                             <p className="mt-2 text-xs text-zinc-500">
-                                                Previous close: {q.previousClose.toFixed(2)} · Change: {q.change >= 0 ? "+" : ""}{q.change.toFixed(2)}
+                                                Previous close: {q.previousClose.toFixed(2)} ... Change: {q.change >= 0 ? "+" : ""}{q.change.toFixed(2)}
                                             </p>
                                         </div>
                                     )}
@@ -306,7 +306,7 @@ export default function MarketPulseSection() {
                         })}
                     </div>
 
-                    {/* Plain-language read on the chart — always renders, doesn't need AI */}
+                    {/* Plain-language read on the chart ... always renders, doesn't need AI */}
                     {describePattern(data.quotes) && (
                         <div className="rounded-xl border border-violet-900/40 bg-violet-950/10 p-4">
                             <p className="text-sm text-zinc-200">{describePattern(data.quotes)}</p>
@@ -333,7 +333,7 @@ export default function MarketPulseSection() {
                                     labelStyle={{ color: "#e4e4e7" }}
                                     formatter={(value) => {
                                         const n = typeof value === "number" ? value : Number(value);
-                                        if (!Number.isFinite(n)) return ["—", "Change"];
+                                        if (!Number.isFinite(n)) return ["...", "Change"];
                                         return [`${n > 0 ? "+" : ""}${n}%`, "Change"];
                                     }}
                                 />
@@ -367,14 +367,14 @@ export default function MarketPulseSection() {
                 <div className="space-y-4">
                     <div className="flex items-center gap-1.5 text-xs font-medium text-violet-400">
                         <Sparkles size={12} />
-                        AI ANALYSIS — educational interpretation, not verified fact or advice
+                        AI ANALYSIS ... educational interpretation, not verified fact or advice
                     </div>
 
                     {data.pulse.headline && (
                         <h2 className="text-xl font-bold text-white">{data.pulse.headline}</h2>
                     )}
 
-                    {/* Evidence + uncertainty come first and get their own visual weight —
+                    {/* Evidence + uncertainty come first and get their own visual weight ...
                         this is the "justify reasoning, name uncertainty, say what would
                         change your mind" framing, front and center rather than buried
                         among the other Q&A cards. */}
@@ -447,11 +447,11 @@ export default function MarketPulseSection() {
 
             {!loading && data && !data.pulse.available && (
                 <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-3 text-sm text-zinc-500">
-                    AI analysis unavailable — {data.pulse.reason ?? "not configured."}
+                    AI analysis unavailable ... {data.pulse.reason ?? "not configured."}
                     {data.pulse.reason?.includes("ANTHROPIC_API_KEY") && (
                         <span className="block mt-1 text-xs text-zinc-600">
                             Set ANTHROPIC_API_KEY in your .env.local and restart the dev server to enable the
-                            AI explainer — the index cards and chart above use real data either way.
+                            AI explainer ... the index cards and chart above use real data either way.
                         </span>
                     )}
                 </div>
@@ -473,12 +473,12 @@ export default function MarketPulseSection() {
                                         <ExternalLink size={13} className="mt-0.5 shrink-0 text-zinc-500 group-hover:text-zinc-300" />
                                         <span>
                                             {h.headline}{" "}
-                                            <span className="text-zinc-500">— {h.source}</span>
+                                            <span className="text-zinc-500">... {h.source}</span>
                                         </span>
                                     </a>
                                 ) : (
                                     <span className="text-sm text-zinc-400">
-                                        {h.headline} <span className="text-zinc-500">— {h.source}</span>
+                                        {h.headline} <span className="text-zinc-500">... {h.source}</span>
                                     </span>
                                 )}
                             </li>
@@ -571,7 +571,7 @@ function ShareImageDownload() {
                     className="inline-flex items-center gap-2 rounded-lg border border-zinc-700 bg-zinc-900 px-4 py-2.5 text-sm font-medium text-zinc-200 hover:border-emerald-600 hover:text-white transition disabled:opacity-50"
                 >
                     <Download size={14} />
-                    {status === "loading" ? "Generating…" : "Preview for Twitter / X"}
+                    {status === "loading" ? "Generating..." : "Preview for Twitter / X"}
                 </button>
                 {status === "error" && <p className="mt-2 text-sm text-red-400">{errorMessage}</p>}
             </div>
@@ -582,7 +582,7 @@ function ShareImageDownload() {
         <div className="space-y-2">
             {/* eslint-disable-next-line @next/next/no-img-element -- object URL preview, not a static asset */}
             <a href={previewUrl} target="_blank" rel="noopener noreferrer" title="Click to open full size in a new tab">
-                <img src={previewUrl} alt="Market Pulse share card" className="w-full max-w-2xl rounded-lg border border-zinc-800 transition hover:border-violet-600" />
+                <img src={previewUrl} alt="Your Market Pulse share card" className="w-full max-w-2xl rounded-lg border border-zinc-800 transition hover:border-violet-600" />
             </a>
             <p className="text-xs text-zinc-500">Click the image to open it full size in a new tab.</p>
             <div className="flex gap-2">

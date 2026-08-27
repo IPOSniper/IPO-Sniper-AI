@@ -36,7 +36,7 @@ export default function WorkstationPage() {
  <div className="flex items-center gap-3">
  <GraduationCap size={16} className="text-violet-300" />
  <p className="text-xs font-semibold text-white">
- Market Pulse
+ Your Market Pulse
  <span className="ml-2 font-normal text-zinc-400">Dow -- S&amp;P -- Nasdaq -- Gold -- Bonds</span>
  </p>
  </div>
