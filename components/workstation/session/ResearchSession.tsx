@@ -1,4 +1,4 @@
-﻿import { WorkstationPanelProps } from "../contracts/WorkstationPanelProps";
+import { WorkstationPanelProps } from "../contracts/WorkstationPanelProps";
 
 import MissionControlHeader from "../panels/MissionControlHeader";
 import AIVerdictRow from "../panels/AIVerdictRow";

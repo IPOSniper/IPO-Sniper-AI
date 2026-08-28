@@ -1,4 +1,4 @@
-﻿import { WorkstationPanelProps } from "../contracts/WorkstationPanelProps";
+import { WorkstationPanelProps } from "../contracts/WorkstationPanelProps";
 
 export default function InvestorDecisionCenter({ research }: WorkstationPanelProps) {
  const { committee, investmentDecision } = research;

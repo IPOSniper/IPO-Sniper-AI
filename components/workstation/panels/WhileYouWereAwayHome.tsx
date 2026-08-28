@@ -1,4 +1,4 @@
-﻿import Link from "next/link";
+import Link from "next/link";
 import { getWhileYouWereAwayHome } from "@/app/(app)/workstation/while-you-were-away/actions";
 
 export default async function WhileYouWereAwayHome() {

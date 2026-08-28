@@ -1,4 +1,4 @@
-﻿import type { CompanySection, MarketSection } from "@/types/ResearchWorkstation";
+import type { CompanySection, MarketSection } from "@/types/ResearchWorkstation";
 
 interface CompanyHeaderProps {
  company: CompanySection;

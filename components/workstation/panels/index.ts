@@ -1,4 +1,4 @@
-﻿export { default as CatalystPanel } from "./CatalystPanel";
+export { default as CatalystPanel } from "./CatalystPanel";
 export { default as CommitteePanel } from "./CommitteePanel";
 export { default as EarningsPanel } from "./EarningsPanel";
 export { default as EvidencePanel } from "./EvidencePanel";

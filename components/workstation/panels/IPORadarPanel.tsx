@@ -1,4 +1,4 @@
-﻿import Link from "next/link";
+import Link from "next/link";
 import { FinnhubIPOProvider, type IPOCalendarEntry } from "@/engine/evidence/providers/FinnhubIPOProvider";
 import { SECEdgarProvider } from "@/engine/evidence/providers/SECEdgarProvider";
 

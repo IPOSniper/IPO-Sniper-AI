@@ -1,4 +1,4 @@
-﻿import { WorkstationPanelProps } from "../contracts/WorkstationPanelProps";
+import { WorkstationPanelProps } from "../contracts/WorkstationPanelProps";
 
 import EvidenceSummaryGrid from "../panels/EvidenceSummaryGrid/EvidenceSummaryGrid";
 import ExecutiveSummaryPanel from "../panels/ExecutiveSummaryPanel";

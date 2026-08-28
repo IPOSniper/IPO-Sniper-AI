@@ -1,4 +1,4 @@
-﻿import { WorkstationPanelProps } from "../contracts/WorkstationPanelProps";
+import { WorkstationPanelProps } from "../contracts/WorkstationPanelProps";
 
 import { ResearchSession } from "../session";
 

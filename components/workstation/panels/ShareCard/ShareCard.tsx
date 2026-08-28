@@ -1,4 +1,4 @@
-﻿import { forwardRef } from "react";
+import { forwardRef } from "react";
 import { WorkstationPanelProps } from "../../contracts/WorkstationPanelProps";
 import { excludeAnalysts, recommendationToRating, recommendationToHeadline, strengthLabel } from "../../shared/scorePresentation";
 import { buildCommitteePhotoAssignments } from "../committeeAvatars";

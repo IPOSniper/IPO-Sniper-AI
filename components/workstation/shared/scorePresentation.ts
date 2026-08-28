@@ -1,4 +1,4 @@
-﻿import type { CommitteeReport } from "@/engine/committee/contracts/CommitteeReport";
+import type { CommitteeReport } from "@/engine/committee/contracts/CommitteeReport";
 import type { AnalystReport } from "@/engine/committee/contracts/AnalystReport";
 import type { Recommendation } from "@/engine/committee/contracts/types";
 

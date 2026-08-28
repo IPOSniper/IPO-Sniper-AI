@@ -1,4 +1,4 @@
-﻿import Link from "next/link";
+import Link from "next/link";
 import { getContinueWhereYouLeftOff } from "@/app/(app)/workstation/continue-research/actions";
 
 function timeAgo(dateStr: string): string {

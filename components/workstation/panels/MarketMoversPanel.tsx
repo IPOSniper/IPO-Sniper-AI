@@ -1,4 +1,4 @@
-﻿import Link from "next/link";
+import Link from "next/link";
 import { getGainersAndLosers, fetchAssetInfoBatch, type PriceMover } from "@/engine/evidence/providers/AlpacaMoversProvider";
 
 async function getFilteredMovers(): Promise<{ gainers: PriceMover[]; losers: PriceMover[]; filteredByAsset: boolean }> {
