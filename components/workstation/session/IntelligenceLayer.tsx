@@ -27,8 +27,8 @@ return(
 <ExecutiveSummaryPanel research={research} />
 
 <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-    <ConvictionRadar research={research} />
-    <RecommendationPanel research={research} />
+ <ConvictionRadar research={research} />
+ <RecommendationPanel research={research} />
 </div>
 
 <CommitteePanel research={research} />
@@ -37,13 +37,13 @@ return(
 <PortfolioIntelligence research={research} />
 
 <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-    <FinancialOverviewChart research={research} />
-    <ValuationSummary />
+ <FinancialOverviewChart research={research} />
+ <ValuationSummary />
 </div>
 
 <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-    <NewsSentimentDonut research={research} />
-    <EvidencePanel research={research} />
+ <NewsSentimentDonut research={research} />
+ <EvidencePanel research={research} />
 </div>
 
 <RiskPanel research={research} />
@@ -51,12 +51,12 @@ return(
 <EarningsPanel research={research} />
 
 <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-4">
-    <h2 className="mb-1 text-lg font-semibold">Share Research Card</h2>
-    <p className="mb-3 text-xs text-zinc-600">
-        Excludes News data — NewsAPI&apos;s free tier terms forbid production/public use.
-        Recommendation shown is recomputed without the News Analyst&apos;s vote.
-    </p>
-    <ShareCardButton research={research} />
+ <h2 className="mb-1 text-lg font-semibold">Share Research Card</h2>
+ <p className="mb-3 text-xs text-zinc-600">
+ Excludes News data - NewsAPI&apos;s free tier terms forbid production/public use.
+ Recommendation shown is recomputed without the News Analyst&apos;s vote.
+ </p>
+ <ShareCardButton research={research} />
 </div>
 </section>
 );

@@ -8,7 +8,7 @@ import IntelligenceLayer from "./IntelligenceLayer";
 import OperationsLayer from "./OperationsLayer";
 
 export default function ResearchSession({
-    research,
+ research,
 }: WorkstationPanelProps){
 
 return(

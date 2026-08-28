@@ -1,0 +1,1 @@
+$env:VERCEL_TOKEN = "PASTE_HERE"

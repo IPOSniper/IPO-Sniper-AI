@@ -3,7 +3,7 @@
 import { ResearchSession } from "../session";
 
 export default function ResearchViewport({
-    research,
+ research,
 }: WorkstationPanelProps){
 
 return(

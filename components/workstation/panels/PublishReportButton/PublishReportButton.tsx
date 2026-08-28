@@ -5,77 +5,77 @@ import { publishResearchAction } from "@/app/(app)/research/[ticker]/actions";
 import { WorkstationPanelProps } from "../../contracts/WorkstationPanelProps";
 
 export default function PublishReportButton({ research }: WorkstationPanelProps) {
-    const [status, setStatus] = useState<"idle" | "publishing" | "done" | "error">("idle");
-    const [shareUrl, setShareUrl] = useState<string | null>(null);
-    const [errorMessage, setErrorMessage] = useState<string | null>(null);
-    const [copied, setCopied] = useState(false);
+ const [status, setStatus] = useState<"idle" | "publishing" | "done" | "error">("idle");
+ const [shareUrl, setShareUrl] = useState<string | null>(null);
+ const [errorMessage, setErrorMessage] = useState<string | null>(null);
+ const [copied, setCopied] = useState(false);
 
-    async function handlePublish() {
-        setStatus("publishing");
-        setErrorMessage(null);
+ async function handlePublish() {
+ setStatus("publishing");
+ setErrorMessage(null);
 
-        const result = await publishResearchAction(research);
+ const result = await publishResearchAction(research);
 
-        if (result.success && result.shareUrl) {
-            setShareUrl(result.shareUrl);
-            setStatus("done");
-        } else {
-            setStatus("error");
-            setErrorMessage(result.error ?? "Could not publish report.");
-        }
-    }
+ if (result.success && result.shareUrl) {
+ setShareUrl(result.shareUrl);
+ setStatus("done");
+ } else {
+ setStatus("error");
+ setErrorMessage(result.error ?? "Could not publish report.");
+ }
+ }
 
-    async function handleCopy() {
-        if (!shareUrl) return;
-        await navigator.clipboard.writeText(shareUrl);
-        setCopied(true);
-        setTimeout(() => setCopied(false), 1500);
-    }
+ async function handleCopy() {
+ if (!shareUrl) return;
+ await navigator.clipboard.writeText(shareUrl);
+ setCopied(true);
+ setTimeout(() => setCopied(false), 1500);
+ }
 
-    if (status === "done" && shareUrl) {
-        // Deliberately doesn't explain the QR code -- the card
-        // itself already says "Scan for full report," which is a
-        // clearer CTA than a caption trying to describe it. Also
-        // deliberately says "public evidence," not just "research" --
-        // the card's own footer discloses that proprietary/licensed
-        // inputs are omitted, so the caption shouldn't imply
-        // completeness the card itself doesn't claim.
-        const xIntent = `https://twitter.com/intent/tweet?text=${encodeURIComponent(
-            `${research.company.ticker} — public evidence from IPO Sniper AI's AI Committee, every claim sourced:`
-        )}&url=${encodeURIComponent(shareUrl)}`;
+ if (status === "done" && shareUrl) {
+ // Deliberately doesn't explain the QR code -- the card
+ // itself already says "Scan for full report," which is a
+ // clearer CTA than a caption trying to describe it. Also
+ // deliberately says "public evidence," not just "research" --
+ // the card's own footer discloses that proprietary/licensed
+ // inputs are omitted, so the caption shouldn't imply
+ // completeness the card itself doesn't claim.
+ const xIntent = `https://twitter.com/intent/tweet?text=${encodeURIComponent(
+ `${research.company.ticker} - public evidence from IPO Sniper AI's AI Committee, every claim sourced:`
+ )}&url=${encodeURIComponent(shareUrl)}`;
 
-        return (
-            <div className="flex items-center gap-2">
-                <button
-                    type="button"
-                    onClick={handleCopy}
-                    className="rounded-lg border border-zinc-700 px-3 py-2 text-xs font-medium text-zinc-300 hover:border-zinc-500 hover:text-white"
-                >
-                    {copied ? "Copied ✓" : "Copy Link"}
-                </button>
-                <a
-                    href={xIntent}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="rounded-lg bg-violet-600 px-3 py-2 text-xs font-semibold text-white hover:bg-violet-500"
-                >
-                    Share on X
-                </a>
-            </div>
-        );
-    }
+ return (
+ <div className="flex items-center gap-2">
+ <button
+ type="button"
+ onClick={handleCopy}
+ className="rounded-lg border border-zinc-700 px-3 py-2 text-xs font-medium text-zinc-300 hover:border-zinc-500 hover:text-white"
+ >
+ {copied ? "Copied -" : "Copy Link"}
+ </button>
+ <a
+ href={xIntent}
+ target="_blank"
+ rel="noopener noreferrer"
+ className="rounded-lg bg-violet-600 px-3 py-2 text-xs font-semibold text-white hover:bg-violet-500"
+ >
+ Share on X
+ </a>
+ </div>
+ );
+ }
 
-    return (
-        <button
-            type="button"
-            onClick={handlePublish}
-            disabled={status === "publishing"}
-            title={status === "error" ? errorMessage ?? undefined : "Publish a public, shareable version of this report"}
-            className="rounded-lg border border-zinc-700 px-4 py-2 text-sm font-medium text-zinc-300 hover:border-zinc-500 hover:text-white disabled:opacity-60"
-        >
-            {status === "publishing" ? "Publishing..." :
-             status === "error" ? "Failed — retry?" :
-             "Publish Report"}
-        </button>
-    );
+ return (
+ <button
+ type="button"
+ onClick={handlePublish}
+ disabled={status === "publishing"}
+ title={status === "error" ? errorMessage ?? undefined : "Publish a public, shareable version of this report"}
+ className="rounded-lg border border-zinc-700 px-4 py-2 text-sm font-medium text-zinc-300 hover:border-zinc-500 hover:text-white disabled:opacity-60"
+ >
+ {status === "publishing" ? "Publishing..." :
+ status === "error" ? "Failed - retry?" :
+ "Publish Report"}
+ </button>
+ );
 }

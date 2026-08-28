@@ -1,0 +1,1171 @@
+﻿**********************
+Windows PowerShell transcript start
+Start time: 20260827193821
+Username: HANIBELLBARCA\inago
+RunAs User: HANIBELLBARCA\inago
+Configuration Name: 
+Machine: HANIBELLBARCA (Microsoft Windows NT 10.0.26200.0)
+Host Application: C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe -noexit -command try { . "c:\Users\inago\AppData\Local\Programs\Microsoft VS Code\a5b5009513\resources\app\out\vs\workbench\contrib\terminal\common\scripts\shellIntegration.ps1" } catch {}
+Process ID: 74596
+PSVersion: 5.1.26100.9168
+PSEdition: Desktop
+PSCompatibleVersions: 1.0, 2.0, 3.0, 4.0, 5.0, 5.1.26100.9168
+BuildVersion: 10.0.26100.9168
+CLRVersion: 4.0.30319.42000
+WSManStackVersion: 3.0
+PSRemotingProtocolVersion: 2.3
+SerializationVersion: 1.1.0.1
+**********************
+Transcript started, output file is C:\Users\inago\dev\IPO_Sniper_AI_v4\bootstrap-master-20260827-193821.log
+]633;D;0]633;A]633;P;Cwd=C:\x5cUsers\x5cinago\x5cdev\x5cIPO_Sniper_AI_v4PS C:\Users\inago\dev\IPO_Sniper_AI_v4> ]633;B
+]633;D]633;A]633;P;Cwd=C:\x5cUsers\x5cinago\x5cdev\x5cIPO_Sniper_AI_v4PS C:\Users\inago\dev\IPO_Sniper_AI_v4> ]633;B
+PS>Write-Host ""
+
+]633;D;0]633;A]633;P;Cwd=C:\x5cUsers\x5cinago\x5cdev\x5cIPO_Sniper_AI_v4PS C:\Users\inago\dev\IPO_Sniper_AI_v4> ]633;B
+PS>Write-Host "============================================================"
+============================================================
+]633;D;0]633;A]633;P;Cwd=C:\x5cUsers\x5cinago\x5cdev\x5cIPO_Sniper_AI_v4PS C:\Users\inago\dev\IPO_Sniper_AI_v4> ]633;B
+PS>Write-Host " IPO SNIPER AI — MASTER BOOTSTRAP"
+ IPO SNIPER AI — MASTER BOOTSTRAP
+]633;D;0]633;A]633;P;Cwd=C:\x5cUsers\x5cinago\x5cdev\x5cIPO_Sniper_AI_v4PS C:\Users\inago\dev\IPO_Sniper_AI_v4> ]633;B
+PS>Write-Host "============================================================"
+============================================================
+]633;D;0]633;A]633;P;Cwd=C:\x5cUsers\x5cinago\x5cdev\x5cIPO_Sniper_AI_v4PS C:\Users\inago\dev\IPO_Sniper_AI_v4> ]633;B
+PS>Write-Host "Root: $Root"
+Root: C:\Users\inago\dev\IPO_Sniper_AI_v4
+]633;D;0]633;A]633;P;Cwd=C:\x5cUsers\x5cinago\x5cdev\x5cIPO_Sniper_AI_v4PS C:\Users\inago\dev\IPO_Sniper_AI_v4> ]633;B
+PS>Write-Host "Time: $(Get-Date)"
+Time: 08/27/2026 19:38:22
+]633;D;0]633;A]633;P;Cwd=C:\x5cUsers\x5cinago\x5cdev\x5cIPO_Sniper_AI_v4PS C:\Users\inago\dev\IPO_Sniper_AI_v4> ]633;B
+PS>Write-Host ""
+
+]633;D;0]633;A]633;P;Cwd=C:\x5cUsers\x5cinago\x5cdev\x5cIPO_Sniper_AI_v4PS C:\Users\inago\dev\IPO_Sniper_AI_v4> ]633;B
+]633;D]633;A]633;P;Cwd=C:\x5cUsers\x5cinago\x5cdev\x5cIPO_Sniper_AI_v4PS C:\Users\inago\dev\IPO_Sniper_AI_v4> ]633;B
+PS># ------------------------------------------------------------
+]633;D;0]633;A]633;P;Cwd=C:\x5cUsers\x5cinago\x5cdev\x5cIPO_Sniper_AI_v4PS C:\Users\inago\dev\IPO_Sniper_AI_v4> ]633;B
+PS># 1. GIT STATE
+]633;D;0]633;A]633;P;Cwd=C:\x5cUsers\x5cinago\x5cdev\x5cIPO_Sniper_AI_v4PS C:\Users\inago\dev\IPO_Sniper_AI_v4> ]633;B
+PS># ------------------------------------------------------------
+]633;D;0]633;A]633;P;Cwd=C:\x5cUsers\x5cinago\x5cdev\x5cIPO_Sniper_AI_v4PS C:\Users\inago\dev\IPO_Sniper_AI_v4> ]633;B
+]633;D]633;A]633;P;Cwd=C:\x5cUsers\x5cinago\x5cdev\x5cIPO_Sniper_AI_v4PS C:\Users\inago\dev\IPO_Sniper_AI_v4> ]633;B
+PS>Write-Host "`n=== 1. GIT STATE ===" -ForegroundColor Cyan
+
+=== 1. GIT STATE ===
+]633;D;0]633;A]633;P;Cwd=C:\x5cUsers\x5cinago\x5cdev\x5cIPO_Sniper_AI_v4PS C:\Users\inago\dev\IPO_Sniper_AI_v4> ]633;B
+]633;D]633;A]633;P;Cwd=C:\x5cUsers\x5cinago\x5cdev\x5cIPO_Sniper_AI_v4PS C:\Users\inago\dev\IPO_Sniper_AI_v4> ]633;B
+PS>git branch --show-current
+
+]633;D;0]633;A]633;P;Cwd=C:\x5cUsers\x5cinago\x5cdev\x5cIPO_Sniper_AI_v4PS C:\Users\inago\dev\IPO_Sniper_AI_v4> ]633;B
+PS>git status --short
+
+]633;D;0]633;A]633;P;Cwd=C:\x5cUsers\x5cinago\x5cdev\x5cIPO_Sniper_AI_v4PS C:\Users\inago\dev\IPO_Sniper_AI_v4> ]633;B
+PS>git log -5 --oneline --decorate
+
+]633;D;0]633;A]633;P;Cwd=C:\x5cUsers\x5cinago\x5cdev\x5cIPO_Sniper_AI_v4PS C:\Users\inago\dev\IPO_Sniper_AI_v4> ]633;B
+]633;D]633;A]633;P;Cwd=C:\x5cUsers\x5cinago\x5cdev\x5cIPO_Sniper_AI_v4PS C:\Users\inago\dev\IPO_Sniper_AI_v4> ]633;B
+PS># ------------------------------------------------------------
+]633;D;0]633;A]633;P;Cwd=C:\x5cUsers\x5cinago\x5cdev\x5cIPO_Sniper_AI_v4PS C:\Users\inago\dev\IPO_Sniper_AI_v4> ]633;B
+PS># 2. PROJECT STRUCTURE
+]633;D;0]633;A]633;P;Cwd=C:\x5cUsers\x5cinago\x5cdev\x5cIPO_Sniper_AI_v4PS C:\Users\inago\dev\IPO_Sniper_AI_v4> ]633;B
+PS># ------------------------------------------------------------
+]633;D;0]633;A]633;P;Cwd=C:\x5cUsers\x5cinago\x5cdev\x5cIPO_Sniper_AI_v4PS C:\Users\inago\dev\IPO_Sniper_AI_v4> ]633;B
+]633;D]633;A]633;P;Cwd=C:\x5cUsers\x5cinago\x5cdev\x5cIPO_Sniper_AI_v4PS C:\Users\inago\dev\IPO_Sniper_AI_v4> ]633;B
+PS>Write-Host "`n=== 2. APP STRUCTURE ===" -ForegroundColor Cyan
+
+=== 2. APP STRUCTURE ===
+]633;D;0]633;A]633;P;Cwd=C:\x5cUsers\x5cinago\x5cdev\x5cIPO_Sniper_AI_v4PS C:\Users\inago\dev\IPO_Sniper_AI_v4> ]633;B
+]633;D]633;A]633;P;Cwd=C:\x5cUsers\x5cinago\x5cdev\x5cIPO_Sniper_AI_v4PS C:\Users\inago\dev\IPO_Sniper_AI_v4> ]633;B
+PS>Write-Host "`n--- app routes ---"
+
+--- app routes ---
+]633;D;0]633;A]633;P;Cwd=C:\x5cUsers\x5cinago\x5cdev\x5cIPO_Sniper_AI_v4PS C:\Users\inago\dev\IPO_Sniper_AI_v4> ]633;B
+PS>Get-ChildItem ".\app" -Recurse -File -ErrorAction SilentlyContinue |
+    Where-Object {
+        $_.Name -eq "page.tsx" -or
+        $_.Name -eq "layout.tsx" -or
+        $_.Name -eq "route.ts"
+    } |
+    Select-Object FullName
+
+FullName
+--------
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\layout.tsx
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\page.tsx
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\layout.tsx
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\academy\page.tsx
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\alerts\page.tsx
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\hedge-fund\page.tsx
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\market\page.tsx
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\portfolio\page.tsx
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\research\[ticker]\page.tsx
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\settings\page.tsx
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\watchlist\page.tsx
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\workstation\page.tsx
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\api\cron\overnight-watch\route.ts
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\api\cron\quant-harness\route.ts
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\api\cron\quant-momentum\route.ts
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\api\cron\quant-opportunities\route.ts
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\api\diagnostic-newsapi\route.ts
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\api\earnings\calendar\route.ts
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\api\earnings\preview\[ticker]\route.ts
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\api\earnings\recap\[ticker]\route.ts
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\api\education\market-pulse\route.ts
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\api\forecast\route.ts
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\api\forecast\earnings\route.ts
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\api\ipo-filed\route.ts
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\api\ipo-radar-data\route.ts
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\api\ipo-strategic-signals\route.ts
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\api\ipo-watch\route.ts
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\api\live-feed\route.ts
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\api\market-news\route.ts
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\api\quant-environment\route.ts
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\api\quant-opportunity-engine\route.ts
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\api\quote\[ticker]\candles\route.ts
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\api\search\route.ts
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\auth\callback\route.ts
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\auth\sign-out\route.ts
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\companies\[ticker]\page.tsx
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\demo\page.tsx
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\dev\providers\page.tsx
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\dev\research\page.tsx
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\dev\verify\page.tsx
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\education\layout.tsx
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\education\page.tsx
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\forgot-password\page.tsx
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\ipo\[ticker]\page.tsx
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\login\page.tsx
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\mfa-challenge\page.tsx
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\privacy\page.tsx
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\r\[slug]\page.tsx
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\reset-password\page.tsx
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\signup\page.tsx
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\terms\page.tsx
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\test\page.tsx
+
+
+]633;D;0]633;A]633;P;Cwd=C:\x5cUsers\x5cinago\x5cdev\x5cIPO_Sniper_AI_v4PS C:\Users\inago\dev\IPO_Sniper_AI_v4> ]633;B
+]633;D]633;A]633;P;Cwd=C:\x5cUsers\x5cinago\x5cdev\x5cIPO_Sniper_AI_v4PS C:\Users\inago\dev\IPO_Sniper_AI_v4> ]633;B
+PS>Write-Host "`n--- components ---"
+
+--- components ---
+]633;D;0]633;A]633;P;Cwd=C:\x5cUsers\x5cinago\x5cdev\x5cIPO_Sniper_AI_v4PS C:\Users\inago\dev\IPO_Sniper_AI_v4> ]633;B
+PS>Get-ChildItem ".\components" -Recurse -File -ErrorAction SilentlyContinue |
+    Where-Object {$_.Extension -in ".tsx",".ts"} |
+    Select-Object FullName
+
+FullName
+--------
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\DashboardCard.tsx
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\MarketHeader.tsx
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\TopNav.tsx
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\UpcomingIPOCard.tsx
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\ai\AIScoreCard.tsx
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\dashboard\AIMarketBrief.tsx
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\dashboard\CalendarCard.tsx
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\dashboard\CauseEffectCard.tsx
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\dashboard\MarketCard.tsx
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\dashboard\SmartMoneyCard.tsx
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\dashboard\layout\DashboardGrid.tsx
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\dashboard\market\IPOWeatherCard.tsx
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\dashboard\prototype\workstation\DashboardWorkstation.tsx
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\dashboard\prototype\workstation\panels\CommitteeSummary.tsx
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\dashboard\prototype\workstation\panels\CompanyHeader.tsx
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\dashboard\prototype\workstation\panels\ConvictionPanel.tsx
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\dashboard\prototype\workstation\panels\EvidencePanel.tsx
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\dashboard\prototype\workstation\panels\InvestmentThesis.tsx
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\dashboard\prototype\workstation\panels\ResearchDashboard.tsx
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\dashboard\prototype\workstation\panels\ResearchProgress.tsx
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\dashboard\prototype\workstation\shared\ProgressBar.tsx
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\dashboard\prototype\workstation\shared\ScoreGauge.tsx
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\dashboard\prototype\workstation\shared\SectionTitle.tsx
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\dashboard\prototype\workstation\shared\StatusBadge.tsx
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\dashboard\prototype\workstation\shared\WorkstationCard.tsx
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\dashboard\widgets\BusinessFundamentalsWidget.tsx
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\demo\BootScreen.tsx
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\demo\DemoContext.tsx
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\demo\DemoDirector.tsx
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\demo\DemoPlayer.tsx
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\demo\DemoTimeline.tsx
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\demo\shell\ActivityFeed.tsx
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\demo\shell\CommitteePanel.tsx
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\demo\shell\ConvictionPanel.tsx
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\demo\shell\DashboardShell.tsx
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\demo\shell\EvidencePanel.tsx
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\demo\shell\ResearchPanel.tsx
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\demo\shell\Sidebar.tsx
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\demo\shell\TopBar.tsx
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\design\GlassPanel.tsx
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\design\SectionHeader.tsx
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\design\StatusChip.tsx
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\dev\ResearchInspector.tsx
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\education\MarketPulseSection.tsx
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\hedge-fund\ActivityFeedPanel.tsx
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\hedge-fund\BatchScannerPanel.tsx
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\hedge-fund\ClosedTradesPanel.tsx
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\hedge-fund\CurrentOpportunitiesPanel.tsx
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\hedge-fund\DecisionFunnelPanel.tsx
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\hedge-fund\EquityCurvePanel.tsx
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\hedge-fund\ExecutionBreakdownPanel.tsx
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\hedge-fund\IndustryExposurePanel.tsx
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\hedge-fund\MomentumRadarPlaceholder.tsx
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\hedge-fund\PaperTradingPanel.tsx
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\hedge-fund\PortfolioAllocationDonut.tsx
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\hedge-fund\PortfolioRiskPanel.tsx
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\hedge-fund\PortfolioSummaryCards.tsx
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\hedge-fund\PositionCards.tsx
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\hedge-fund\PositionManager.tsx
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\hedge-fund\QuantActivityPanel.tsx
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\hedge-fund\QuantControlPanel.tsx
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\hedge-fund\QuantMemoryPanel.tsx
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\hedge-fund\QuantNowStrip.tsx
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\hedge-fund\QuantStrategistPanel.tsx
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\hedge-fund\RejectionBreakdownPanel.tsx
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\hedge-fund\RunHistoryPanel.tsx
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\hedge-fund\RunHistoryRow.tsx
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\hedge-fund\StrategyPlaybooksPlaceholder.tsx
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\hedge-fund\SystemStatusPanel.tsx
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\hedge-fund\TestHarnessPanel.tsx
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\hedge-fund\TradeTimeline.tsx
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\hedge-fund\ValidationProgressPanel.tsx
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\hedge-fund\WhileYouWereAwayPanel.tsx
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\hedge-fund\PositionPriceChart\PositionPriceChart.tsx
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\ipo\AIRecommendation.tsx
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\ipo\IPOHeader.tsx
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\landing\Disclosures.tsx
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\landing\Hero.tsx
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\landing\HowItWorks.tsx
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\layout\AppShell.tsx
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\layout\Header.tsx
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\layout\Sidebar.tsx
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\settings\SecuritySection.tsx
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\ui\Badge.tsx
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\ui\button.tsx
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\ui\Card.tsx
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\ui\GlassCard.tsx
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\ui\LiveDot.tsx
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\ui\Metric.tsx
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\ui\MetricCard.tsx
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\ui\ProgressBar.tsx
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\ui\SectionHeader.tsx
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\watchlist\WatchlistManager.tsx
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\workstation\cards\index.ts
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\workstation\cards\BusinessOverviewCard\BusinessOverviewCard.tsx
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\workstation\cards\BusinessOverviewCard\index.ts
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\workstation\cards\CatalystsCard\CatalystsCard.tsx
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\workstation\cards\CatalystsCard\index.ts
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\workstation\cards\CompanyHeaderCard\CompanyHeaderCard.tsx
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\workstation\cards\CompanyHeaderCard\index.ts
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\workstation\cards\ExecutiveSummaryCard\ExecutiveSummaryCard.tsx
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\workstation\cards\ExecutiveSummaryCard\index.ts
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\workstation\cards\FinancialHealthCard\FinancialHealthCard.tsx
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\workstation\cards\FinancialHealthCard\index.ts
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\workstation\cards\InvestmentThesisCard\index.ts
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\workstation\cards\InvestmentThesisCard\InvestmentThesisCard.tsx
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\workstation\cards\RecommendationCard\index.ts
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\workstation\cards\RecommendationCard\RecommendationCard.tsx
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\workstation\cards\RisksCard\index.ts
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\workstation\cards\RisksCard\RisksCard.tsx
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\workstation\cards\ValuationCard\index.ts
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\workstation\cards\ValuationCard\ValuationCard.tsx
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\workstation\contracts\WorkstationPanelProps.ts
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\workstation\developer\DeveloperMode.ts
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\workstation\dock\BottomDock.tsx
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\workstation\dock\index.ts
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\workstation\header\CompanyHeader.tsx
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\workstation\header\Header.tsx
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\workstation\header\index.ts
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\workstation\layout\AppShell.tsx
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\workstation\layout\CenterWorkspace.tsx
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\workstation\layout\index.ts
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\workstation\layout\LeftSidebar.tsx
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\workstation\layout\RightSidebar.tsx
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\workstation\models\ResearchViewModel.ts
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\workstation\panels\AdaptiveIntelligencePanel.tsx
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\workstation\panels\AIVerdictRow.tsx
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\workstation\panels\AnalystWorkspace.tsx
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\workstation\panels\CatalystPanel.tsx
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\workstation\panels\CommitteeAvatarRow.tsx
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\workstation\panels\committeeAvatars.ts
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\workstation\panels\CommitteePanel.tsx
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\workstation\panels\ContinueResearchPanel.tsx
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\workstation\panels\EarningsPanel.tsx
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\workstation\panels\EarningsPreviewPanel.tsx
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\workstation\panels\EarningsRecapPanel.tsx
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\workstation\panels\EvidencePanel.tsx
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\workstation\panels\ExecutiveSummaryPanel.tsx
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\workstation\panels\index.ts
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\workstation\panels\InsiderActivityPanel.tsx
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\workstation\panels\InvestmentThesisPanel.tsx
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\workstation\panels\InvestorDecisionCenter.tsx
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\workstation\panels\IPOIntelligenceCenter.tsx
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\workstation\panels\IPORadarPanel.tsx
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\workstation\panels\LiveIntelligenceFeed.tsx
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\workstation\panels\MarketMoversPanel.tsx
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\workstation\panels\MissionControlHeader.tsx
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\workstation\panels\OptionsChainPanel.tsx
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\workstation\panels\PortfolioExecutionPlaceholder.tsx
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\workstation\panels\QuantAwarenessStrip.tsx
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\workstation\panels\QuantLiveDeskPlaceholder.tsx
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\workstation\panels\RecommendationPanel.tsx
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\workstation\panels\ResearchSpotlightPlaceholder.tsx
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\workstation\panels\RiskPanel.tsx
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\workstation\panels\SnapshotPanel.tsx
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\workstation\panels\SystemStatusBar.tsx
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\workstation\panels\WhatCouldChangeThisPanel.tsx
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\workstation\panels\WhatMattersNow.tsx
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\workstation\panels\WhileYouWereAwayHome.tsx
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\workstation\panels\CommandBar\CommandBar.tsx
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\workstation\panels\ConvictionRadar\ConvictionRadar.tsx
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\workstation\panels\EarningsPreviewShareCard\EarningsPreviewShareCard.tsx
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\workstation\panels\EarningsPreviewShareCard\EarningsPreviewShareCardButton.tsx
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\workstation\panels\EvidenceSummaryGrid\EvidenceSummaryGrid.tsx
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\workstation\panels\FinancialOverviewChart\FinancialOverviewChart.tsx
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\workstation\panels\InstitutionalOwnershipCard\InstitutionalOwnershipCard.tsx
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\workstation\panels\MarketContext\index.ts
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\workstation\panels\MarketContext\MarketContext.tsx
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\workstation\panels\NewsRail\index.ts
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\workstation\panels\NewsRail\NewsRail.tsx
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\workstation\panels\NewsSentimentDonut\NewsSentimentDonut.tsx
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\workstation\panels\PortfolioIntelligence\PortfolioIntelligence.tsx
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\workstation\panels\PriceChart\PriceChart.tsx
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\workstation\panels\ProcessStepper\ProcessStepper.tsx
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\workstation\panels\PublishReportButton\PublishReportButton.tsx
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\workstation\panels\ResearchHistory\ResearchHistory.tsx
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\workstation\panels\ResearchProgress\index.ts
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\workstation\panels\ResearchProgress\ResearchProgress.tsx
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\workstation\panels\ResearchTarget\index.ts
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\workstation\panels\ResearchTarget\ResearchTarget.tsx
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\workstation\panels\SaveResearchButton\SaveResearchButton.tsx
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\workstation\panels\ShareCard\ShareCard.tsx
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\workstation\panels\ShareCard\ShareCardButton.tsx
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\workstation\panels\ShareCard\ShareCardCompact.tsx
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\workstation\panels\SystemLog\index.ts
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\workstation\panels\SystemLog\SystemLog.tsx
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\workstation\panels\UpcomingEarnings\index.ts
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\workstation\panels\UpcomingEarnings\UpcomingEarnings.tsx
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\workstation\panels\UpcomingEvents\index.ts
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\workstation\panels\UpcomingEvents\UpcomingEvents.tsx
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\workstation\panels\ValuationSummary\index.ts
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\workstation\panels\ValuationSummary\ValuationSummary.tsx
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\workstation\registry\index.ts
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\workstation\registry\WorkstationPanel.ts
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\workstation\ribbon\index.ts
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\workstation\ribbon\MarketRibbon.tsx
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\workstation\session\AnalystLayer.tsx
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\workstation\session\index.ts
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\workstation\session\IntelligenceLayer.tsx
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\workstation\session\OperationsLayer.tsx
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\workstation\session\ResearchSession.tsx
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\workstation\shared\scorePresentation.ts
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\workstation\shared\UnverifiedCard.tsx
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\workstation\shell\index.ts
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\workstation\shell\WorkstationShell.tsx
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\workstation\sidebar\index.ts
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\workstation\sidebar\IntelligenceSidebar.tsx
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\workstation\sidebar\LeftSidebar.tsx
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\workstation\sidebar\NavigationSidebar.tsx
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\workstation\ui\ConfidenceBar.tsx
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\workstation\ui\index.ts
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\workstation\ui\MetricRow.tsx
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\workstation\ui\ResearchCard.tsx
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\workstation\ui\ScoreBadge.tsx
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\workstation\ui\SourceBadge.tsx
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\workstation\ui\ConfidenceMeter\ConfidenceMeter.tsx
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\workstation\ui\ConfidenceMeter\index.ts
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\workstation\ui\MetricCard\index.ts
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\workstation\ui\MetricCard\MetricCard.tsx
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\workstation\ui\Panel\index.ts
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\workstation\ui\Panel\Panel.tsx
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\workstation\ui\ProgressRing\index.ts
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\workstation\ui\ProgressRing\ProgressRing.tsx
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\workstation\ui\SectionHeader\index.ts
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\workstation\ui\SectionHeader\SectionHeader.tsx
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\workstation\ui\StatusBadge\index.ts
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\workstation\ui\StatusBadge\StatusBadge.tsx
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\workstation\viewport\index.ts
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\workstation\viewport\ResearchViewport.tsx
+
+
+]633;D;0]633;A]633;P;Cwd=C:\x5cUsers\x5cinago\x5cdev\x5cIPO_Sniper_AI_v4PS C:\Users\inago\dev\IPO_Sniper_AI_v4> ]633;B
+]633;D]633;A]633;P;Cwd=C:\x5cUsers\x5cinago\x5cdev\x5cIPO_Sniper_AI_v4PS C:\Users\inago\dev\IPO_Sniper_AI_v4> ]633;B
+PS># ------------------------------------------------------------
+]633;D;0]633;A]633;P;Cwd=C:\x5cUsers\x5cinago\x5cdev\x5cIPO_Sniper_AI_v4PS C:\Users\inago\dev\IPO_Sniper_AI_v4> ]633;B
+PS># 3. FIND KEY IPO SNIPER AREAS
+]633;D;0]633;A]633;P;Cwd=C:\x5cUsers\x5cinago\x5cdev\x5cIPO_Sniper_AI_v4PS C:\Users\inago\dev\IPO_Sniper_AI_v4> ]633;B
+PS># ------------------------------------------------------------
+]633;D;0]633;A]633;P;Cwd=C:\x5cUsers\x5cinago\x5cdev\x5cIPO_Sniper_AI_v4PS C:\Users\inago\dev\IPO_Sniper_AI_v4> ]633;B
+]633;D]633;A]633;P;Cwd=C:\x5cUsers\x5cinago\x5cdev\x5cIPO_Sniper_AI_v4PS C:\Users\inago\dev\IPO_Sniper_AI_v4> ]633;B
+PS>Write-Host "`n=== 3. KEY PRODUCT AREAS ===" -ForegroundColor Cyan
+
+=== 3. KEY PRODUCT AREAS ===
+]633;D;0]633;A]633;P;Cwd=C:\x5cUsers\x5cinago\x5cdev\x5cIPO_Sniper_AI_v4PS C:\Users\inago\dev\IPO_Sniper_AI_v4> ]633;B
+]633;D]633;A]633;P;Cwd=C:\x5cUsers\x5cinago\x5cdev\x5cIPO_Sniper_AI_v4PS C:\Users\inago\dev\IPO_Sniper_AI_v4> ]633;B
+PS>$Terms = @(
+    "MarketPulse",
+    "Your Market Pulse",
+    "IPO Intelligence",
+    "Analyst",
+    "Research",
+    "Workstation",
+    "Dashboard",
+    "Current Opportunities",
+    "Quant",
+    "Market Regime",
+    "Earnings",
+    "IPO Radar",
+    "Institutional"
+)
+]633;D;0]633;A]633;P;Cwd=C:\x5cUsers\x5cinago\x5cdev\x5cIPO_Sniper_AI_v4PS C:\Users\inago\dev\IPO_Sniper_AI_v4> ]633;B
+]633;D]633;A]633;P;Cwd=C:\x5cUsers\x5cinago\x5cdev\x5cIPO_Sniper_AI_v4PS C:\Users\inago\dev\IPO_Sniper_AI_v4> ]633;B
+PS>foreach ($Term in $Terms) {
+    Write-Host "`n--- $Term ---" -ForegroundColor Yellow
+
+    Get-ChildItem ".\app",".\components" -Recurse -File `
+        -Include *.tsx,*.ts `
+        -ErrorAction SilentlyContinue |
+        Select-String -Pattern $Term -SimpleMatch -ErrorAction SilentlyContinue |
+        Select-Object -First 20 Path,LineNumber,Line
+}
+
+--- MarketPulse ---
+
+
+--- Your Market Pulse ---
+
+--- IPO Intelligence ---
+
+--- Analyst ---
+
+--- Research ---
+
+--- Workstation ---
+
+--- Dashboard ---
+Path                                                                                        LineNumber Line
+----                                                                                        ---------- ----
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\api\education\market-pulse\route.ts                          3 import { MarketPulseSynthesizer } from "@/engine/e...
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\api\education\market-pulse\route.ts                         56         const pulse = await new MarketPulseSynthes...
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\api\education\share-image\route.tsx                         37  * MarketPulseSection's describePattern, kept in s...
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\education\page.tsx                                           1 import MarketPulseSection from "@/components/educa...
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\education\page.tsx                                          28  <MarketPulseSection />
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\education\MarketPulseSection.tsx                    176 export default function MarketPulseSection() {
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\workstation\page.tsx                                  54                         Your Market Pulse
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\education\page.tsx                                          21  <h1 className="text-2xl font-bold">Your Market Pu...
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\education\MarketPulseSection.tsx                    263                     Loading your market pulse...
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\education\MarketPulseSection.tsx                    585                 <img src={previewUrl} alt="Your Ma...
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\workstation\page.tsx                                  20  * Pulse -> Your Market -> IPO Intelligence -> Qua...
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\workstation\page.tsx                                  71                 <p className="text-xs font-semibol...
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\api\ipo-strategic-signals\route.ts                           5  * Step 2 of IPO Intelligence enrichment: a second...
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\layout.tsx                                                  17   description: "AI-Powered IPO Intelligence Platfo...
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\workstation\panels\IPOIntelligenceCenter.tsx        201                 <h2 className="text-sm font-bold u...
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\workstation\panels\IPOIntelligenceCenter.tsx        215                 <p className="text-xs text-zinc-60...
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\hedge-fund\quant-strategist\actions.ts                33      * separate, safe data source from the News-An...
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\hedge-fund\quant-strategist\actions.ts               162         // separate, safe data source from the New...
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\workstation\page.tsx                                  24  * Steps 5-9 (populate real gaps, deepen Analyst V...
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\dev\providers\page.tsx                                      71     // KnowledgeAnalyst is the one remaining block...
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\dev\providers\page.tsx                                      74     // News/SEC data-wiring pass. See KnowledgeAna...
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\dev\providers\page.tsx                                      75     const blockedAnalysts = ["Knowledge"];
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\dev\providers\page.tsx                                     123                         <h2 className="text-sm fon...
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\dev\providers\page.tsx                                     128                             {blockedAnalysts.map(n...
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\r\[slug]\page.tsx                                            6 import { excludeAnalysts } from "@/components/work...
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\r\[slug]\page.tsx                                           39     const { recommendation } = excludeAnalysts(res...
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\r\[slug]\page.tsx                                           42     // free-text AI synthesis that could incorpora...
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\r\[slug]\page.tsx                                           72  * News Analyst had) plus multiple free-text AI-ge...
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\r\[slug]\page.tsx                                           79  * same real excludeAnalysts() function the Share ...
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\r\[slug]\page.tsx                                           85  * already-vetted-safe presentation (real per-anal...
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\r\[slug]\page.tsx                                          100     const { score, confidence, agreement, recommen...
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\r\[slug]\page.tsx                                          101     const scoredAnalysts = committee.reports.filte...
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\r\[slug]\page.tsx                                          102     const scoreRows = scoredAnalysts
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\r\[slug]\page.tsx                                          103         .map(r => ({ name: r.analyst.replace(" Ana...
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\r\[slug]\page.tsx                                          174                             <p className="text-xs ...
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\r\[slug]\page.tsx                                          204                         <h2 className="text-lg fon...
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\alerts\page.tsx                                       77                         You&apos;re not watching a...
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\hedge-fund\batch-scanner\actions.ts                    6 import { ResearchService } from "@/engine/services...
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\hedge-fund\batch-scanner\actions.ts                  134             const research = await new ResearchSer...
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\hedge-fund\batch-scanner\actions.ts                  135             const plan = strategist.buildTradePlan...
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\hedge-fund\batch-scanner\actions.ts                  211             const errorMessage = err instanceof Er...
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\hedge-fund\contract-finder\actions.ts                 95  * the research page already is).
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\hedge-fund\paper-trading\actions.ts                  409  * the Options Chain panel on the research page --...
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\hedge-fund\quant-control\actions.ts                  159             ? "Safe Mode is active — new autonomou...
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\hedge-fund\quant-strategist\actions.ts                 5 import { ResearchService } from "@/engine/services...
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\hedge-fund\quant-strategist\actions.ts                24      * in the research pipeline (investmentDecisio...
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\hedge-fund\quant-strategist\actions.ts                27      * Quant is proposing. Null when the research ...
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\hedge-fund\quant-strategist\actions.ts               116  * Reuses the SAME real research pipeline every ot...
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\hedge-fund\quant-strategist\actions.ts               117  * (ResearchService.load -> real Committee) -- Qua...
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\hedge-fund\quant-strategist\actions.ts               118  * own separate/duplicate research logic. Fetches ...
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\hedge-fund\quant-strategist\actions.ts               131         const research = await new ResearchService...
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\hedge-fund\quant-strategist\actions.ts               133         const plan = strategist.buildTradePlan(res...
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\hedge-fund\quant-strategist\actions.ts               136         // elsewhere in the research pipeline -- s...
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\hedge-fund\quant-strategist\actions.ts               138         const scenarios: ScenarioAnalysis | null =...
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\hedge-fund\quant-strategist\actions.ts               156                 // of the research/plan succeeding...
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\hedge-fund\quant-strategist\actions.ts               194         return { success: false, error: err instan...
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\hedge-fund\portfolio-execution-summary.ts              9  * Real Portfolio/Execution summary for the Workst...
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\hedge-fund\quant-funnel-summary.ts                     7  * Real, honest Quant funnel summary for the Works...
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\portfolio\page.tsx                                    15                 Portfolio Workstation is under con...
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\research\[ticker]\page.tsx                             1 import { WorkstationShell } from "@/components/wor...
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\research\[ticker]\page.tsx                             6 import AdaptiveIntelligencePanel from "@/component...
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\research\[ticker]\page.tsx                            50                 <WorkstationShell
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\research\[ticker]\page.tsx                            66                     href="/workstation"
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\research\[ticker]\page.tsx                            69                     Back to Workstation
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\workstation\while-you-were-away\actions.ts            36  const { data: profile } = await supabase.from("pr...
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\workstation\while-you-were-away\actions.ts            37  const lastVisitedAt = profile?.workstation_last_v...
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\workstation\while-you-were-away\actions.ts            40  await supabase.from("profiles").update({ workstat...
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\workstation\while-you-were-away\actions.ts            52  await supabase.from("profiles").update({ workstat...
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\workstation\page.tsx                                   3 import ResearchTarget from "@/components/workstati...
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\workstation\page.tsx                                   4 import NewsRail from "@/components/workstation/pan...
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\workstation\page.tsx                                   5 import MarketContext from "@/components/workstatio...
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\workstation\page.tsx                                   6 import UpcomingEarnings from "@/components/worksta...
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\workstation\page.tsx                                   7 import WhileYouWereAwayHome from "@/components/wor...
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\workstation\page.tsx                                   8 import MarketMoversPanel from "@/components/workst...
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\workstation\page.tsx                                   9 import IPOIntelligenceCenter from "@/components/wo...
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\workstation\page.tsx                                  10 import ContinueResearchPanel from "@/components/wo...
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\hedge-fund\quant-control\actions.ts                  121  * switch a real control rather than a dashboard b...
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\hedge-fund\while-you-were-away\actions.ts              7  * the user's last real visit to the Hedge Fund da...
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\workstation\page.tsx                                  18  * Dashboard Information Architecture v1 -- reorga...
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\workstation\page.tsx                                  31                 Dashboard
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\signup\page.tsx                                              8  * "Allow new users to sign up" toggle in the dash...
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\dashboard\layout\DashboardGrid.tsx                   22 export default function DashboardGrid() {
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\dashboard\prototype\workstation\panels\Re...          8 export default function ResearchDashboard({researc...
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\dashboard\prototype\workstation\panels\Re...         12         <WorkstationCard title="Research Dashboard">
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\dashboard\prototype\workstation\Dashboard...          3 import ResearchDashboard from "./panels/ResearchDa...
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\dashboard\prototype\workstation\Dashboard...         11 export default async function DashboardWorkstation...
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\dashboard\prototype\workstation\Dashboard...         35                     <ResearchDashboard research={r...
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\demo\shell\DashboardShell.tsx                        13 export default function DashboardShell() {
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\demo\DemoDirector.tsx                                 5 import DashboardShell from "./shell/DashboardShell";
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\demo\DemoDirector.tsx                                29   return <DashboardShell />;
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\layout\Sidebar.tsx                                    6   LayoutDashboard,
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\layout\Sidebar.tsx                                   21   { label: "Dashboard", href: "/workstation", icon...
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\workstation\sidebar\LeftSidebar.tsx                  11                 <div>Dashboard</div>
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\DashboardCard.tsx                                     1 type DashboardCardProps = {
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\DashboardCard.tsx                                     6 export default function DashboardCard({
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\DashboardCard.tsx                                     9 }: DashboardCardProps) {
+
+--- Current Opportunities ---
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\hedge-fund\page.tsx                                   80                 <p className="text-xs font-semibol...
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\api\cron\quant-momentum\route.ts                            13  * (Current Opportunities -> Momentum Detector), n...
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\hedge-fund\BatchScannerPanel.tsx                    158                             {loadingOpportunities ...
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\hedge-fund\CurrentOpportunitiesPanel.tsx             51                 <h3 className="text-sm font-medium...
+
+--- Quant ---
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\hedge-fund\activity-feed\actions.ts                   17  * (quant_trade_decisions, paper_trade_orders) int...
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\hedge-fund\activity-feed\actions.ts                   33                 .from("quant_trade_decisions")
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\hedge-fund\batch-scanner\actions.ts                    7 import { QuantStrategist } from "@/engine/quant/Qu...
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\hedge-fund\batch-scanner\actions.ts                    8 import { BatchScanner, DEFAULT_AUTO_EXECUTION_GATE...
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\hedge-fund\batch-scanner\actions.ts                    9 import { recordDecisionLayer, recordDecisionLayers...
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\hedge-fund\batch-scanner\actions.ts                   10 import { notEvaluated, type DecisionLayerRecord } ...
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\hedge-fund\batch-scanner\actions.ts                   11 import { detectVolatilityEdge } from "@/engine/qua...
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\hedge-fund\batch-scanner\actions.ts                   12 import { checkDataFreshness } from "@/engine/quant...
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\hedge-fund\batch-scanner\actions.ts                   18 import { checkAutonomousExecutionAllowed } from "@...
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\hedge-fund\batch-scanner\actions.ts                   55  * Every ticker's outcome is logged to quant_trade...
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\hedge-fund\batch-scanner\actions.ts                   58  * Quant Strategist panel.
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\hedge-fund\batch-scanner\actions.ts                   68     const strategist = new QuantStrategist();
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\hedge-fund\batch-scanner\actions.ts                  153                         suggestedQty = strategist....
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\hedge-fund\batch-scanner\actions.ts                  244  * (committee thresholds, portfolio exposure, AND ...
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\hedge-fund\batch-scanner\actions.ts                  273         const { error: insertError } = await supab...
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\hedge-fund\batch-scanner\actions.ts                  290             console.error("quant_runs insert faile...
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\hedge-fund\batch-scanner\actions.ts                  322         const { error } = await supabase.from("qua...
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\hedge-fund\batch-scanner\actions.ts                  349             console.error("quant_trade_decisions i...
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\hedge-fund\batch-scanner\actions.ts                  441  * queries the same quant_trade_decisions table ev...
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\hedge-fund\batch-scanner\actions.ts                  452  * Real counts from quant_trade_decisions -- 7-day...
+
+--- Market Regime ---
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\hedge-fund\batch-scanner\actions.ts                   21  * Real market regime for the Hedge Fund page -- s...
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\hedge-fund\BatchScannerPanel.tsx                    118                     <span className="text-zinc-500...
+
+--- Earnings ---
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\hedge-fund\quant-strategist\actions.ts                12 import { FinnhubEarningsCalendarProvider } from "@...
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\hedge-fund\quant-strategist\actions.ts                32      * Real earnings-date check via Finnhub's cale...
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\hedge-fund\quant-strategist\actions.ts                34      * concern above -- earnings dates are schedul...
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\hedge-fund\quant-strategist\actions.ts                36      * holding period would span an upcoming earni...
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\hedge-fund\quant-strategist\actions.ts                41     earningsWithinHoldingPeriod: { reportDate: str...
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\hedge-fund\quant-strategist\actions.ts               161         // Real earnings-date check via Finnhub's ...
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\hedge-fund\quant-strategist\actions.ts               168         // earnings falls inside the window being ...
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\hedge-fund\quant-strategist\actions.ts               169         let earningsWithinHoldingPeriod: TradePlan...
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\hedge-fund\quant-strategist\actions.ts               172                 const entry = await new FinnhubEar...
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\hedge-fund\quant-strategist\actions.ts               180                         earningsWithinHoldingPerio...
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\hedge-fund\quant-strategist\actions.ts               185                 // earningsWithinHoldingPeriod jus...
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\hedge-fund\quant-strategist\actions.ts               192         return { success: true, result: { decision...
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\workstation\page.tsx                                   6 import UpcomingEarnings from "@/components/worksta...
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\workstation\page.tsx                                  91                 <UpcomingEarnings />
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\api\cron\quant-opportunities\route.ts                       15  * earnings/price events) has real value outside r...
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\api\cron\quant-opportunities\route.ts                       80         const totalProviders = 4; // sec, news, ea...
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\api\earnings\calendar\route.ts                               2 import { buildEarningsCalendar } from "@/engine/in...
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\api\earnings\calendar\route.ts                               5  * Feeds the Workstation homepage's "Upcoming Earn...
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\api\earnings\calendar\route.ts                              14     const result = await buildEarningsCalendar(days);
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\api\earnings\preview\[ticker]\route.ts                       2 import { FinnhubEarningsCalendarProvider } from "@...
+
+--- IPO Radar ---
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\workstation\panels\IPORadarPanel.tsx                 43  <h2 className="mb-2 text-sm font-semibold text-zi...
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\workstation\panels\IPORadarPanel.tsx                 57  <h2 className="mb-3 text-sm font-semibold text-zi...
+
+--- Institutional ---
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\api\ipo-strategic-signals\route.ts                           6  * GDELT query family for strategic/institutional/...
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\api\market-news\route.ts                                    35 // Form types worth surfacing on an IPO/institutio...
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\dashboard\layout\DashboardGrid.tsx                   37       {/* Institutional Activity */}
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\dashboard\AIMarketBrief.tsx                          22             institutional demand.
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\dashboard\AIMarketBrief.tsx                         117           <p>Institutional Portfolio Rotation</p>
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\demo\DemoTimeline.tsx                                88                 "SpaceX demonstrates exceptional g...
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\landing\Disclosures.tsx                              62                         Institutional/13F holdings...
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\landing\Hero.tsx                                      9           Institutional Investment Intelligence
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\workstation\panels\ConvictionRadar\Convic...         43  <h2 className="text-lg font-semibold">Institution...
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\workstation\panels\EvidenceSummaryGrid\Ev...          3 import InstitutionalOwnershipCard from "../Institu...
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\workstation\panels\EvidenceSummaryGrid\Ev...         61  <InstitutionalOwnershipCard ticker={research.comp...
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\workstation\panels\InstitutionalOwnership...         81 export default async function InstitutionalOwnersh...
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\workstation\panels\InstitutionalOwnership...        107  return <UnverifiedCard title="Institutional Owner...
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\workstation\panels\InstitutionalOwnership...        114  return <UnverifiedCard title="Institutional Owner...
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\workstation\panels\InstitutionalOwnership...        129  <p className="text-xs text-zinc-500">Institutiona...
+C:\Users\inago\dev\IPO_Sniper_AI_v4\components\workstation\panels\InstitutionalOwnership...        150  <p className="text-xs text-zinc-500">Institutiona...
+
+
+]633;D;0]633;A]633;P;Cwd=C:\x5cUsers\x5cinago\x5cdev\x5cIPO_Sniper_AI_v4PS C:\Users\inago\dev\IPO_Sniper_AI_v4> ]633;B
+]633;D]633;A]633;P;Cwd=C:\x5cUsers\x5cinago\x5cdev\x5cIPO_Sniper_AI_v4PS C:\Users\inago\dev\IPO_Sniper_AI_v4> ]633;B
+PS># ------------------------------------------------------------
+]633;D;0]633;A]633;P;Cwd=C:\x5cUsers\x5cinago\x5cdev\x5cIPO_Sniper_AI_v4PS C:\Users\inago\dev\IPO_Sniper_AI_v4> ]633;B
+PS># 4. EXISTING BOOTSTRAP / FIX SCRIPTS
+]633;D;0]633;A]633;P;Cwd=C:\x5cUsers\x5cinago\x5cdev\x5cIPO_Sniper_AI_v4PS C:\Users\inago\dev\IPO_Sniper_AI_v4> ]633;B
+PS># ------------------------------------------------------------
+]633;D;0]633;A]633;P;Cwd=C:\x5cUsers\x5cinago\x5cdev\x5cIPO_Sniper_AI_v4PS C:\Users\inago\dev\IPO_Sniper_AI_v4> ]633;B
+]633;D]633;A]633;P;Cwd=C:\x5cUsers\x5cinago\x5cdev\x5cIPO_Sniper_AI_v4PS C:\Users\inago\dev\IPO_Sniper_AI_v4> ]633;B
+PS>Write-Host "`n=== 4. EXISTING POWERSHELL SCRIPTS ===" -ForegroundColor Cyan
+
+=== 4. EXISTING POWERSHELL SCRIPTS ===
+]633;D;0]633;A]633;P;Cwd=C:\x5cUsers\x5cinago\x5cdev\x5cIPO_Sniper_AI_v4PS C:\Users\inago\dev\IPO_Sniper_AI_v4> ]633;B
+]633;D]633;A]633;P;Cwd=C:\x5cUsers\x5cinago\x5cdev\x5cIPO_Sniper_AI_v4PS C:\Users\inago\dev\IPO_Sniper_AI_v4> ]633;B
+PS>Get-ChildItem ".\*.ps1" -File -ErrorAction SilentlyContinue |
+    Select-Object Name,Length,LastWriteTime
+
+Name                                         Length LastWriteTime
+----                                         ------ -------------
+add-page-headings.ps1                          3279 8/27/2026 3:41:00 PM
+add-page-headings2.ps1                         3236 8/27/2026 3:41:59 PM
+audit-bootstrap.ps1                            1265 8/27/2026 1:44:54 AM
+audit-dashboard-arch.ps1                       1219 8/27/2026 6:01:09 PM
+audit-phase2.ps1                               1264 8/26/2026 10:34:06 PM
+build-dashboard-shell.ps1                      7549 8/27/2026 7:33:42 PM
+build-data-quality.ps1                         4133 8/27/2026 2:35:54 AM
+build-decision-matrix.ps1                      4717 8/26/2026 2:23:45 PM
+build-volatility-edge.ps1                      5602 8/26/2026 11:36:09 PM
+decode-mojibake-bytes.ps1                      4683 8/27/2026 11:42:27 AM
+decode-mojibake-fix.ps1                        2766 8/27/2026 11:19:59 AM
+decode-volatility-edge.ps1                      578 8/26/2026 11:47:15 PM
+fix-data-quality-scope.ps1                     3216 8/27/2026 2:40:13 AM
+fix-education-page.ps1                         1886 8/27/2026 6:49:32 PM
+fix-layer-type-2.ps1                            970 8/27/2026 2:41:42 AM
+fix-layer-type.ps1                              956 8/27/2026 12:03:23 AM
+fix-mojibake-bytes.ps1                         3167 8/27/2026 11:42:36 AM
+fix-mojibake.ps1                               1742 8/27/2026 11:14:06 AM
+fix-mojibake2.ps1                              1732 8/27/2026 11:20:08 AM
+fix-volatility-edge.ps1                        4540 8/26/2026 11:38:42 PM
+fix-workstation-link.ps1                       1104 8/27/2026 5:08:54 PM
+inspect-project.ps1                             744 8/6/2026 5:53:36 AM
+IPO_Sniper_Dashboard_Bootstrap.ps1             7555 8/21/2026 6:53:45 PM
+IPO_Sniper_Shared_Intelligence_Bootstrap.ps1  17175 8/21/2026 9:29:26 PM
+quant-opportunities-workflow.ps1               2677 8/27/2026 2:03:56 AM
+rebuild-volatility-edge.ps1                    1290 8/26/2026 11:39:46 PM
+rename-market-pulse.ps1                        2520 8/27/2026 5:08:04 PM
+sweep-mojibake-all.ps1                         1327 8/27/2026 7:12:23 PM
+temp-token.ps1                                   32 8/26/2026 7:36:18 AM
+wire-data-quality.ps1                          4395 8/27/2026 2:37:58 AM
+wire-decision-matrix.ps1                       6511 8/26/2026 10:35:48 PM
+wire-decision-matrix2.ps1                      6568 8/26/2026 10:54:28 PM
+wire-volatility-edge.ps1                       2688 8/27/2026 12:02:32 AM
+
+
+]633;D;0]633;A]633;P;Cwd=C:\x5cUsers\x5cinago\x5cdev\x5cIPO_Sniper_AI_v4PS C:\Users\inago\dev\IPO_Sniper_AI_v4> ]633;B
+]633;D]633;A]633;P;Cwd=C:\x5cUsers\x5cinago\x5cdev\x5cIPO_Sniper_AI_v4PS C:\Users\inago\dev\IPO_Sniper_AI_v4> ]633;B
+PS># ------------------------------------------------------------
+]633;D;0]633;A]633;P;Cwd=C:\x5cUsers\x5cinago\x5cdev\x5cIPO_Sniper_AI_v4PS C:\Users\inago\dev\IPO_Sniper_AI_v4> ]633;B
+PS># 5. EXISTING LOGS
+]633;D;0]633;A]633;P;Cwd=C:\x5cUsers\x5cinago\x5cdev\x5cIPO_Sniper_AI_v4PS C:\Users\inago\dev\IPO_Sniper_AI_v4> ]633;B
+PS># ------------------------------------------------------------
+]633;D;0]633;A]633;P;Cwd=C:\x5cUsers\x5cinago\x5cdev\x5cIPO_Sniper_AI_v4PS C:\Users\inago\dev\IPO_Sniper_AI_v4> ]633;B
+]633;D]633;A]633;P;Cwd=C:\x5cUsers\x5cinago\x5cdev\x5cIPO_Sniper_AI_v4PS C:\Users\inago\dev\IPO_Sniper_AI_v4> ]633;B
+PS>Write-Host "`n=== 5. EXISTING LOGS ===" -ForegroundColor Cyan
+
+=== 5. EXISTING LOGS ===
+]633;D;0]633;A]633;P;Cwd=C:\x5cUsers\x5cinago\x5cdev\x5cIPO_Sniper_AI_v4PS C:\Users\inago\dev\IPO_Sniper_AI_v4> ]633;B
+]633;D]633;A]633;P;Cwd=C:\x5cUsers\x5cinago\x5cdev\x5cIPO_Sniper_AI_v4PS C:\Users\inago\dev\IPO_Sniper_AI_v4> ]633;B
+PS>Get-ChildItem ".\*.log" -File -ErrorAction SilentlyContinue |
+    Sort-Object LastWriteTime -Descending |
+    Select-Object -First 30 Name,Length,LastWriteTime
+
+Name                                 Length LastWriteTime
+----                                 ------ -------------
+bootstrap-master-20260827-193821.log  62692 8/27/2026 7:38:23 PM
+audit-dashboard-output.log            12206 8/27/2026 6:01:15 PM
+audit-bootstrap-output.log            10402 8/27/2026 1:45:02 AM
+wire-dm2-output.log                    6502 8/26/2026 10:54:42 PM
+wire-dm-output.log                      108 8/26/2026 10:43:23 PM
+audit-phase2-output.log               23976 8/26/2026 10:34:15 PM
+build-dm-output.log                    2306 8/26/2026 2:24:01 PM
+next-dev.log                            424 8/6/2026 5:53:36 AM
+
+
+]633;D;0]633;A]633;P;Cwd=C:\x5cUsers\x5cinago\x5cdev\x5cIPO_Sniper_AI_v4PS C:\Users\inago\dev\IPO_Sniper_AI_v4> ]633;B
+]633;D]633;A]633;P;Cwd=C:\x5cUsers\x5cinago\x5cdev\x5cIPO_Sniper_AI_v4PS C:\Users\inago\dev\IPO_Sniper_AI_v4> ]633;B
+PS># ------------------------------------------------------------
+]633;D;0]633;A]633;P;Cwd=C:\x5cUsers\x5cinago\x5cdev\x5cIPO_Sniper_AI_v4PS C:\Users\inago\dev\IPO_Sniper_AI_v4> ]633;B
+PS># 6. PACKAGE / BUILD CONFIG
+]633;D;0]633;A]633;P;Cwd=C:\x5cUsers\x5cinago\x5cdev\x5cIPO_Sniper_AI_v4PS C:\Users\inago\dev\IPO_Sniper_AI_v4> ]633;B
+PS># ------------------------------------------------------------
+]633;D;0]633;A]633;P;Cwd=C:\x5cUsers\x5cinago\x5cdev\x5cIPO_Sniper_AI_v4PS C:\Users\inago\dev\IPO_Sniper_AI_v4> ]633;B
+]633;D]633;A]633;P;Cwd=C:\x5cUsers\x5cinago\x5cdev\x5cIPO_Sniper_AI_v4PS C:\Users\inago\dev\IPO_Sniper_AI_v4> ]633;B
+PS>Write-Host "`n=== 6. BUILD CONFIGURATION ===" -ForegroundColor Cyan
+
+=== 6. BUILD CONFIGURATION ===
+]633;D;0]633;A]633;P;Cwd=C:\x5cUsers\x5cinago\x5cdev\x5cIPO_Sniper_AI_v4PS C:\Users\inago\dev\IPO_Sniper_AI_v4> ]633;B
+]633;D]633;A]633;P;Cwd=C:\x5cUsers\x5cinago\x5cdev\x5cIPO_Sniper_AI_v4PS C:\Users\inago\dev\IPO_Sniper_AI_v4> ]633;B
+PS>if (Test-Path ".\package.json") {
+    Get-Content ".\package.json"
+}
+{
+  "name": "frontend",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "lint": "eslint",
+    "type-check": "tsc --noEmit",
+    "check": "npm run lint && npm run type-check",
+    "analyze": "tsx scripts/research.ts"
+  },
+  "dependencies": {
+    "qrcode": "^1.5.4",
+    "@base-ui/react": "^1.6.0",
+    "@heroicons/react": "^2.2.0",
+    "@supabase/supabase-js": "^2.110.7",
+    "@supabase/ssr": "^0.7.0",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "dotenv": "^17.4.2",
+    "framer-motion": "^12.42.2",
+    "html-to-image": "^1.11.11",
+    "lucide-react": "^1.27.0",
+    "next": "16.2.10",
+    "react": "19.2.4",
+    "react-countup": "^6.5.3",
+    "react-dom": "19.2.4",
+    "recharts": "^3.10.1",
+    "shadcn": "^4.13.0",
+    "tailwind-merge": "^3.6.0",
+    "tw-animate-css": "^1.4.0"
+  },
+  "devDependencies": {
+    "@types/qrcode": "^1.5.5",
+    "@tailwindcss/postcss": "^4",
+    "@types/node": "^20.19.43",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "eslint": "^9",
+    "eslint-config-next": "16.2.10",
+    "tailwindcss": "^4",
+    "tsx": "^4.23.1",
+    "typescript": "^5"
+  }
+}
+]633;D;0]633;A]633;P;Cwd=C:\x5cUsers\x5cinago\x5cdev\x5cIPO_Sniper_AI_v4PS C:\Users\inago\dev\IPO_Sniper_AI_v4> ]633;B
+]633;D]633;A]633;P;Cwd=C:\x5cUsers\x5cinago\x5cdev\x5cIPO_Sniper_AI_v4PS C:\Users\inago\dev\IPO_Sniper_AI_v4> ]633;B
+PS>Write-Host "`n--- Next.js ---"
+
+--- Next.js ---
+]633;D;0]633;A]633;P;Cwd=C:\x5cUsers\x5cinago\x5cdev\x5cIPO_Sniper_AI_v4PS C:\Users\inago\dev\IPO_Sniper_AI_v4> ]633;B
+PS>if (Test-Path ".\package.json") {
+    Select-String -Path ".\package.json" -Pattern '"next"'
+}
+
+package.json:25:    "next": "16.2.10",
+
+
+]633;D;0]633;A]633;P;Cwd=C:\x5cUsers\x5cinago\x5cdev\x5cIPO_Sniper_AI_v4PS C:\Users\inago\dev\IPO_Sniper_AI_v4> ]633;B
+]633;D]633;A]633;P;Cwd=C:\x5cUsers\x5cinago\x5cdev\x5cIPO_Sniper_AI_v4PS C:\Users\inago\dev\IPO_Sniper_AI_v4> ]633;B
+PS>Write-Host "`n--- TypeScript ---"
+
+--- TypeScript ---
+]633;D;0]633;A]633;P;Cwd=C:\x5cUsers\x5cinago\x5cdev\x5cIPO_Sniper_AI_v4PS C:\Users\inago\dev\IPO_Sniper_AI_v4> ]633;B
+PS>if (Test-Path ".\package.json") {
+    Select-String -Path ".\package.json" -Pattern '"typescript"'
+}
+
+package.json:44:    "typescript": "^5"
+
+
+]633;D;0]633;A]633;P;Cwd=C:\x5cUsers\x5cinago\x5cdev\x5cIPO_Sniper_AI_v4PS C:\Users\inago\dev\IPO_Sniper_AI_v4> ]633;B
+]633;D]633;A]633;P;Cwd=C:\x5cUsers\x5cinago\x5cdev\x5cIPO_Sniper_AI_v4PS C:\Users\inago\dev\IPO_Sniper_AI_v4> ]633;B
+PS># ------------------------------------------------------------
+]633;D;0]633;A]633;P;Cwd=C:\x5cUsers\x5cinago\x5cdev\x5cIPO_Sniper_AI_v4PS C:\Users\inago\dev\IPO_Sniper_AI_v4> ]633;B
+PS># 7. DATABASE / DATA LAYER REFERENCES
+]633;D;0]633;A]633;P;Cwd=C:\x5cUsers\x5cinago\x5cdev\x5cIPO_Sniper_AI_v4PS C:\Users\inago\dev\IPO_Sniper_AI_v4> ]633;B
+PS># ------------------------------------------------------------
+]633;D;0]633;A]633;P;Cwd=C:\x5cUsers\x5cinago\x5cdev\x5cIPO_Sniper_AI_v4PS C:\Users\inago\dev\IPO_Sniper_AI_v4> ]633;B
+]633;D]633;A]633;P;Cwd=C:\x5cUsers\x5cinago\x5cdev\x5cIPO_Sniper_AI_v4PS C:\Users\inago\dev\IPO_Sniper_AI_v4> ]633;B
+PS>Write-Host "`n=== 7. DATA / DATABASE REFERENCES ===" -ForegroundColor Cyan
+
+=== 7. DATA / DATABASE REFERENCES ===
+]633;D;0]633;A]633;P;Cwd=C:\x5cUsers\x5cinago\x5cdev\x5cIPO_Sniper_AI_v4PS C:\Users\inago\dev\IPO_Sniper_AI_v4> ]633;B
+]633;D]633;A]633;P;Cwd=C:\x5cUsers\x5cinago\x5cdev\x5cIPO_Sniper_AI_v4PS C:\Users\inago\dev\IPO_Sniper_AI_v4> ]633;B
+PS>Get-ChildItem ".\app",".\components",".\lib",".\engine" `
+    -Recurse -File `
+    -Include *.ts,*.tsx,*.sql `
+    -ErrorAction SilentlyContinue |
+    Select-String -Pattern `
+        "supabase",
+        "research_history",
+        "quant_decision_layers",
+        "current_opportunities",
+        "last_seen_at",
+        "finnhub",
+        "GDELT",
+        "EDGAR",
+        "13F" `
+    -SimpleMatch `
+    -ErrorAction SilentlyContinue |
+    Select-Object -First 150 Path,LineNumber,Line
+
+Path                                                                                    LineNumber Line
+----                                                                                    ---------- ----
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\alerts\page.tsx                                    1 import { createClient } from "@/lib/supabase/server";
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\alerts\page.tsx                                    2 import { isSupabaseConfigured } from "@/lib/supabase/c...
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\alerts\page.tsx                                   28     if (!isSupabaseConfigured()) {
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\alerts\page.tsx                                   32     const supabase = await createClient();
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\alerts\page.tsx                                   33     const { data: { user } } = await supabase.auth.get...
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\alerts\page.tsx                                   37         supabase.from("watchlist").select("ticker").eq...
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\alerts\page.tsx                                   38         supabase.from("positions").select("ticker").eq...
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\alerts\page.tsx                                   50     const { data: alerts } = await supabase
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\hedge-fund\activity-feed\actions.ts                3 import { createClient } from "@/lib/supabase/server";
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\hedge-fund\activity-feed\actions.ts                4 import { isSupabaseConfigured } from "@/lib/supabase/c...
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\hedge-fund\activity-feed\actions.ts               25     if (!isSupabaseConfigured()) return [];
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\hedge-fund\activity-feed\actions.ts               27         const supabase = await createClient();
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\hedge-fund\activity-feed\actions.ts               28         const { data: { user } } = await supabase.auth...
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\hedge-fund\activity-feed\actions.ts               32             supabase
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\hedge-fund\activity-feed\actions.ts               38             supabase
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\hedge-fund\batch-scanner\actions.ts                3 import { createClient } from "@/lib/supabase/server";
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\hedge-fund\batch-scanner\actions.ts                4 import { isSupabaseConfigured } from "@/lib/supabase/c...
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\hedge-fund\batch-scanner\actions.ts                5 import { createServiceRoleClient, isServiceRoleConfigu...
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\hedge-fund\batch-scanner\actions.ts               16 import { FinnhubQuoteProvider, type Quote } from "@/en...
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\hedge-fund\batch-scanner\actions.ts               27     if (!process.env.FINNHUB_API_KEY) return null;
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\hedge-fund\batch-scanner\actions.ts               29         const provider = new FinnhubQuoteProvider();
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\hedge-fund\batch-scanner\actions.ts               72     // Data Quality Gate v1 needs a Supabase client to...
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\hedge-fund\batch-scanner\actions.ts               73     // ticker's real last_seen_at -- same client-selec...
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\hedge-fund\batch-scanner\actions.ts               76     let dataQualitySupabase;
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\hedge-fund\batch-scanner\actions.ts               78         dataQualitySupabase = createServiceRoleClient();
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\hedge-fund\batch-scanner\actions.ts               80         dataQualitySupabase = await createClient();
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\hedge-fund\batch-scanner\actions.ts               92             // opportunities row has no real last_seen...
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\hedge-fund\batch-scanner\actions.ts               95             const oppLookup = await dataQualitySupabase
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\hedge-fund\batch-scanner\actions.ts               97                 .select("last_seen_at")
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\hedge-fund\batch-scanner\actions.ts               99                 .order("last_seen_at", { ascending: fa...
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\hedge-fund\batch-scanner\actions.ts              102             const dataQuality = checkDataFreshness(opp...
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\hedge-fund\batch-scanner\actions.ts              212             const isDataCoverageGap = /no finnhub prof...
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\hedge-fund\batch-scanner\actions.ts              257     if (!isSupabaseConfigured()) return;
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\hedge-fund\batch-scanner\actions.ts              260         let supabase;
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\hedge-fund\batch-scanner\actions.ts              265             supabase = createServiceRoleClient();
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\hedge-fund\batch-scanner\actions.ts              267             supabase = await createClient();
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\hedge-fund\batch-scanner\actions.ts              268             const { data: { user } } = await supabase....
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\hedge-fund\batch-scanner\actions.ts              273         const { error: insertError } = await supabase....
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\hedge-fund\batch-scanner\actions.ts              306     if (!isSupabaseConfigured() || !plan) return;
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\hedge-fund\batch-scanner\actions.ts              309         let supabase;
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\hedge-fund\batch-scanner\actions.ts              314             supabase = createServiceRoleClient();
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\hedge-fund\batch-scanner\actions.ts              316             supabase = await createClient();
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\hedge-fund\batch-scanner\actions.ts              317             const { data: { user } } = await supabase....
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\hedge-fund\batch-scanner\actions.ts              322         const { error } = await supabase.from("quant_t...
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\hedge-fund\batch-scanner\actions.ts              463     if (!isSupabaseConfigured()) return null;
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\hedge-fund\batch-scanner\actions.ts              465         const supabase = await createClient();
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\hedge-fund\batch-scanner\actions.ts              466         const { data: { user } } = await supabase.auth...
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\hedge-fund\batch-scanner\actions.ts              472         const { data, error } = await supabase
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\hedge-fund\batch-scanner\actions.ts              512     if (!isSupabaseConfigured()) return [];
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\hedge-fund\batch-scanner\actions.ts              514         const supabase = await createClient();
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\hedge-fund\batch-scanner\actions.ts              515         const { data: { user } } = await supabase.auth...
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\hedge-fund\batch-scanner\actions.ts              518         const { data, error } = await supabase
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\hedge-fund\batch-scanner\actions.ts              560     if (!isSupabaseConfigured()) return 0;
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\hedge-fund\batch-scanner\actions.ts              562         const supabase = await createClient();
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\hedge-fund\batch-scanner\actions.ts              563         const { data: { user } } = await supabase.auth...
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\hedge-fund\batch-scanner\actions.ts              566         const { count, error } = await supabase
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\hedge-fund\batch-scanner\actions.ts              596     if (!isSupabaseConfigured()) return [];
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\hedge-fund\batch-scanner\actions.ts              598         const supabase = await createClient();
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\hedge-fund\batch-scanner\actions.ts              599         const { data: { user } } = await supabase.auth...
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\hedge-fund\batch-scanner\actions.ts              602         const { data, error } = await supabase
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\hedge-fund\closed-trades\actions.ts                3 import { createClient } from "@/lib/supabase/server";
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\hedge-fund\closed-trades\actions.ts                4 import { isSupabaseConfigured } from "@/lib/supabase/c...
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\hedge-fund\closed-trades\actions.ts               33     if (!isSupabaseConfigured()) return null;
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\hedge-fund\closed-trades\actions.ts               36         const supabase = await createClient();
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\hedge-fund\closed-trades\actions.ts               37         const { data: { user } } = await supabase.auth...
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\hedge-fund\closed-trades\actions.ts               40         const { data, error } = await supabase
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\hedge-fund\industry-exposure\actions.ts            9  * each held ticker's real industry classification (Fi...
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\hedge-fund\industry-exposure\actions.ts           15  * "IREN260821P00038500"), which Finnhub's /stock/prof...
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\hedge-fund\momentum\actions.ts                     3 import { createClient } from "@/lib/supabase/server";
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\hedge-fund\momentum\actions.ts                     4 import { isSupabaseConfigured } from "@/lib/supabase/c...
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\hedge-fund\momentum\actions.ts                    27     if (!isSupabaseConfigured()) return [];
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\hedge-fund\momentum\actions.ts                    29         const supabase = await createClient();
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\hedge-fund\momentum\actions.ts                    30         const { data: { user } } = await supabase.auth...
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\hedge-fund\momentum\actions.ts                    33         const { data, error } = await supabase
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\hedge-fund\momentum\actions.ts                    35             .select("id, ticker, rvol, price_change_pe...
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\hedge-fund\momentum\actions.ts                    51             lastSeenAt: row.last_seen_at,
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\hedge-fund\opportunities\actions.ts                3 import { createClient } from "@/lib/supabase/server";
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\hedge-fund\opportunities\actions.ts                4 import { isSupabaseConfigured } from "@/lib/supabase/c...
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\hedge-fund\opportunities\actions.ts               39     if (!isSupabaseConfigured()) return [];
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\hedge-fund\opportunities\actions.ts               41         const supabase = await createClient();
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\hedge-fund\opportunities\actions.ts               42         const { data: { user } } = await supabase.auth...
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\hedge-fund\opportunities\actions.ts               45         const { data, error } = await supabase
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\hedge-fund\opportunities\actions.ts               47             .select("id, ticker, score, events, score_...
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\hedge-fund\opportunities\actions.ts               61             lastSeenAt: row.last_seen_at,
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\hedge-fund\paper-trading\actions.ts                3 import { createClient } from "@/lib/supabase/server";
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\hedge-fund\paper-trading\actions.ts                4 import { isSupabaseConfigured } from "@/lib/supabase/c...
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\hedge-fund\paper-trading\actions.ts                5 import { createServiceRoleClient, isServiceRoleConfigu...
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\hedge-fund\paper-trading\actions.ts                9 import { FinnhubQuoteProvider } from "@/engine/evidenc...
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\hedge-fund\paper-trading\actions.ts               26  * every call rather than caching in Supabase, so it's...
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\hedge-fund\paper-trading\actions.ts               60     if (!isSupabaseConfigured()) {
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\hedge-fund\paper-trading\actions.ts               66         let supabase;
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\hedge-fund\paper-trading\actions.ts               71             supabase = createServiceRoleClient();
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\hedge-fund\paper-trading\actions.ts               73             supabase = await createClient();
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\hedge-fund\paper-trading\actions.ts               74             const { data: { user } } = await supabase....
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\hedge-fund\paper-trading\actions.ts               82             const { data: updatedRows, error } = await...
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\hedge-fund\paper-trading\actions.ts              168         // not a Finnhub equity quote -- Finnhub's /qu...
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\hedge-fund\paper-trading\actions.ts              216             const quote = await new FinnhubQuoteProvid...
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\hedge-fund\paper-trading\actions.ts              330  * order flow if Supabase isn't configured or the inse...
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\hedge-fund\paper-trading\actions.ts              338     if (!isSupabaseConfigured()) {
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\hedge-fund\paper-trading\actions.ts              344         let supabase;
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\hedge-fund\paper-trading\actions.ts              349             supabase = createServiceRoleClient();
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\hedge-fund\paper-trading\actions.ts              351             supabase = await createClient();
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\hedge-fund\paper-trading\actions.ts              352             const { data: { user } } = await supabase....
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\hedge-fund\paper-trading\actions.ts              357         // Real fix: Supabase JS's .insert() does NOT ...
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\hedge-fund\paper-trading\actions.ts              367         const { error } = await supabase.from("paper_t...
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\hedge-fund\paper-trading\actions.ts              402  * real FinnhubQuoteProvider already used elsewhere in...
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\hedge-fund\paper-trading\actions.ts              417         const quote = await new FinnhubQuoteProvider()...
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\hedge-fund\quant-control\actions.ts                3 import { createClient } from "@/lib/supabase/server";
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\hedge-fund\quant-control\actions.ts                4 import { isSupabaseConfigured } from "@/lib/supabase/c...
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\hedge-fund\quant-control\actions.ts                5 import { createServiceRoleClient, isServiceRoleConfigu...
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\hedge-fund\quant-control\actions.ts               41     if (!isSupabaseConfigured()) return DEFAULT;
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\hedge-fund\quant-control\actions.ts               56             const supabase = createServiceRoleClient();
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\hedge-fund\quant-control\actions.ts               57             const { data, error } = await supabase
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\hedge-fund\quant-control\actions.ts               69         const supabase = await createClient();
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\hedge-fund\quant-control\actions.ts               70         const { data: { user } } = await supabase.auth...
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\hedge-fund\quant-control\actions.ts               73         const { data, error } = await supabase
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\hedge-fund\quant-control\actions.ts               96     if (!isSupabaseConfigured()) return { success: fal...
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\hedge-fund\quant-control\actions.ts              100         const supabase = await createClient();
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\hedge-fund\quant-control\actions.ts              101         const { data: { user } } = await supabase.auth...
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\hedge-fund\quant-control\actions.ts              104         const { error } = await supabase.from("quant_c...
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\hedge-fund\quant-memory\actions.ts                 3 import { createClient } from "@/lib/supabase/server";
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\hedge-fund\quant-memory\actions.ts                 4 import { isSupabaseConfigured } from "@/lib/supabase/c...
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\hedge-fund\quant-memory\actions.ts                15     if (!isSupabaseConfigured()) {
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\hedge-fund\quant-memory\actions.ts                19         const supabase = await createClient();
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\hedge-fund\quant-memory\actions.ts                20         const { data: { user } } = await supabase.auth...
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\hedge-fund\quant-strategist\actions.ts             3 import { createClient } from "@/lib/supabase/server";
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\hedge-fund\quant-strategist\actions.ts             4 import { isSupabaseConfigured } from "@/lib/supabase/c...
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\hedge-fund\quant-strategist\actions.ts            12 import { FinnhubEarningsCalendarProvider } from "@/eng...
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\hedge-fund\quant-strategist\actions.ts            15     /** Row id in quant_trade_decisions, when logging ...
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\hedge-fund\quant-strategist\actions.ts            32      * Real earnings-date check via Finnhub's calendar...
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\hedge-fund\quant-strategist\actions.ts            61     if (!isSupabaseConfigured()) return null;
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\hedge-fund\quant-strategist\actions.ts            64         const supabase = await createClient();
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\hedge-fund\quant-strategist\actions.ts            65         const { data: { user } } = await supabase.auth...
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\hedge-fund\quant-strategist\actions.ts            68         const { data, error } = await supabase.from("q...
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\hedge-fund\quant-strategist\actions.ts           106     if (!isSupabaseConfigured()) return;
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\hedge-fund\quant-strategist\actions.ts           108         const supabase = await createClient();
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\hedge-fund\quant-strategist\actions.ts           109         await supabase.from("quant_trade_decisions").u...
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\hedge-fund\quant-strategist\actions.ts           161         // Real earnings-date check via Finnhub's cale...
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\hedge-fund\quant-strategist\actions.ts           172                 const entry = await new FinnhubEarning...
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\hedge-fund\rejection-breakdown\actions.ts         20 import { createClient } from "@/lib/supabase/server";
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\hedge-fund\rejection-breakdown\actions.ts         21 import { isSupabaseConfigured } from "@/lib/supabase/c...
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\hedge-fund\rejection-breakdown\actions.ts         45     if (!isSupabaseConfigured()) return null;
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\hedge-fund\rejection-breakdown\actions.ts         47         const supabase = await createClient();
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\hedge-fund\rejection-breakdown\actions.ts         48         const { data: { user } } = await supabase.auth...
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\hedge-fund\rejection-breakdown\actions.ts         53         const { data, error } = await supabase
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\hedge-fund\test-harness\actions.ts                19 import { createClient } from "@/lib/supabase/server";
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\hedge-fund\test-harness\actions.ts                20 import { isSupabaseConfigured } from "@/lib/supabase/c...
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\hedge-fund\test-harness\actions.ts                61     if (!isSupabaseConfigured()) return null;
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\hedge-fund\test-harness\actions.ts                62     const supabase = await createClient();
+C:\Users\inago\dev\IPO_Sniper_AI_v4\app\(app)\hedge-fund\test-harness\actions.ts                63     const { data: { user } } = await supabase.auth.get...
+
+
+]633;D;0]633;A]633;P;Cwd=C:\x5cUsers\x5cinago\x5cdev\x5cIPO_Sniper_AI_v4PS C:\Users\inago\dev\IPO_Sniper_AI_v4> ]633;B
+]633;D]633;A]633;P;Cwd=C:\x5cUsers\x5cinago\x5cdev\x5cIPO_Sniper_AI_v4PS C:\Users\inago\dev\IPO_Sniper_AI_v4> ]633;B
+PS># ------------------------------------------------------------
+]633;D;0]633;A]633;P;Cwd=C:\x5cUsers\x5cinago\x5cdev\x5cIPO_Sniper_AI_v4PS C:\Users\inago\dev\IPO_Sniper_AI_v4> ]633;B
+PS># 8. ENVIRONMENT — NAMES ONLY
+]633;D;0]633;A]633;P;Cwd=C:\x5cUsers\x5cinago\x5cdev\x5cIPO_Sniper_AI_v4PS C:\Users\inago\dev\IPO_Sniper_AI_v4> ]633;B
+PS># ------------------------------------------------------------
+]633;D;0]633;A]633;P;Cwd=C:\x5cUsers\x5cinago\x5cdev\x5cIPO_Sniper_AI_v4PS C:\Users\inago\dev\IPO_Sniper_AI_v4> ]633;B
+]633;D]633;A]633;P;Cwd=C:\x5cUsers\x5cinago\x5cdev\x5cIPO_Sniper_AI_v4PS C:\Users\inago\dev\IPO_Sniper_AI_v4> ]633;B
+PS>Write-Host "`n=== 8. ENVIRONMENT VARIABLE NAMES ===" -ForegroundColor Cyan
+
+=== 8. ENVIRONMENT VARIABLE NAMES ===
+]633;D;0]633;A]633;P;Cwd=C:\x5cUsers\x5cinago\x5cdev\x5cIPO_Sniper_AI_v4PS C:\Users\inago\dev\IPO_Sniper_AI_v4> ]633;B
+]633;D]633;A]633;P;Cwd=C:\x5cUsers\x5cinago\x5cdev\x5cIPO_Sniper_AI_v4PS C:\Users\inago\dev\IPO_Sniper_AI_v4> ]633;B
+PS>if (Test-Path ".\.env.local") {
+    Get-Content ".\.env.local" |
+        Where-Object {
+            $_ -match "^[A-Za-z_][A-Za-z0-9_]*="
+        } |
+        ForEach-Object {
+            ($_ -split "=",2)[0]
+        }
+}
+ALPACA_API_KEY_ID
+ALPACA_SECRET_KEY
+ANTHROPIC_API_KEY
+ANTHROPIC_API_KEY_URL
+CRON_SECRET
+CURRENTS_API_KEY
+FINNHUB_API_KEY
+FMP_API_KEY
+NEWS_API_KEY
+NEXT_PUBLIC_SITE_URL
+NEXT_PUBLIC_SUPABASE_ANON_KEY
+NEXT_PUBLIC_SUPABASE_URL
+NX_DAEMON
+SEC_EDGAR_USER_AGENT
+SUPABASE_SERVICE_ROLE_KEY
+TURBO_CACHE
+TURBO_DOWNLOAD_LOCAL_ENABLED
+TURBO_REMOTE_ONLY
+TURBO_RUN_SUMMARY
+VERCEL
+VERCEL_ENV
+VERCEL_GIT_COMMIT_AUTHOR_LOGIN
+VERCEL_GIT_COMMIT_AUTHOR_NAME
+VERCEL_GIT_COMMIT_MESSAGE
+VERCEL_GIT_COMMIT_REF
+VERCEL_GIT_COMMIT_SHA
+VERCEL_GIT_PREVIOUS_SHA
+VERCEL_GIT_PROVIDER
+VERCEL_GIT_PULL_REQUEST_ID
+VERCEL_GIT_REPO_ID
+VERCEL_GIT_REPO_OWNER
+VERCEL_GIT_REPO_SLUG
+VERCEL_OIDC_TOKEN
+VERCEL_TARGET_ENV
+VERCEL_URL
+]633;D;0]633;A]633;P;Cwd=C:\x5cUsers\x5cinago\x5cdev\x5cIPO_Sniper_AI_v4PS C:\Users\inago\dev\IPO_Sniper_AI_v4> ]633;B
+]633;D]633;A]633;P;Cwd=C:\x5cUsers\x5cinago\x5cdev\x5cIPO_Sniper_AI_v4PS C:\Users\inago\dev\IPO_Sniper_AI_v4> ]633;B
+PS># ------------------------------------------------------------
+]633;D;0]633;A]633;P;Cwd=C:\x5cUsers\x5cinago\x5cdev\x5cIPO_Sniper_AI_v4PS C:\Users\inago\dev\IPO_Sniper_AI_v4> ]633;B
+PS># 9. VERCEL PROJECT
+]633;D;0]633;A]633;P;Cwd=C:\x5cUsers\x5cinago\x5cdev\x5cIPO_Sniper_AI_v4PS C:\Users\inago\dev\IPO_Sniper_AI_v4> ]633;B
+PS># ------------------------------------------------------------
+]633;D;0]633;A]633;P;Cwd=C:\x5cUsers\x5cinago\x5cdev\x5cIPO_Sniper_AI_v4PS C:\Users\inago\dev\IPO_Sniper_AI_v4> ]633;B
+]633;D]633;A]633;P;Cwd=C:\x5cUsers\x5cinago\x5cdev\x5cIPO_Sniper_AI_v4PS C:\Users\inago\dev\IPO_Sniper_AI_v4> ]633;B
+PS>Write-Host "`n=== 9. VERCEL ===" -ForegroundColor Cyan
+
+=== 9. VERCEL ===
+]633;D;0]633;A]633;P;Cwd=C:\x5cUsers\x5cinago\x5cdev\x5cIPO_Sniper_AI_v4PS C:\Users\inago\dev\IPO_Sniper_AI_v4> ]633;B
+]633;D]633;A]633;P;Cwd=C:\x5cUsers\x5cinago\x5cdev\x5cIPO_Sniper_AI_v4PS C:\Users\inago\dev\IPO_Sniper_AI_v4> ]633;B
+PS>vercel project ls 2>&1
+
+]633;D;0]633;A]633;P;Cwd=C:\x5cUsers\x5cinago\x5cdev\x5cIPO_Sniper_AI_v4PS C:\Users\inago\dev\IPO_Sniper_AI_v4> ]633;B
+]633;D]633;A]633;P;Cwd=C:\x5cUsers\x5cinago\x5cdev\x5cIPO_Sniper_AI_v4PS C:\Users\inago\dev\IPO_Sniper_AI_v4> ]633;B
+PS># ------------------------------------------------------------
+]633;D;0]633;A]633;P;Cwd=C:\x5cUsers\x5cinago\x5cdev\x5cIPO_Sniper_AI_v4PS C:\Users\inago\dev\IPO_Sniper_AI_v4> ]633;B
+PS># 10. TYPE CHECK — READ ONLY
+]633;D;0]633;A]633;P;Cwd=C:\x5cUsers\x5cinago\x5cdev\x5cIPO_Sniper_AI_v4PS C:\Users\inago\dev\IPO_Sniper_AI_v4> ]633;B
+PS># ------------------------------------------------------------
+]633;D;0]633;A]633;P;Cwd=C:\x5cUsers\x5cinago\x5cdev\x5cIPO_Sniper_AI_v4PS C:\Users\inago\dev\IPO_Sniper_AI_v4> ]633;B
+]633;D]633;A]633;P;Cwd=C:\x5cUsers\x5cinago\x5cdev\x5cIPO_Sniper_AI_v4PS C:\Users\inago\dev\IPO_Sniper_AI_v4> ]633;B
+PS>Write-Host "`n=== 10. TYPE CHECK ===" -ForegroundColor Cyan
+
+=== 10. TYPE CHECK ===
+]633;D;0]633;A]633;P;Cwd=C:\x5cUsers\x5cinago\x5cdev\x5cIPO_Sniper_AI_v4PS C:\Users\inago\dev\IPO_Sniper_AI_v4> ]633;B
+]633;D]633;A]633;P;Cwd=C:\x5cUsers\x5cinago\x5cdev\x5cIPO_Sniper_AI_v4PS C:\Users\inago\dev\IPO_Sniper_AI_v4> ]633;B
+PS>npm run type-check 2>&1
+
+]633;D;1]633;A]633;P;Cwd=C:\x5cUsers\x5cinago\x5cdev\x5cIPO_Sniper_AI_v4PS C:\Users\inago\dev\IPO_Sniper_AI_v4> ]633;B
+]633;D]633;A]633;P;Cwd=C:\x5cUsers\x5cinago\x5cdev\x5cIPO_Sniper_AI_v4PS C:\Users\inago\dev\IPO_Sniper_AI_v4> ]633;B
+PS># ------------------------------------------------------------
+]633;D;1]633;A]633;P;Cwd=C:\x5cUsers\x5cinago\x5cdev\x5cIPO_Sniper_AI_v4PS C:\Users\inago\dev\IPO_Sniper_AI_v4> ]633;B
+PS># 11. BUILD — READ ONLY VERIFICATION
+]633;D;1]633;A]633;P;Cwd=C:\x5cUsers\x5cinago\x5cdev\x5cIPO_Sniper_AI_v4PS C:\Users\inago\dev\IPO_Sniper_AI_v4> ]633;B
+PS># ------------------------------------------------------------
+]633;D;1]633;A]633;P;Cwd=C:\x5cUsers\x5cinago\x5cdev\x5cIPO_Sniper_AI_v4PS C:\Users\inago\dev\IPO_Sniper_AI_v4> ]633;B
+]633;D]633;A]633;P;Cwd=C:\x5cUsers\x5cinago\x5cdev\x5cIPO_Sniper_AI_v4PS C:\Users\inago\dev\IPO_Sniper_AI_v4> ]633;B
+PS>Write-Host "`n=== 11. PRODUCTION BUILD ===" -ForegroundColor Cyan
+
+=== 11. PRODUCTION BUILD ===
+]633;D;0]633;A]633;P;Cwd=C:\x5cUsers\x5cinago\x5cdev\x5cIPO_Sniper_AI_v4PS C:\Users\inago\dev\IPO_Sniper_AI_v4> ]633;B
+]633;D]633;A]633;P;Cwd=C:\x5cUsers\x5cinago\x5cdev\x5cIPO_Sniper_AI_v4PS C:\Users\inago\dev\IPO_Sniper_AI_v4> ]633;B
+PS>npm run build 2>&1
+
+]633;D;1]633;A]633;P;Cwd=C:\x5cUsers\x5cinago\x5cdev\x5cIPO_Sniper_AI_v4PS C:\Users\inago\dev\IPO_Sniper_AI_v4> ]633;B
+]633;D]633;A]633;P;Cwd=C:\x5cUsers\x5cinago\x5cdev\x5cIPO_Sniper_AI_v4PS C:\Users\inago\dev\IPO_Sniper_AI_v4> ]633;B
+PS># ------------------------------------------------------------
+]633;D;1]633;A]633;P;Cwd=C:\x5cUsers\x5cinago\x5cdev\x5cIPO_Sniper_AI_v4PS C:\Users\inago\dev\IPO_Sniper_AI_v4> ]633;B
+PS># 12. ROADMAP CHECK
+]633;D;1]633;A]633;P;Cwd=C:\x5cUsers\x5cinago\x5cdev\x5cIPO_Sniper_AI_v4PS C:\Users\inago\dev\IPO_Sniper_AI_v4> ]633;B
+PS># ------------------------------------------------------------
+]633;D;1]633;A]633;P;Cwd=C:\x5cUsers\x5cinago\x5cdev\x5cIPO_Sniper_AI_v4PS C:\Users\inago\dev\IPO_Sniper_AI_v4> ]633;B
+]633;D]633;A]633;P;Cwd=C:\x5cUsers\x5cinago\x5cdev\x5cIPO_Sniper_AI_v4PS C:\Users\inago\dev\IPO_Sniper_AI_v4> ]633;B
+PS>Write-Host ""
+
+]633;D;0]633;A]633;P;Cwd=C:\x5cUsers\x5cinago\x5cdev\x5cIPO_Sniper_AI_v4PS C:\Users\inago\dev\IPO_Sniper_AI_v4> ]633;B
+PS>Write-Host "============================================================"
+============================================================
+]633;D;0]633;A]633;P;Cwd=C:\x5cUsers\x5cinago\x5cdev\x5cIPO_Sniper_AI_v4PS C:\Users\inago\dev\IPO_Sniper_AI_v4> ]633;B
+PS>Write-Host " ROADMAP CHECKPOINT"
+ ROADMAP CHECKPOINT
+]633;D;0]633;A]633;P;Cwd=C:\x5cUsers\x5cinago\x5cdev\x5cIPO_Sniper_AI_v4PS C:\Users\inago\dev\IPO_Sniper_AI_v4> ]633;B
+PS>Write-Host "============================================================"
+============================================================
+]633;D;0]633;A]633;P;Cwd=C:\x5cUsers\x5cinago\x5cdev\x5cIPO_Sniper_AI_v4PS C:\Users\inago\dev\IPO_Sniper_AI_v4> ]633;B
+]633;D]633;A]633;P;Cwd=C:\x5cUsers\x5cinago\x5cdev\x5cIPO_Sniper_AI_v4PS C:\Users\inago\dev\IPO_Sniper_AI_v4> ]633;B
+PS>Write-Host ""
+
+]633;D;0]633;A]633;P;Cwd=C:\x5cUsers\x5cinago\x5cdev\x5cIPO_Sniper_AI_v4PS C:\Users\inago\dev\IPO_Sniper_AI_v4> ]633;B
+PS>Write-Host "PUBLIC IPO SNIPER AI"
+PUBLIC IPO SNIPER AI
+]633;D;0]633;A]633;P;Cwd=C:\x5cUsers\x5cinago\x5cdev\x5cIPO_Sniper_AI_v4PS C:\Users\inago\dev\IPO_Sniper_AI_v4> ]633;B
+PS>Write-Host "A. Reliability"
+A. Reliability
+]633;D;0]633;A]633;P;Cwd=C:\x5cUsers\x5cinago\x5cdev\x5cIPO_Sniper_AI_v4PS C:\Users\inago\dev\IPO_Sniper_AI_v4> ]633;B
+PS>Write-Host "B. Aggregation / Research"
+B. Aggregation / Research
+]633;D;0]633;A]633;P;Cwd=C:\x5cUsers\x5cinago\x5cdev\x5cIPO_Sniper_AI_v4PS C:\Users\inago\dev\IPO_Sniper_AI_v4> ]633;B
+PS>Write-Host "C. Public Intelligence consumption"
+C. Public Intelligence consumption
+]633;D;0]633;A]633;P;Cwd=C:\x5cUsers\x5cinago\x5cdev\x5cIPO_Sniper_AI_v4PS C:\Users\inago\dev\IPO_Sniper_AI_v4> ]633;B
+PS>Write-Host "D. Beta infrastructure"
+D. Beta infrastructure
+]633;D;0]633;A]633;P;Cwd=C:\x5cUsers\x5cinago\x5cdev\x5cIPO_Sniper_AI_v4PS C:\Users\inago\dev\IPO_Sniper_AI_v4> ]633;B
+PS>Write-Host "E. Monetization"
+E. Monetization
+]633;D;0]633;A]633;P;Cwd=C:\x5cUsers\x5cinago\x5cdev\x5cIPO_Sniper_AI_v4PS C:\Users\inago\dev\IPO_Sniper_AI_v4> ]633;B
+PS>Write-Host ""
+
+]633;D;0]633;A]633;P;Cwd=C:\x5cUsers\x5cinago\x5cdev\x5cIPO_Sniper_AI_v4PS C:\Users\inago\dev\IPO_Sniper_AI_v4> ]633;B
+]633;D]633;A]633;P;Cwd=C:\x5cUsers\x5cinago\x5cdev\x5cIPO_Sniper_AI_v4PS C:\Users\inago\dev\IPO_Sniper_AI_v4> ]633;B
+PS>Write-Host "PRIVATE QUANT"
+PRIVATE QUANT
+]633;D;0]633;A]633;P;Cwd=C:\x5cUsers\x5cinago\x5cdev\x5cIPO_Sniper_AI_v4PS C:\Users\inago\dev\IPO_Sniper_AI_v4> ]633;B
+PS>Write-Host "A. Data Quality"
+A. Data Quality
+]633;D;0]633;A]633;P;Cwd=C:\x5cUsers\x5cinago\x5cdev\x5cIPO_Sniper_AI_v4PS C:\Users\inago\dev\IPO_Sniper_AI_v4> ]633;B
+PS>Write-Host "B. Decision Matrix"
+B. Decision Matrix
+]633;D;0]633;A]633;P;Cwd=C:\x5cUsers\x5cinago\x5cdev\x5cIPO_Sniper_AI_v4PS C:\Users\inago\dev\IPO_Sniper_AI_v4> ]633;B
+PS>Write-Host "C. Contract Resolution"
+C. Contract Resolution
+]633;D;0]633;A]633;P;Cwd=C:\x5cUsers\x5cinago\x5cdev\x5cIPO_Sniper_AI_v4PS C:\Users\inago\dev\IPO_Sniper_AI_v4> ]633;B
+PS>Write-Host "D. Evidence / Performance Ledger"
+D. Evidence / Performance Ledger
+]633;D;0]633;A]633;P;Cwd=C:\x5cUsers\x5cinago\x5cdev\x5cIPO_Sniper_AI_v4PS C:\Users\inago\dev\IPO_Sniper_AI_v4> ]633;B
+PS>Write-Host "E. Private Trading Validation"
+E. Private Trading Validation
+]633;D;0]633;A]633;P;Cwd=C:\x5cUsers\x5cinago\x5cdev\x5cIPO_Sniper_AI_v4PS C:\Users\inago\dev\IPO_Sniper_AI_v4> ]633;B
+PS>Write-Host ""
+
+]633;D;0]633;A]633;P;Cwd=C:\x5cUsers\x5cinago\x5cdev\x5cIPO_Sniper_AI_v4PS C:\Users\inago\dev\IPO_Sniper_AI_v4> ]633;B
+]633;D]633;A]633;P;Cwd=C:\x5cUsers\x5cinago\x5cdev\x5cIPO_Sniper_AI_v4PS C:\Users\inago\dev\IPO_Sniper_AI_v4> ]633;B
+PS>Write-Host "SHARED BOUNDARY"
+SHARED BOUNDARY
+]633;D;0]633;A]633;P;Cwd=C:\x5cUsers\x5cinago\x5cdev\x5cIPO_Sniper_AI_v4PS C:\Users\inago\dev\IPO_Sniper_AI_v4> ]633;B
+PS>Write-Host "Quant -> Public Intelligence Engine -> IPO Sniper AI"
+Quant -> Public Intelligence Engine -> IPO Sniper AI
+]633;D;0]633;A]633;P;Cwd=C:\x5cUsers\x5cinago\x5cdev\x5cIPO_Sniper_AI_v4PS C:\Users\inago\dev\IPO_Sniper_AI_v4> ]633;B
+PS>Write-Host "One-way, classified, read-only consumption."
+One-way, classified, read-only consumption.
+]633;D;0]633;A]633;P;Cwd=C:\x5cUsers\x5cinago\x5cdev\x5cIPO_Sniper_AI_v4PS C:\Users\inago\dev\IPO_Sniper_AI_v4> ]633;B
+PS>Write-Host ""
+
+]633;D;0]633;A]633;P;Cwd=C:\x5cUsers\x5cinago\x5cdev\x5cIPO_Sniper_AI_v4PS C:\Users\inago\dev\IPO_Sniper_AI_v4> ]633;B
+]633;D]633;A]633;P;Cwd=C:\x5cUsers\x5cinago\x5cdev\x5cIPO_Sniper_AI_v4PS C:\Users\inago\dev\IPO_Sniper_AI_v4> ]633;B
+PS>Stop-Transcript
+**********************
+Windows PowerShell transcript end
+End time: 20260827193832
+**********************
