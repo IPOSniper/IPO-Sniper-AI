@@ -1,6 +1,4 @@
-﻿import Link from "next/link";
-
-export const dynamic = "force-dynamic";
+import Link from "next/link";
 import { GraduationCap, ArrowRight } from "lucide-react";
 import ResearchTarget from "@/components/workstation/panels/ResearchTarget/ResearchTarget";
 import NewsRail from "@/components/workstation/panels/NewsRail";
