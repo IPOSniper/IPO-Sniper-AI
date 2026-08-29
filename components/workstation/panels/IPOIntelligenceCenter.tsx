@@ -10,6 +10,7 @@ interface ScheduledItem {
     price: string;
     numberOfShares: number;
     secFilingUrl: string | null;
+    exchange: string;
 }
 
 interface FiledItem {
@@ -54,6 +55,11 @@ interface IpoRow {
     evidenceCount: number;
     /** Real source labels already available -- domain/outlet names, not fabricated. */
     sources: string[];
+    /** Real Company.exchange for Scheduled rows (has a real ticker to look up).
+     * "Unknown" for Filed/Watch/Strategic rows -- those sources carry a free-text
+     * company name, not a ticker, so an exchange lookup isn't available yet.
+     * Never fabricated -- an honest "Unknown" beats a guessed value. */
+    exchange: string;
     /** Short, honest explanation derived only from real fields already present on this row
      * (lifecycle + evidence count) -- never a claim about data we don't have. */
     whySurfaced: string;
@@ -115,6 +121,7 @@ export default function IPOIntelligenceCenter() {
         evidenceCount: item.secFilingUrl ? 1 : 0,
         sources: item.secFilingUrl ? ["SEC EDGAR"] : [],
         whySurfaced: "SEC-confirmed IPO scheduling activity.",
+        exchange: item.exchange,
     }));
 
     const filedRows: IpoRow[] = filed.map((item, i) => ({
@@ -130,6 +137,7 @@ export default function IPOIntelligenceCenter() {
         evidenceCount: 1,
         sources: ["SEC EDGAR"],
         whySurfaced: `SEC filing (${item.formType}) confirms real registration activity.`,
+        exchange: "Unknown",
     }));
 
     const watchRows: IpoRow[] = watch.map(c => {
@@ -152,6 +160,7 @@ export default function IPOIntelligenceCenter() {
                 whySurfaced: evidenceCount > 1
                     ? `${evidenceCount} related news sources detected in the last 30 days.`
                     : "Single news source detected -- not yet independently corroborated.",
+                exchange: "Unknown",
             };
         }
         if (c.status === "unavailable") {
@@ -170,6 +179,7 @@ export default function IPOIntelligenceCenter() {
                 evidenceCount: 0,
                 sources: [],
                 whySurfaced: "Provider could not be reached -- not necessarily zero real signal.",
+                exchange: "Unknown",
             };
         }
         return {
@@ -185,6 +195,7 @@ export default function IPOIntelligenceCenter() {
             evidenceCount: 0,
             sources: [],
             whySurfaced: "Checked -- no qualifying developments found in the last 30 days.",
+            exchange: "Unknown",
         };
     });
 
@@ -225,6 +236,7 @@ export default function IPOIntelligenceCenter() {
                                 <th className="py-1.5 pr-3 font-medium">Date</th>
                                 <th className="py-1.5 pr-3 font-medium">Signal</th>
                                 <th className="py-1.5 pr-3 font-medium">Evidence</th>
+                                <th className="py-1.5 pr-3 font-medium">Exchange</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -254,6 +266,7 @@ export default function IPOIntelligenceCenter() {
                                                 </span>
                                             )}
                                         </td>
+                                        <td className="py-1.5 pr-3 text-zinc-400">{row.exchange}</td>
                                     </tr>
                                     {row.whySurfaced && (
                                         <tr key={`${row.key}-why`} className="border-b border-zinc-900">

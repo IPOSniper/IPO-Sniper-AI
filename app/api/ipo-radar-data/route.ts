@@ -1,6 +1,16 @@
-﻿import { NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { FinnhubIPOProvider } from "@/engine/evidence/providers/FinnhubIPOProvider";
 import { SECEdgarProvider } from "@/engine/evidence/providers/SECEdgarProvider";
+import { CompanyBuilder } from "@/engine/evidence/builders/company/CompanyBuilder";
+
+async function resolveExchange(ticker: string): Promise<string> {
+    try {
+        const company = await new CompanyBuilder().build(ticker);
+        return company.exchange;
+    } catch {
+        return "Unknown";
+    }
+}
 
 async function resolveSecFilingUrl(ticker: string): Promise<string | null> {
     try {
@@ -24,7 +34,8 @@ export async function GET() {
     const items = [];
     for (const ipo of ipos) {
         const secFilingUrl = await resolveSecFilingUrl(ipo.symbol);
-        items.push({ ...ipo, secFilingUrl });
+        const exchange = await resolveExchange(ipo.symbol);
+        items.push({ ...ipo, secFilingUrl, exchange });
     }
 
     return NextResponse.json({ items });
