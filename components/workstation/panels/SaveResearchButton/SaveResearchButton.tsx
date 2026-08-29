@@ -17,7 +17,8 @@ export default function SaveResearchButton({ research }: WorkstationPanelProps) 
  research.company.name,
  research.committee.recommendation,
  research.committee.overallScore,
- research.committee.confidence
+ research.committee.confidence,
+ research.committee.agreement
  );
 
  if (result.success) {

@@ -24,7 +24,8 @@ export async function saveResearchAction(
     companyName: string,
     recommendation: string,
     conviction: number,
-    confidence: number
+    confidence: number,
+    agreement: number
 ): Promise<SaveResearchResult> {
 
     if (!isSupabaseConfigured()) {
@@ -48,6 +49,7 @@ export async function saveResearchAction(
             recommendation,
             conviction,
             confidence,
+            committee_agreement: agreement,
         });
 
     if (error) {
@@ -65,12 +67,12 @@ export interface PublishResearchResult {
 
 /**
  * Publishes a completed research run as a public, unauthenticated
- * page at /r/[slug] — for sharing a link (X, etc.) or letting search
+ * page at /r/[slug] â€” for sharing a link (X, etc.) or letting search
  * / AI crawlers cite it. Freezes the full report as JSON at publish
  * time rather than the page re-running research live on every visit
  * (see the migration comment on research_history.report_snapshot for
  * why). Calling this again for the same ticker updates the existing
- * row (and its slug) rather than creating a duplicate — a research
+ * row (and its slug) rather than creating a duplicate â€” a research
  * run gets one canonical public URL, not a new one every re-publish.
  */
 export async function publishResearchAction(
@@ -136,7 +138,7 @@ export interface ResearchHistoryEntry {
 /**
  * Fetches the current user's recent research history. Returns an
  * empty array (not an error) when Supabase isn't configured or the
- * user isn't signed in — callers should treat that the same as "no
+ * user isn't signed in â€” callers should treat that the same as "no
  * history yet," matching this app's honest-empty-state pattern
  * elsewhere, since an empty list and "can't check" look the same to
  * a user who has no real Supabase project yet.
@@ -157,7 +159,7 @@ export async function getResearchHistory(limit = 10): Promise<ResearchHistoryEnt
 
     const { data, error } = await supabase
         .from("research_history")
-        .select("id, ticker, company_name, recommendation, conviction, confidence, created_at")
+        .select("id, ticker, company_name, recommendation, conviction, confidence, committee_agreement, created_at")
         .eq("user_id", user.id)
         .order("created_at", { ascending: false })
         .limit(limit);
