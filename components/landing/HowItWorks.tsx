@@ -38,7 +38,7 @@ export default function HowItWorks() {
                 <p className="mb-3 text-center text-sm uppercase tracking-[0.35em] text-blue-400">
                     Evidence · Analysis · Conviction
                 </p>
-                <p className="mt-3 text-center text-sm text-zinc-300">
+                <p className="mt-4 text-center text-base sm:text-lg font-medium text-violet-300 bg-violet-950/20 border border-violet-800/40 rounded-lg py-2 px-4 inline-block mx-auto">
                     Paul Jardim’s Rule: Facts, Not Sentiment. It’s the discipline behind Evidence, Analysis, Conviction.
                 </p>
 
