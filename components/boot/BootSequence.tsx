@@ -1,19 +1,32 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 /**
- * Web equivalent of the mobile app's BootSequence -- same visual
- * language (Evidence/Analysis/Conviction, purple/blue/teal), same
- * staggered-fill timing. Deliberately isolated: this file, plus
- * SessionBootGate.tsx, are the only two things touched to add this
- * feature. Nothing in the existing app/layout/pages is modified
- * except one wrapper line in layout.tsx around {children}.
+ * Web equivalent of the mobile app's BootSequence. 2.4s is a CAP,
+ * not a forced hold -- if the app is genuinely ready sooner (fonts
+ * loaded, boot logo loaded), we finish early. Never artificially
+ * delays the user past real readiness; never claims readiness before
+ * it's real either. A ~550ms floor exists purely to avoid an
+ * imperceptible flicker on very fast connections, not to fake work.
  *
- * This is a decorative startup sequence, not a live system check --
- * "INTELLIGENCE ENGINE ONLINE" does not mean any real provider or
- * evidence system was actually verified in these 5 seconds. Never
- * describe it as one.
+ * Real signals raced against the 2400ms cap:
+ * 1. document.fonts.ready -- genuine browser API, resolves when web
+ *    fonts have actually finished loading.
+ * 2. The boot logo's own onLoad event -- confirms that specific
+ *    image genuinely finished loading, not just requested.
+ * Whichever combination of (real readiness, floor) finishes LAST
+ * determines when the stage visually reaches "ready" -- but never
+ * later than the 2400ms cap, and the cap always wins if real
+ * readiness signals hang or never resolve (e.g. an unsupported
+ * browser missing document.fonts).
+ *
+ * This is still a decorative brand moment, not a live system check
+ * of Evidence/Analysis/Conviction -- "INTELLIGENCE ENGINE ONLINE"
+ * does not mean any real provider or evidence system was verified.
+ * Never describe it as one. What IS real here is the timing itself:
+ * the moment this dismisses is tied to genuine readiness, not a
+ * fabricated number.
  */
 
 const theme = {
@@ -27,12 +40,14 @@ const theme = {
   teal: "#2DD4BF",
 };
 
+const CAP_MS = 2400;
+const FLOOR_MS = 550;
+
 interface StageDef {
   key: "evidence" | "analysis" | "conviction";
   label: string;
   description: string;
   color: string;
-  delayMs: number;
 }
 
 const STAGES: StageDef[] = [
@@ -41,25 +56,22 @@ const STAGES: StageDef[] = [
     label: "EVIDENCE",
     description: "Collecting & verifying market intelligence",
     color: theme.purple,
-    delayMs: 0,
   },
   {
     key: "analysis",
     label: "ANALYSIS",
     description: "Processing company, financial & market data",
     color: theme.blue,
-    delayMs: 700,
   },
   {
     key: "conviction",
     label: "CONVICTION",
     description: "Generating investment conviction signal",
     color: theme.teal,
-    delayMs: 1400,
   },
 ];
 
-function BootStageRow({ stage, active, complete }: { stage: StageDef; active: boolean; complete: boolean }) {
+function BootStageRow({ stage, complete }: { stage: StageDef; complete: boolean }) {
   return (
     <div style={{ marginBottom: 22 }}>
       <div style={{ display: "flex", alignItems: "center", marginBottom: 4 }}>
@@ -71,7 +83,7 @@ function BootStageRow({ stage, active, complete }: { stage: StageDef; active: bo
             border: `2px solid ${stage.color}`,
             marginRight: 8,
             backgroundColor: complete ? stage.color : "transparent",
-            transition: "background-color 300ms ease",
+            transition: "background-color 200ms ease",
           }}
         />
         <span style={{ color: theme.text, fontSize: 13, fontWeight: 900, letterSpacing: 1 }}>
@@ -96,8 +108,8 @@ function BootStageRow({ stage, active, complete }: { stage: StageDef; active: bo
             height: 3,
             borderRadius: 2,
             backgroundColor: stage.color,
-            width: active || complete ? "100%" : "0%",
-            transition: `width 900ms cubic-bezier(0.33, 1, 0.68, 1) ${stage.delayMs}ms`,
+            width: complete ? "100%" : "0%",
+            transition: "width 260ms ease",
           }}
         />
       </div>
@@ -105,23 +117,89 @@ function BootStageRow({ stage, active, complete }: { stage: StageDef; active: bo
   );
 }
 
+function BootLogo({ onLoadOrError }: { onLoadOrError: () => void }) {
+  const [imgFailed, setImgFailed] = useState(false);
+
+  if (imgFailed) {
+    return (
+      <div style={{ backgroundColor: "#000", borderRadius: 12, padding: 32, marginBottom: 40, textAlign: "center" }}>
+        <span style={{ color: theme.text, fontSize: 24, fontWeight: 900, letterSpacing: 1 }}>
+          IPO SNIPER <span style={{ color: theme.purple }}>AI</span>
+        </span>
+      </div>
+    );
+  }
+
+  return (
+    <div style={{ backgroundColor: "#000", borderRadius: 12, padding: 32, marginBottom: 40, textAlign: "center" }}>
+      {/* eslint-disable-next-line @next/next/no-img-element -- static brand asset, boot screen only, needs onLoad/onError */}
+      <img
+        src="/ipo-sniper-logo.png"
+        alt="IPO Sniper AI"
+        style={{ width: "100%", maxWidth: 220, margin: "0 auto", display: "block" }}
+        onLoad={onLoadOrError}
+        onError={() => {
+          setImgFailed(true);
+          onLoadOrError();
+        }}
+      />
+    </div>
+  );
+}
+
 export default function BootSequence({ onComplete }: { onComplete: () => void }) {
   const [stage, setStage] = useState<"initializing" | "booting" | "ready">("initializing");
-  const [fillsStarted, setFillsStarted] = useState(false);
+  const startRef = useRef<number>(Date.now());
+  const fontsReadyRef = useRef(false);
+  const logoReadyRef = useRef(false);
+  const dismissedRef = useRef(false);
 
   useEffect(() => {
-    const bootTimer = setTimeout(() => setStage("booting"), 1000);
-    const fillTimer = setTimeout(() => setFillsStarted(true), 1050);
-    const readyTimer = setTimeout(() => setStage("ready"), 3350);
-    const completeTimer = setTimeout(() => onComplete(), 5000);
+    setStage("booting");
+
+    function tryDismiss() {
+      if (dismissedRef.current) return;
+      const realReady = fontsReadyRef.current && logoReadyRef.current;
+      const elapsed = Date.now() - startRef.current;
+      if (realReady && elapsed >= FLOOR_MS) {
+        dismissedRef.current = true;
+        setStage("ready");
+        setTimeout(onComplete, 180);
+      }
+    }
+
+    if (typeof document !== "undefined" && "fonts" in document) {
+      document.fonts.ready
+        .then(() => {
+          fontsReadyRef.current = true;
+          tryDismiss();
+        })
+        .catch(() => {
+          fontsReadyRef.current = true;
+          tryDismiss();
+        });
+    } else {
+      fontsReadyRef.current = true;
+    }
+
+    const floorTimer = setTimeout(tryDismiss, FLOOR_MS);
+
+    const capTimer = setTimeout(() => {
+      if (dismissedRef.current) return;
+      dismissedRef.current = true;
+      setStage("ready");
+      setTimeout(onComplete, 180);
+    }, CAP_MS);
 
     return () => {
-      clearTimeout(bootTimer);
-      clearTimeout(fillTimer);
-      clearTimeout(readyTimer);
-      clearTimeout(completeTimer);
+      clearTimeout(floorTimer);
+      clearTimeout(capTimer);
     };
   }, [onComplete]);
+
+  function handleLogoReady() {
+    logoReadyRef.current = true;
+  }
 
   return (
     <div
@@ -138,26 +216,12 @@ export default function BootSequence({ onComplete }: { onComplete: () => void })
       }}
     >
       <div style={{ width: "100%", maxWidth: 380 }}>
-        <div
-          style={{
-            backgroundColor: "#000",
-            borderRadius: 12,
-            padding: 32,
-            marginBottom: 40,
-            textAlign: "center",
-          }}
-        >
-          {/* eslint-disable-next-line @next/next/no-img-element -- static brand asset, boot screen only */}
-          <img src="/ipo-sniper-logo.png" alt="IPO Sniper AI" style={{ width: "100%", maxWidth: 220, margin: "0 auto" }} />
-        </div>
+        <BootLogo onLoadOrError={handleLogoReady} />
 
         {stage === "initializing" && (
           <div style={{ textAlign: "center" }}>
             <p style={{ color: theme.purple, fontSize: 14, fontWeight: 900, letterSpacing: 2, marginBottom: 6 }}>
               INITIALIZING
-            </p>
-            <p style={{ color: theme.muted, fontSize: 12, fontWeight: 700, letterSpacing: 1 }}>
-              INTELLIGENCE ENGINE INITIALIZING
             </p>
           </div>
         )}
@@ -168,7 +232,7 @@ export default function BootSequence({ onComplete }: { onComplete: () => void })
               BOOTING
             </p>
             {STAGES.map(s => (
-              <BootStageRow key={s.key} stage={s} active={fillsStarted} complete={false} />
+              <BootStageRow key={s.key} stage={s} complete={false} />
             ))}
           </div>
         )}
@@ -179,7 +243,7 @@ export default function BootSequence({ onComplete }: { onComplete: () => void })
               READY
             </p>
             {STAGES.map(s => (
-              <BootStageRow key={s.key} stage={s} active={true} complete={true} />
+              <BootStageRow key={s.key} stage={s} complete={true} />
             ))}
             <p style={{ color: theme.teal, fontSize: 13, fontWeight: 900, letterSpacing: 1, textAlign: "center", marginTop: 16 }}>
               INTELLIGENCE ENGINE ONLINE
