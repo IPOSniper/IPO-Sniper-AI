@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import SessionBootGate from "@/components/boot/SessionBootGate";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -25,11 +26,11 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      // This app has no light/dark toggle — it's dark-themed
+      // This app has no light/dark toggle â€” it's dark-themed
       // everywhere by design. Without the literal "dark" class here,
       // globals.css's @custom-variant dark rule (&:is(.dark *)) never
       // matches anything, so every dark: Tailwind variant across the
-      // whole app — not just this Button component — was silently
+      // whole app â€” not just this Button component â€” was silently
       // inactive. That's what caused the OAuth buttons on /login to
       // render white-background/white-text (bg-background fell back
       // to its light-mode value, and Button's outline variant never
@@ -37,7 +38,7 @@ export default function RootLayout({
       className={`dark ${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full bg-[#09090B] text-white">
-        {children}
+        <SessionBootGate>{children}</SessionBootGate>
       </body>
     </html>
   );
