@@ -1,4 +1,5 @@
 import type { IPO } from "@/types/ipo";
+import { getRecommendationLabel } from "@/engine/committee/shared/recommendationLabels";
 import {
   RecommendationColors,
 } from "@/types/recommendation";
@@ -24,7 +25,7 @@ export default function AIRecommendation({
           </p>
 
           <h2 className={`mt-2 text-4xl font-bold ${recommendationClass}`}>
-            {analysis.recommendation}
+            {getRecommendationLabel(analysis.recommendation)}
           </h2>
 
           <p className="mt-2 text-zinc-400">
@@ -74,7 +75,7 @@ export default function AIRecommendation({
                 key={reason}
                 className="flex gap-2 text-zinc-300"
               >
-                <span className="text-cyan-400">•</span>
+                <span className="text-cyan-400">â€¢</span>
                 {reason}
               </li>
             ))}

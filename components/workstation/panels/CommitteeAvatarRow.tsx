@@ -7,6 +7,7 @@ import type { CommitteeReport } from "@/engine/committee/contracts/CommitteeRepo
 import { buildCommitteePhotoAssignments } from "./committeeAvatars";
 import AnalystWorkspace from "./AnalystWorkspace";
 import type { AnalystReport } from "@/engine/committee/contracts/AnalystReport";
+import { getRecommendationLabel } from "@/engine/committee/shared/recommendationLabels";
 
 /**
  * Final revision of the committee-avatar decision: real submitted
@@ -109,7 +110,7 @@ export default function CommitteeAvatarRow({ committee }: { committee: Committee
  className="mt-0.5 text-[10px] font-semibold"
  style={{ color: hasOpinion ? color : "#52525b" }}
  >
- {hasOpinion ? RECOMMENDATION_LABEL[report.recommendation] ?? report.recommendation : "NO DATA"}
+ {hasOpinion ? getRecommendationLabel(report.recommendation) : "NO DATA"}
  </span>
  </button>
  );
@@ -132,7 +133,7 @@ export default function CommitteeAvatarRow({ committee }: { committee: Committee
  <div className="mt-3 flex items-center justify-between border-t border-zinc-800 pt-3 text-xs">
  <span className="text-zinc-500">Committee vote</span>
  <span className="font-semibold text-white">
- {RECOMMENDATION_LABEL[committee.recommendation] ?? committee.recommendation} - {committee.confidence}% confidence
+ {getRecommendationLabel(committee.recommendation)} - {committee.confidence}% confidence
  </span>
  </div>
  </div>

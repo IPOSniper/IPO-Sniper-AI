@@ -1,4 +1,5 @@
 import { WorkstationPanelProps } from "../contracts/WorkstationPanelProps";
+import { getRecommendationLabel } from "@/engine/committee/shared/recommendationLabels";
 
 const RECOMMENDATION_LABEL: Record<string, string> = {
  STRONG_BUY: "STRONG BUY",
@@ -44,7 +45,7 @@ export default function AIVerdictRow({ research }: WorkstationPanelProps) {
  <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-4">
  <p className="text-xs text-zinc-500">AI Verdict</p>
  <p className={`mt-1 text-2xl font-bold ${RECOMMENDATION_COLOR[committee.recommendation] ?? "text-zinc-300"}`}>
- {RECOMMENDATION_LABEL[committee.recommendation] ?? committee.recommendation}
+ {getRecommendationLabel(committee.recommendation)}
  </p>
  <p className="mt-1 text-xs text-zinc-500">{committee.confidence}% confidence - {committee.agreement}% agreement</p>
  <p className="mt-0.5 text-[10px] text-zinc-600">Full committee (all 15 analysts) - some other views of this research use a News-Analyst-excluded number instead, which may differ from this.</p>

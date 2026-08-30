@@ -1,4 +1,5 @@
 import { WorkstationPanelProps } from "../contracts/WorkstationPanelProps";
+import { getRecommendationLabel } from "@/engine/committee/shared/recommendationLabels";
 
 const RECOMMENDATION_COLOR: Record<string, string> = {
  STRONG_BUY: "text-emerald-400",
@@ -17,7 +18,7 @@ export default function ExecutiveSummaryPanel({ research }: WorkstationPanelProp
  <div className="flex items-center justify-between mb-3">
  <h2 className="text-lg font-semibold">Executive Summary</h2>
  <span className={`text-sm font-semibold ${color}`}>
- {report.recommendation.replace("_", " ")}
+ {getRecommendationLabel(report.recommendation)}
  </span>
  </div>
 
