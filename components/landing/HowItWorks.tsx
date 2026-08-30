@@ -39,7 +39,7 @@ export default function HowItWorks() {
                     Evidence · Analysis · Conviction
                 </p>
                 <p className="mt-3 text-center text-sm text-zinc-300">
-                    Jardim’s Rule: Facts, Not Sentiment — the discipline of never trusting sentiment over evidence.
+                    Paul Jardim’s Rule: Facts, Not Sentiment. It’s the discipline behind Evidence, Analysis, Conviction.
                 </p>
 
                 <h2 className="mb-16 text-center text-3xl font-bold sm:text-4xl">
