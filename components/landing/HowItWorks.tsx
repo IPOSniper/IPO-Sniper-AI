@@ -2,7 +2,7 @@ const STEPS = [
     {
         number: "01",
         title: "Sign In",
-        description: "Create a free account. Takes under a minute â€” no credit card.",
+        description: "Create a free account. Takes under a minute — no credit card.",
     },
     {
         number: "02",
@@ -12,18 +12,18 @@ const STEPS = [
     {
         number: "03",
         title: "Watch the Committee Work",
-        description: "15 specialized AI analysts examine SEC filings, financials, and market data in real time. You'll see exactly which ones found enough verified evidence to form an opinion â€” and which honestly didn't.",
+        description: "15 specialized AI analysts examine SEC filings, financials, and market data in real time. You'll see exactly which ones found enough verified evidence to form an opinion — and which honestly didn't.",
     },
     {
         number: "04",
         title: "Get a Traceable Conviction Score",
-        description: "Every number traces back to a real source you can inspect. Not a black box â€” a paper trail.",
+        description: "Every number traces back to a real source you can inspect. Not a black box — a paper trail.",
     },
 ];
 
 /**
  * Real, honest description of what actually happens when someone
- * signs up â€” not aspirational feature copy. Matches the true
+ * signs up — not aspirational feature copy. Matches the true
  * pipeline (Evidence -> Committee -> Report) and the actual honest-
  * uncertainty behavior (some analysts correctly report "no verified
  * data" rather than a fake confident answer), since overselling this
@@ -36,7 +36,10 @@ export default function HowItWorks() {
             <div className="mx-auto max-w-5xl">
 
                 <p className="mb-3 text-center text-sm uppercase tracking-[0.35em] text-blue-400">
-                    Evidence Â· Analysis Â· Conviction
+                    Evidence · Analysis · Conviction
+                </p>
+                <p className="mt-3 text-center text-sm text-zinc-300">
+                    Jardim’s Rule: Facts, Not Sentiment — the discipline of never trusting sentiment over evidence.
                 </p>
                 <p className="mb-3 text-center text-xs text-zinc-500">
                     Jardim&apos;s Rule: Facts, Not Sentiment
