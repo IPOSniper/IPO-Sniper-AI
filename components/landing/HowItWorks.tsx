@@ -41,9 +41,6 @@ export default function HowItWorks() {
                 <p className="mt-3 text-center text-sm text-zinc-300">
                     Jardim’s Rule: Facts, Not Sentiment — the discipline of never trusting sentiment over evidence.
                 </p>
-                <p className="mb-3 text-center text-xs text-zinc-500">
-                    Jardim&apos;s Rule: Facts, Not Sentiment
-                </p>
 
                 <h2 className="mb-16 text-center text-3xl font-bold sm:text-4xl">
                     From raw data to an investment decision, in one research run
