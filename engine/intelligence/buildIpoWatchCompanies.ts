@@ -48,6 +48,7 @@ async function searchIpoNews(company: string, apiKey: string): Promise<SearchRes
             q: query,
             from: from.toISOString().slice(0, 10),
             sortBy: "publishedAt",
+            searchIn: "title",
             language: "en",
             pageSize: "5",
             apiKey,
