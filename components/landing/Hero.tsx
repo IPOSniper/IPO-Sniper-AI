@@ -14,12 +14,13 @@ export default function Hero() {
         </h1>
 
         <p className="mx-auto mt-8 max-w-3xl text-xl text-zinc-300">
-          An AI Investment Committee that continuously evaluates whether your
-          investment thesis is becoming stronger or weaker.
+          An AI research committee that examines the actual filings, financials,
+          and market data behind a company -- and shows you exactly what it
+          found, unfiltered.
         </p>
 
         <p className="mt-8 text-2xl font-semibold">
-          From Raw Data to Investment Decisions.
+          Raw Data. Real Evidence. No Spin.
         </p>
 
         <div className="mt-12 flex justify-center gap-6">
