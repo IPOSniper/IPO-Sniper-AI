@@ -26,7 +26,11 @@ export default async function MarketContext() {
 
     const allFailed = results.every(r => r.status === "rejected");
     if (allFailed) {
-        return <UnverifiedCard title="Market Context" reason="No FINNHUB_API_KEY configured, or index quotes unavailable" />;
+        const firstRejected = results.find(r => r.status === "rejected") as PromiseRejectedResult | undefined;
+        const realReason = firstRejected?.reason instanceof Error
+            ? firstRejected.reason.message
+            : "No FINNHUB_API_KEY configured, or index quotes unavailable";
+        return <UnverifiedCard title="Market Context" reason={realReason} />;
     }
 
     const indexResults = results.slice(0, INDICES.length);
@@ -46,10 +50,11 @@ export default async function MarketContext() {
                         {INDICES.map((index, i) => {
                             const result = indexResults[i];
                             if (result.status === "rejected") {
+                                const reason = result.reason instanceof Error ? result.reason.message : "unavailable";
                                 return (
                                     <div key={index.symbol} className="flex items-center justify-between">
                                         <span className="text-zinc-500">{index.label}</span>
-                                        <span className="text-xs text-zinc-700">unavailable</span>
+                                        <span className="text-xs text-zinc-700" title={reason}>unavailable</span>
                                     </div>
                                 );
                             }
