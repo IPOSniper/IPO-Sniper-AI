@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createServiceRoleClient, isServiceRoleConfigured } from "@/lib/supabase/serviceRole";
 import { buildOpportunityUniverseWithStatus } from "@/engine/quant/OpportunityEngine";
 import crypto from "crypto";
+import { heartbeatStart, heartbeatSuccess, heartbeatFailure } from "@/engine/observability/heartbeat";
 
 /**
  * Real, dedicated Opportunity Discovery cron -- deliberately separate
@@ -63,6 +64,7 @@ export async function GET(request: NextRequest) {
     }
 
     try {
+        await heartbeatStart("quant-opportunities");
         const supabase = createServiceRoleClient();
 
         const { data: profileRow } = await supabase
@@ -152,6 +154,8 @@ export async function GET(request: NextRequest) {
             }
         }
 
+        await heartbeatSuccess("quant-opportunities");
+
         return NextResponse.json({
             success: errors.length === 0,
             inserted: insertedCount,
@@ -161,6 +165,7 @@ export async function GET(request: NextRequest) {
             health: failedProviders.length > 0 ? "partial" : "healthy",
         });
     } catch (err) {
+        await heartbeatFailure("quant-opportunities", err instanceof Error ? err.message : "Unknown real error.");
         return NextResponse.json({ success: false, error: err instanceof Error ? err.message : "Unknown real error." }, { status: 500 });
     }
 }

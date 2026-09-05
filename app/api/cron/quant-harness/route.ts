@@ -3,27 +3,26 @@ import { createServiceRoleClient, isServiceRoleConfigured } from "@/lib/supabase
 import { runObservationCycle } from "@/engine/quant/orchestration/ObservationCycle";
 import { isMarketOpen } from "@/engine/quant/orchestration/MarketHours";
 import { buildAutonomousCandidateSet } from "@/engine/quant/OpportunityAdapter";
+import { heartbeatStart, heartbeatSuccess, heartbeatFailure } from "@/engine/observability/heartbeat";
 
 export async function GET(request: NextRequest) {
     const secret = process.env.CRON_SECRET;
-
     if (!secret) {
         return NextResponse.json({ success: false, error: "CRON_SECRET is not configured." }, { status: 500 });
     }
-
     const authHeader = request.headers.get("authorization");
     if (authHeader !== `Bearer ${secret}`) {
         return NextResponse.json({ success: false, error: "Unauthorized." }, { status: 401 });
     }
-
+    await heartbeatStart("quant-harness");
     if (!isServiceRoleConfigured()) {
+        await heartbeatFailure("quant-harness", "Service role not configured.");
         return NextResponse.json({ success: false, error: "Service role not configured." }, { status: 500 });
     }
-
     if (!isMarketOpen()) {
+        await heartbeatSuccess("quant-harness");
         return NextResponse.json({ success: true, skipped: true, reason: "Market is closed (real NYSE/NASDAQ standard-hours check, holidays not yet accounted for)." });
     }
-
     try {
         const supabase = createServiceRoleClient();
         let { data: activeTest, error } = await supabase
@@ -32,11 +31,10 @@ export async function GET(request: NextRequest) {
             .eq("status", "RUNNING")
             .eq("environment", "paper")
             .maybeSingle();
-
         if (error) {
+            await heartbeatFailure("quant-harness", `Real error finding active test: ${error.message}`);
             return NextResponse.json({ success: false, error: `Real error finding active test: ${error.message}` }, { status: 500 });
         }
-
         if (!activeTest) {
             const { data: anyNonTerminal } = await supabase
                 .from("quant_test_harness")
@@ -44,31 +42,27 @@ export async function GET(request: NextRequest) {
                 .in("status", ["IDLE", "RUNNING", "PAUSED", "STOPPING"])
                 .limit(1)
                 .maybeSingle();
-
             if (anyNonTerminal) {
+                await heartbeatSuccess("quant-harness");
                 return NextResponse.json({ success: true, skipped: true, reason: "A test exists but isn't currently RUNNING (paused/stopping) -- not auto-creating a duplicate." });
             }
-
             const { data: profileRow } = await supabase
                 .from("profiles")
                 .select("id")
                 .limit(1)
                 .maybeSingle();
             const realUserId = profileRow?.id;
-
             if (!realUserId) {
+                await heartbeatSuccess("quant-harness");
                 return NextResponse.json({ success: true, skipped: true, reason: "No real user found to auto-initialize a test for." });
             }
-
             const candidateSet = await buildAutonomousCandidateSet(12, ["RIOT", "IREN", "RKLB", "KTOS", "CLSK"]);
             const watchlist = candidateSet.tickers;
-
             console.log(
                 candidateSet.discoverySource === "opportunity_engine"
-                    ? `Discovery source: Opportunity Engine | Status: ${candidateSet.providerStatus.toUpperCase()} | Candidates: ${candidateSet.tickers.length}${candidateSet.failedProviders.length > 0 ? ` | Failed providers: ${candidateSet.failedProviders.join(", ")}` : ""}`
+                    ? `Discovery source: Opportunity Engine | Status: ${candidateSet.providerStatus.toUpperCase()} | Candidates: ${candidateSet.tickers.length}${candidateSet.failedProviders.length > 0 ? `| Failed providers: ${candidateSet.failedProviders.join(", ")}` : ""}`
                     : `Discovery source: Legacy fallback | Reason: Opportunity Engine returned no usable candidates | Candidates: ${candidateSet.tickers.length} | Failed providers: ${candidateSet.failedProviders.join(", ")}`
             );
-
             const { data: newTest, error: insertError } = await supabase
                 .from("quant_test_harness")
                 .insert({
@@ -85,26 +79,23 @@ export async function GET(request: NextRequest) {
                 })
                 .select("id, user_id, watchlist, status, environment, observations_count, autonomous_decisions_count, completed_trade_cycles_count, target_observations, target_autonomous_runs, target_completed_trade_cycles, use_paper_validation_gates")
                 .single();
-
             if (insertError || !newTest) {
+                await heartbeatSuccess("quant-harness");
                 return NextResponse.json({ success: true, skipped: true, reason: `Auto-initialization attempted but failed: ${insertError?.message ?? "unknown error"}.` });
             }
-
             activeTest = newTest;
         }
-
         const result = await runObservationCycle(activeTest.user_id, activeTest.id, activeTest.watchlist, true, activeTest.use_paper_validation_gates);
-
         const observationsMet = activeTest.observations_count + 1 >= activeTest.target_observations;
         const decisionsMet = activeTest.autonomous_decisions_count + (result.newDecisionFormed ? 1 : 0) >= activeTest.target_autonomous_runs;
         const cyclesMet = activeTest.completed_trade_cycles_count >= activeTest.target_completed_trade_cycles;
-
         if (observationsMet && decisionsMet && cyclesMet) {
             await supabase.from("quant_test_harness").update({ status: "COMPLETED", stop_reason: "Real validation parameters met.", completed_at: new Date().toISOString() }).eq("id", activeTest.id);
         }
-
+        await heartbeatSuccess("quant-harness");
         return NextResponse.json({ success: true, testId: activeTest.id, cycle: result });
     } catch (err) {
+        await heartbeatFailure("quant-harness", err instanceof Error ? err.message : "Unknown real error.");
         return NextResponse.json({ success: false, error: err instanceof Error ? err.message : "Unknown real error." }, { status: 500 });
     }
 }
