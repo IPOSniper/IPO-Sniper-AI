@@ -36,6 +36,7 @@ import { PAPER_VALIDATION_EXECUTION_GATES } from "@/engine/quant/BatchScanner";
 import { runAutonomousExitCheck, type ExitOutcome } from "./AutonomousExitEngine";
 import { reassessOpenPosition, type MidPositionReassessment } from "@/engine/intelligence/MidPositionReassessment";
 import { AlpacaPaperTradingProvider } from "@/engine/trading/providers/AlpacaPaperTradingProvider";
+import { reconcilePaperTradeOrders } from "@/engine/trading/reconciliation/PaperTradeReconciliation";
 import { extractUnderlyingFromOccSymbol } from "@/engine/trading/contracts/occSymbol";
 
 export interface CycleResult {
@@ -175,6 +176,23 @@ export async function runObservationCycle(userId: string, testHarnessId: string,
         const gates = usePaperValidationGates ? PAPER_VALIDATION_EXECUTION_GATES : undefined;
         const executionOutcome = await runAutonomousTradingSession(userId, `${idempotencyKey}-execution`, watchlist, gates, useServiceRole);
         const newDecisionFormed = executionOutcome.status === "COMPLETED" && executionOutcome.results.some(r => r.plan && r.plan.direction !== "none");
+
+        // Phase 1, Step 1 -- ONLY reconciliation wiring. This does
+        // NOT count completed cycles, create ledger rows, infer a
+        // fill, or touch completed_trade_cycles_count. It solely
+        // gives the autonomous path the same real, authoritative
+        // broker-state sync the dashboard already has, via the
+        // exact same reconcilePaperTradeOrders() logic. SUBMITTED
+        // is not FILLED -- this is what makes FILLED knowable here.
+        if (isSupabaseConfigured()) {
+            try {
+                const provider = new AlpacaPaperTradingProvider();
+                const orders = await provider.listOrders(50);
+                await reconcilePaperTradeOrders(orders, useServiceRole ? userId : undefined);
+            } catch (reconcileErr) {
+                console.error("Phase 1 Step 1 reconciliation error:", reconcileErr instanceof Error ? reconcileErr.message : reconcileErr);
+            }
+        }
 
         // Real, honest progress-counter update on the test harness row
         // -- observation always increments; decision/execution counts
