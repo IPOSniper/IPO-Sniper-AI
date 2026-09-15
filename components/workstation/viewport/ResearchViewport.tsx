@@ -7,7 +7,7 @@ export default function ResearchViewport({
 }: WorkstationPanelProps){
 
 return(
-<main className="flex flex-col gap-8 h-full overflow-y-auto">
+<main className="flex flex-col gap-8">
 <ResearchSession research={research} />
 </main>
 );

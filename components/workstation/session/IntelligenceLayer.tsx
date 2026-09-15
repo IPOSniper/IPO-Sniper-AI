@@ -16,6 +16,7 @@ import NewsSentimentDonut from "../panels/NewsSentimentDonut/NewsSentimentDonut"
 import PortfolioIntelligence from "../panels/PortfolioIntelligence/PortfolioIntelligence";
 import ShareCardButton from "../panels/ShareCard/ShareCardButton";
 import EarningsPanel from "../panels/EarningsPanel";
+import CollapsibleSection from "../shared/CollapsibleSection";
 
 export default function IntelligenceLayer({
 research,
@@ -36,19 +37,23 @@ return(
 <InvestorDecisionCenter research={research} />
 <PortfolioIntelligence research={research} />
 
+<CollapsibleSection title="Financial Overview & Valuation">
 <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
  <FinancialOverviewChart research={research} />
  <ValuationSummary />
 </div>
+</CollapsibleSection>
 
+<CollapsibleSection title="News Sentiment & Evidence">
 <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
  <NewsSentimentDonut research={research} />
  <EvidencePanel research={research} />
 </div>
+</CollapsibleSection>
 
-<RiskPanel research={research} />
-<CatalystPanel research={research} />
-<EarningsPanel research={research} />
+<CollapsibleSection title="Risks"><RiskPanel research={research} /></CollapsibleSection>
+<CollapsibleSection title="Catalysts to Watch"><CatalystPanel research={research} /></CollapsibleSection>
+<CollapsibleSection title="Earnings"><EarningsPanel research={research} /></CollapsibleSection>
 
 <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-4">
  <h2 className="mb-1 text-lg font-semibold">Share Research Card</h2>

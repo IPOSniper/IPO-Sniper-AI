@@ -31,6 +31,17 @@ export interface ResearchObject {
         completedStages:string[];
     };
 
+    researchSnapshot: {
+        recommendation: string;
+        conviction: number;
+        confidence: number;
+        agreement: number;
+        analystCount: number;
+        votingAnalystCount: number;
+    };
+
+
+
     ui:{
         loading:boolean;
     };

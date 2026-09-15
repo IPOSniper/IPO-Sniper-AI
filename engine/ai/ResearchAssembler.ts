@@ -43,6 +43,17 @@ export class ResearchAssembler {
                 ],
             },
 
+            researchSnapshot: {
+                recommendation: report.committee.recommendation,
+                conviction: report.conviction,
+                confidence: report.confidence,
+                agreement: report.committee.agreement,
+                analystCount: report.committee.reports.length,
+                votingAnalystCount: report.committee.reports.filter(r => r.confidence > 0).length,
+            },
+
+
+
             ui: {
                 loading: false,
             },
