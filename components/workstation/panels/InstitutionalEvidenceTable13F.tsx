@@ -24,7 +24,7 @@ export default async function InstitutionalEvidenceTable13F({ research }: Workst
         if (!filing) continue;
         const holding = filing.holdings.find(h => h.cusip === cusipEntry.cusip);
         if (holding) {
-            rows.push({ filer: NOTABLE_13F_FILERS[key].name, shares: holding.shares, value: holding.valueThousands * 1000, period: filing.periodOfReport });
+            rows.push({ filer: NOTABLE_13F_FILERS[key].label, shares: holding.shares, value: holding.valueThousands * 1000, period: filing.periodOfReport });
         }
     }
 
