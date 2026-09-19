@@ -1,7 +1,7 @@
 ﻿import { WorkstationPanelProps } from "../contracts/WorkstationPanelProps";
 
 export default function InvestmentThesisCards({ research }: WorkstationPanelProps) {
-    const idc = research.investorDecisionCenter?.value;
+    const idc = research.report.investorDecisionCenter?.value;
 
     if (!idc) {
         return (
