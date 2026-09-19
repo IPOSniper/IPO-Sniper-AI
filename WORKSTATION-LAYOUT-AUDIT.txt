@@ -1,0 +1,1046 @@
+﻿============================================================
+IPO SNIPER AI — WORKSTATION LAYOUT AUDIT
+Generated: 2026-09-16 18:53:28
+Worktree: C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design
+============================================================
+
+[1] GIT STATUS
+============================================================
+ M components/workstation/panels/FinancialOverviewChart/FinancialOverviewChart.tsx
+ M components/workstation/panels/InstitutionalOwnershipCard/InstitutionalOwnershipCard.tsx
+ M components/workstation/session/IntelligenceLayer.tsx
+ M components/workstation/session/ResearchSession.tsx
+ M components/workstation/shell/WorkstationShell.tsx
+ M components/workstation/sidebar/IntelligenceSidebar.tsx
+ M package-lock.json
+?? WORKSTATION-DESIGN-CONTRACT.md
+?? WORKSTATION-LAYOUT-AUDIT.txt
+?? components/workstation/design/
+?? components/workstation/navigation/
+?? components/workstation/panels/EarningsComparisonChart.tsx
+?? components/workstation/panels/EvidenceModule.tsx
+
+============================================================
+[2] WORKSTATION ARCHITECTURE FILES
+============================================================
+
+FullName                                                                                                          
+--------                                                                                                          
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\cards\BusinessOverviewCard\index.ts 
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\cards\CatalystsCard\index.ts        
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\cards\CompanyHeaderCard\index.ts    
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\cards\ExecutiveSummaryCard\index.ts 
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\cards\FinancialHealthCard\index.ts  
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\cards\index.ts                      
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\cards\InvestmentThesisCard\index.ts 
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\cards\RecommendationCard\index.ts   
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\cards\RisksCard\index.ts            
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\cards\ValuationCard\index.ts        
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\contracts\WorkstationPanelProps.ts  
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\dock\index.ts                       
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\header\index.ts                     
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\layout\AppShell.tsx                 
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\layout\index.ts                     
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\layout\LeftSidebar.tsx              
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\layout\RightSidebar.tsx             
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\navigation\ResearchIndex.tsx        
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\AdaptiveIntelligencePanel.tsx
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\CatalystPanel.tsx            
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\CommitteePanel.tsx           
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\ContinueResearchPanel.tsx    
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\EarningsPanel.tsx            
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\EarningsPreviewPanel.tsx     
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\EarningsRecapPanel.tsx       
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\EvidencePanel.tsx            
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\ExecutiveSummaryPanel.tsx    
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\index.ts                     
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\InsiderActivityPanel.tsx     
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\InvestmentThesisPanel.tsx    
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\IPORadarPanel.tsx            
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\MarketContext\index.ts       
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\MarketMoversPanel.tsx        
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\NewsRail\index.ts            
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\OptionsChainPanel.tsx        
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\RecommendationPanel.tsx      
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\ResearchProgress\index.ts    
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\ResearchSnapshotPanel.tsx    
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\ResearchTarget\index.ts      
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\RiskPanel.tsx                
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\SnapshotPanel.tsx            
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\SystemLog\index.ts           
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\UpcomingEarnings\index.ts    
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\UpcomingEvents\index.ts      
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\ValuationSummary\index.ts    
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\WhatCouldChangeThisPanel.tsx 
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\registry\index.ts                   
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\registry\WorkstationPanel.ts        
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\ribbon\index.ts                     
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\session\AnalystLayer.tsx            
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\session\index.ts                    
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\session\IntelligenceLayer.tsx       
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\session\OperationsLayer.tsx         
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\session\ResearchSession.tsx         
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\shell\index.ts                      
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\shell\WorkstationShell.tsx          
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\sidebar\index.ts                    
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\sidebar\IntelligenceSidebar.tsx     
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\sidebar\LeftSidebar.tsx             
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\sidebar\NavigationSidebar.tsx       
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\ui\ConfidenceMeter\index.ts         
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\ui\index.ts                         
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\ui\MetricCard\index.ts              
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\ui\Panel\index.ts                   
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\ui\Panel\Panel.tsx                  
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\ui\ProgressRing\index.ts            
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\ui\SectionHeader\index.ts           
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\ui\StatusBadge\index.ts             
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\viewport\index.ts                   
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\viewport\ResearchViewport.tsx       
+
+
+
+
+============================================================
+[3] WORKSTATION SHELL
+============================================================
+import React from "react";
+
+import CommandBar from "../panels/CommandBar/CommandBar";
+import ProcessStepper from "../panels/ProcessStepper/ProcessStepper";
+import PriceChart from "../panels/PriceChart/PriceChart";
+import IntelligenceSidebar from "../sidebar/IntelligenceSidebar";
+import ResearchViewport from "../viewport/ResearchViewport";
+import ResearchTarget from "../panels/ResearchTarget/ResearchTarget";
+
+import { ResearchObject } from "@/engine/models/ResearchObject";
+
+interface Props {
+    research: ResearchObject;
+    ticker?: string;
+}
+
+export default function WorkstationShell({ research, ticker }: Props) {
+    return (
+        <div className="space-y-4 text-white">
+            <CommandBar research={research} />
+
+            <PriceChart ticker={research.company.ticker} />
+
+            <ProcessStepper research={research} />
+
+            <div className="mb-4">
+                <ResearchTarget defaultTicker={ticker} />
+            </div>
+
+            <main className="grid grid-cols-12 gap-4">
+                <section className="col-span-9 min-w-0">
+                    <ResearchViewport research={research} />
+                </section>
+
+                <aside className="col-span-3 min-w-0">
+                    <IntelligenceSidebar research={research} />
+                </aside>
+            </main>
+        </div>
+    );
+}
+
+============================================================
+[4] RESEARCH VIEWPORT
+============================================================
+import { WorkstationPanelProps } from "../contracts/WorkstationPanelProps";
+
+import { ResearchSession } from "../session";
+
+export default function ResearchViewport({
+ research,
+}: WorkstationPanelProps){
+
+return(
+<main className="flex flex-col gap-8">
+<ResearchSession research={research} />
+</main>
+);
+}
+
+============================================================
+[5] RESEARCH SESSION
+============================================================
+import { WorkstationPanelProps } from "../contracts/WorkstationPanelProps";
+
+import MissionControlHeader from "../panels/MissionControlHeader";
+import ResearchSnapshotPanel from "../panels/ResearchSnapshotPanel";
+import AIVerdictRow from "../panels/AIVerdictRow";
+import CommitteeAvatarRow from "../panels/CommitteeAvatarRow";
+import AnalystLayer from "./AnalystLayer";
+import IntelligenceLayer from "./IntelligenceLayer";
+import OperationsLayer from "./OperationsLayer";
+
+export default function ResearchSession({
+    research,
+}: WorkstationPanelProps) {
+    return (
+        <div className="space-y-8">
+            <section id="overview" className="scroll-mt-24">
+                <div className="space-y-6">
+                    <ResearchSnapshotPanel research={research} />
+                    <MissionControlHeader research={research} />
+                    <AIVerdictRow research={research} />
+                </div>
+            </section>
+
+            <section id="committee" className="scroll-mt-24">
+                <CommitteeAvatarRow committee={research.committee} />
+            </section>
+
+            <section id="analysts" className="scroll-mt-24">
+                <AnalystLayer research={research} />
+            </section>
+
+            <section id="intelligence" className="scroll-mt-24">
+                <IntelligenceLayer research={research} />
+            </section>
+
+            <section id="operations" className="scroll-mt-24">
+                <OperationsLayer research={research} />
+            </section>
+        </div>
+    );
+}
+
+============================================================
+[6] INTELLIGENCE LAYER
+============================================================
+import { WorkstationPanelProps } from "../contracts/WorkstationPanelProps";
+
+import EvidenceSummaryGrid from "../panels/EvidenceSummaryGrid/EvidenceSummaryGrid";
+import EvidenceModule from "../panels/EvidenceModule";
+import ExecutiveSummaryPanel from "../panels/ExecutiveSummaryPanel";
+import RecommendationPanel from "../panels/RecommendationPanel";
+import CommitteePanel from "../panels/CommitteePanel";
+import ConvictionRadar from "../panels/ConvictionRadar/ConvictionRadar";
+import InvestmentThesisPanel from "../panels/InvestmentThesisPanel";
+import InvestorDecisionCenter from "../panels/InvestorDecisionCenter";
+import FinancialOverviewChart from "../panels/FinancialOverviewChart/FinancialOverviewChart";
+import ValuationSummary from "../panels/ValuationSummary/ValuationSummary";
+import EvidencePanel from "../panels/EvidencePanel";
+import RiskPanel from "../panels/RiskPanel";
+import CatalystPanel from "../panels/CatalystPanel";
+import NewsSentimentDonut from "../panels/NewsSentimentDonut/NewsSentimentDonut";
+import PortfolioIntelligence from "../panels/PortfolioIntelligence/PortfolioIntelligence";
+import ShareCardButton from "../panels/ShareCard/ShareCardButton";
+import EarningsPanel from "../panels/EarningsPanel";
+import EarningsComparisonChart from "../panels/EarningsComparisonChart";
+import CollapsibleSection from "../shared/CollapsibleSection";
+
+export default function IntelligenceLayer({
+research,
+}: WorkstationPanelProps){
+
+return(
+<section className="space-y-6">
+<EvidenceSummaryGrid research={research} />
+<EvidenceModule research={research} />
+<ExecutiveSummaryPanel research={research} />
+
+<div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+ <ConvictionRadar research={research} />
+ <RecommendationPanel research={research} />
+</div>
+
+<CommitteePanel research={research} />
+<InvestmentThesisPanel research={research} />
+<InvestorDecisionCenter research={research} />
+<PortfolioIntelligence research={research} />
+
+<section id="financials" className="scroll-mt-24">
+ <FinancialOverviewChart research={research} />
+</section>
+
+<CollapsibleSection title="Valuation">
+ <ValuationSummary />
+</CollapsibleSection>
+
+<CollapsibleSection title="News Sentiment & Evidence">
+<div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+ <NewsSentimentDonut research={research} />
+ <EvidencePanel research={research} />
+</div>
+</CollapsibleSection>
+
+<CollapsibleSection title="Risks"><RiskPanel research={research} /></CollapsibleSection>
+<CollapsibleSection title="Catalysts to Watch"><CatalystPanel research={research} /></CollapsibleSection>
+<CollapsibleSection title="Earnings">
+<EarningsComparisonChart ticker={research.report.evidence.company.ticker} companyName={research.report.evidence.company.name} />
+<EarningsPanel research={research} />
+</CollapsibleSection>
+
+<div className="rounded-lg border border-zinc-800 bg-zinc-900 p-4">
+ <h2 className="mb-1 text-lg font-semibold">Share Research Card</h2>
+ <p className="mb-3 text-xs text-zinc-600">
+ Excludes News data - NewsAPI&apos;s free tier terms forbid production/public use.
+ Recommendation shown is recomputed without the News Analyst&apos;s vote.
+ </p>
+ <ShareCardButton research={research} />
+</div>
+</section>
+);
+}
+
+
+============================================================
+[7] OPERATIONS LAYER
+============================================================
+import { WorkstationPanelProps } from "../contracts/WorkstationPanelProps";
+
+import ResearchProgress from "../panels/ResearchProgress";
+import SystemLog from "../panels/SystemLog";
+import UpcomingEvents from "../panels/UpcomingEvents";
+import SnapshotPanel from "../panels/SnapshotPanel";
+import WhatCouldChangeThisPanel from "../panels/WhatCouldChangeThisPanel";
+import InsiderActivityPanel from "../panels/InsiderActivityPanel";
+import OptionsChainPanel from "../panels/OptionsChainPanel";
+
+export default function OperationsLayer({
+research,
+}: WorkstationPanelProps){
+
+return(
+<section className="space-y-6">
+<div className="grid gap-4 sm:grid-cols-2">
+<SnapshotPanel research={research} />
+<WhatCouldChangeThisPanel research={research} />
+</div>
+<OptionsChainPanel research={research} />
+<InsiderActivityPanel research={research} />
+<ResearchProgress research={research} />
+<SystemLog research={research} />
+<UpcomingEvents research={research} />
+</section>
+);
+}
+
+============================================================
+[8] ANALYST LAYER
+============================================================
+import { WorkstationPanelProps } from "../contracts/WorkstationPanelProps";
+
+const RECOMMENDATION_DOT: Record<string, string> = {
+ STRONG_BUY: "bg-emerald-400",
+ BUY: "bg-emerald-400",
+ HOLD: "bg-zinc-400",
+ REDUCE: "bg-amber-400",
+ SELL: "bg-red-400",
+};
+
+/**
+ * Analyst Activity Feed: shows every analyst that ran, whether it
+ * had enough verified data to form a real opinion (confidence: 0 ==
+ * my insufficientDataReport guard fired - see
+ * engine/committee/analysts/shared/insufficientData.ts), and its
+ * score/confidence if it did.
+ */
+export default function AnalystLayer({
+research,
+}: WorkstationPanelProps){
+
+const reports = research.committee.reports;
+
+return(
+<section className="rounded-lg border border-zinc-800 bg-zinc-900 p-4">
+ <h2 className="mb-3 text-lg font-semibold">Analyst Activity</h2>
+
+ <div className="divide-y divide-zinc-800">
+ {reports.map(r => {
+ const ran = r.confidence > 0;
+
+ return (
+ <div key={r.analyst} className="flex items-center justify-between py-2 text-sm">
+ <div className="flex items-center gap-2">
+ <span className={`h-2 w-2 rounded-full ${ran ? RECOMMENDATION_DOT[r.recommendation] : "bg-zinc-700"}`} />
+ <span className="text-zinc-200">{r.analyst}</span>
+ </div>
+
+ {ran ? (
+ <span className="text-zinc-500">
+ {r.recommendation.replace("_", " ")} - {r.confidence}%
+ </span>
+ ) : (
+ <span className="text-xs uppercase tracking-wide text-zinc-600">
+ No verified data
+ </span>
+ )}
+ </div>
+ );
+ })}
+ </div>
+</section>
+);
+}
+
+============================================================
+[9] INTELLIGENCE SIDEBAR
+============================================================
+import React from "react";
+
+import { WorkstationPanelProps } from "../contracts/WorkstationPanelProps";
+import type { EvidenceItem } from "@/engine/evidence/types";
+import MarketContext from "../panels/MarketContext/MarketContext";
+import ResearchHistory from "../panels/ResearchHistory/ResearchHistory";
+import { SECForm4Provider } from "@/engine/evidence/providers/SECForm4Provider";
+import ResearchIndex from "../navigation/ResearchIndex";
+
+const RECOMMENDATION_COLOR: Record<string, string> = {
+ STRONG_BUY: "text-emerald-400",
+ BUY: "text-emerald-400",
+ HOLD: "text-zinc-300",
+ REDUCE: "text-amber-400",
+ SELL: "text-red-400",
+};
+
+export default async function IntelligenceSidebar({
+ research,
+}: WorkstationPanelProps) {
+
+ const { committee, report } = research;
+
+ const evidenceCategories = ["financial", "management", "ipo", "market", "industry", "news", "sec", "quote", "financialStatements"] as const;
+ const allItems = evidenceCategories.flatMap(
+ c => Object.values(report.evidence[c]) as EvidenceItem<unknown>[]
+ );
+ const verifiedShare = allItems.length > 0
+ ? Math.round((allItems.filter(i => i.verified).length / allItems.length) * 100)
+ : 0;
+
+ const topThesis = committee.reports.find(r => r.confidence > 0)?.thesis;
+
+ // Real, compact summary -- genuinely new content for this sidebar,
+ // not duplicated from OperationsLayer's full InsiderActivityPanel
+ // (that one lists every transaction; this is just real counts +
+ // the single most recent one, sized for the sidebar).
+ const insiderTransactions = await new SECForm4Provider()
+ .getRecentInsiderTransactions(report.evidence.company.ticker, 10);
+ const buys = insiderTransactions.filter(t => t.acquiredOrDisposed === "A" && t.transactionCode === "P").length;
+ const sells = insiderTransactions.filter(t => t.acquiredOrDisposed === "D" && t.transactionCode === "S").length;
+ const mostRecent = insiderTransactions[0];
+
+ return (
+
+ <section className="space-y-4">
+
+ <ResearchIndex />
+
+ <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-4">
+ <p className="text-xs uppercase tracking-wide text-zinc-500">AI Committee</p>
+ <p className={`mt-1 text-lg font-semibold ${RECOMMENDATION_COLOR[committee.recommendation] ?? "text-zinc-300"}`}>
+ {committee.recommendation.replace("_", " ")}
+ </p>
+ <p className="text-xs text-zinc-500">{committee.agreement}% agreement</p>
+ </div>
+
+ <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-4">
+ <p className="text-xs uppercase tracking-wide text-zinc-500">Confidence</p>
+ <p className="mt-1 text-lg font-semibold text-white">{committee.confidence}%</p>
+ </div>
+
+ <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-4">
+ <p className="text-xs uppercase tracking-wide text-zinc-500">Evidence Feed</p>
+ <p className="mt-1 text-lg font-semibold text-white">{verifiedShare}% verified</p>
+ <p className="text-xs text-zinc-500">{allItems.length} fields tracked</p>
+ </div>
+
+ <MarketContext />
+
+ {/* Real, compact insider-activity summary -- fills real
+ space with real data, doesn't duplicate the full list
+ already shown in the Operations section below. */}
+ <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-4">
+ <p className="text-xs uppercase tracking-wide text-zinc-500">Insider Activity (30d)</p>
+ {insiderTransactions.length === 0 ? (
+ <p className="mt-1 text-sm text-zinc-600">No recent Form 4 filings found.</p>
+ ) : (
+ <>
+ <p className="mt-1 text-sm text-zinc-300">
+ <span className="text-emerald-400">{buys} buy{buys === 1 ? "" : "s"}</span>
+ {" - "}
+ <span className="text-red-400">{sells} sale{sells === 1 ? "" : "s"}</span>
+ {" "}in last {insiderTransactions.length} filings
+ </p>
+ {mostRecent && (
+ <p className="mt-1 text-xs text-zinc-600">
+ Most recent: {mostRecent.insiderName} - {mostRecent.transactionDate}
+ </p>
+ )}
+ </>
+ )}
+ </div>
+
+ {(() => {
+ const articles = report.evidence.news.recentArticles.value;
+
+ return (
+ <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-4">
+ <p className="text-xs uppercase tracking-wide text-zinc-500">Live News</p>
+ {articles.length === 0 ? (
+ <p className="mt-1 text-sm text-zinc-600">
+ No articles found in the last 30 days, or NEWS_API_KEY isn&apos;t configured.
+ </p>
+ ) : (
+ <ul className="mt-2 space-y-2">
+ {articles.slice(0, 6).map((a, i) => (
+ <li key={i} className="text-sm">
+ <a href={a.url} target="_blank" rel="noopener noreferrer" className="block hover:text-violet-300">
+ <p className="text-zinc-300 line-clamp-2 hover:underline">{a.title}</p>
+ </a>
+ <p className="text-xs text-zinc-600">{a.source} - {new Date(a.publishedAt).toLocaleDateString()}</p>
+ </li>
+ ))}
+ </ul>
+ )}
+ </div>
+ );
+ })()}
+
+ <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-4">
+ <p className="text-xs uppercase tracking-wide text-zinc-500">Reasoning Trace</p>
+ <p className="mt-1 text-sm italic text-zinc-400">
+ {topThesis ? `"${topThesis}"` : "No analyst had enough verified data to form a thesis."}
+ </p>
+ </div>
+
+ <ResearchHistory />
+
+ </section>
+
+ );
+}
+
+============================================================
+[10] RESEARCH INDEX
+============================================================
+"use client";
+
+import { useEffect, useState } from "react";
+
+const SECTIONS = [
+    { id: "overview", label: "Overview" },
+    { id: "committee", label: "Committee" },
+    { id: "analysts", label: "Analysts" },
+    { id: "intelligence", label: "Intelligence" },
+    { id: "financials", label: "Financials" },
+    { id: "operations", label: "Operations" },
+] as const;
+
+export default function ResearchIndex() {
+    const [activeSection, setActiveSection] = useState("overview");
+
+    useEffect(() => {
+        const elements = SECTIONS
+            .map(({ id }) => document.getElementById(id))
+            .filter((element): element is HTMLElement => element !== null);
+
+        if (elements.length === 0) {
+            return;
+        }
+
+        const observer = new IntersectionObserver(
+            (entries) => {
+                const visible = entries
+                    .filter((entry) => entry.isIntersecting)
+                    .sort((a, b) => b.intersectionRatio - a.intersectionRatio);
+
+                if (visible[0]?.target.id) {
+                    setActiveSection(visible[0].target.id);
+                }
+            },
+            {
+                rootMargin: "-96px 0px -55% 0px",
+                threshold: [0, 0.25, 0.5, 0.75, 1],
+            }
+        );
+
+        elements.forEach((element) => observer.observe(element));
+
+        return () => observer.disconnect();
+    }, []);
+
+    const navigateTo = (id: string) => {
+        document.getElementById(id)?.scrollIntoView({
+            behavior: "smooth",
+            block: "start",
+        });
+    };
+
+    return (
+        <nav
+            aria-label="Research Index"
+            className="rounded-lg border border-zinc-800 bg-zinc-900 p-3"
+        >
+            <div className="mb-2 px-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-zinc-500">
+                Research Index
+            </div>
+
+            <div className="space-y-0.5">
+                {SECTIONS.map((section) => {
+                    const active = activeSection === section.id;
+
+                    return (
+                        <button
+                            key={section.id}
+                            type="button"
+                            onClick={() => navigateTo(section.id)}
+                            aria-current={active ? "location" : undefined}
+                            className={`flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left text-xs transition-colors ${
+                                active
+                                    ? "bg-zinc-800 text-white"
+                                    : "text-zinc-500 hover:bg-zinc-800/60 hover:text-zinc-300"
+                            }`}
+                        >
+                            <span
+                                className={`h-1.5 w-1.5 rounded-full ${
+                                    active ? "bg-violet-400" : "bg-zinc-700"
+                                }`}
+                            />
+                            {section.label}
+                        </button>
+                    );
+                })}
+            </div>
+        </nav>
+    );
+}
+
+
+============================================================
+[11] CURRENT SECTION ANCHORS
+============================================================
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\FinancialOverviewChart\FinancialOverviewChart.tsx:216: yAxisId="revenue"
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\FinancialOverviewChart\FinancialOverviewChart.tsx:225: yAxisId="netIncome"
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\FinancialOverviewChart\FinancialOverviewChart.tsx:251: yAxisId="revenue"
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\FinancialOverviewChart\FinancialOverviewChart.tsx:260: yAxisId="netIncome"
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\FinancialOverviewChart\FinancialOverviewChart.tsx:272: yAxisId="netIncome"
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\PriceChart\PriceChart.tsx:115: <linearGradient id="priceFill" x1="0" y1="0" x2="0" y2="1">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\session\IntelligenceLayer.tsx:43: <section id="financials" className="scroll-mt-24">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\session\ResearchSession.tsx:16: <section id="overview" className="scroll-mt-24">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\session\ResearchSession.tsx:24: <section id="committee" className="scroll-mt-24">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\session\ResearchSession.tsx:28: <section id="analysts" className="scroll-mt-24">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\session\ResearchSession.tsx:32: <section id="intelligence" className="scroll-mt-24">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\session\ResearchSession.tsx:36: <section id="operations" className="scroll-mt-24">
+
+============================================================
+[12] GRID / FLEX / WIDTH STRUCTURE
+============================================================
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\cards\BusinessOverviewCard\BusinessOverviewCard.tsx:9: <div className="flex items-center justify-between mb-3">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\cards\CatalystsCard\CatalystsCard.tsx:9: <div className="flex items-center justify-between mb-3">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\cards\CompanyHeaderCard\CompanyHeaderCard.tsx:9: <div className="flex items-center justify-between mb-3">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\cards\ExecutiveSummaryCard\ExecutiveSummaryCard.tsx:9: <div className="flex items-center justify-between mb-3">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\cards\FinancialHealthCard\FinancialHealthCard.tsx:9: <div className="flex items-center justify-between mb-3">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\cards\InvestmentThesisCard\InvestmentThesisCard.tsx:9: <div className="flex items-center justify-between mb-3">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\cards\RecommendationCard\RecommendationCard.tsx:9: <div className="flex items-center justify-between mb-3">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\cards\RisksCard\RisksCard.tsx:9: <div className="flex items-center justify-between mb-3">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\cards\ValuationCard\ValuationCard.tsx:9: <div className="flex items-center justify-between mb-3">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\design\DesignPrimitives.tsx:16: <div className="mb-2 flex items-center justify-between gap-3">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\design\DesignPrimitives.tsx:85: <div className="space-y-1">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\design\DesignPrimitives.tsx:87: <div className="flex items-center justify-between gap-2 text-[10px]">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\design\DesignPrimitives.tsx:109: className="grid gap-2 border-b border-zinc-800 bg-zinc-900/60 px-2 py-1.5 text-[9px] uppercase tracking-wide text-zinc-600"
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\design\DesignPrimitives.tsx:117: className="grid gap-2 border-b border-zinc-900 px-2 py-1.5 text-[10px] text-zinc-400 last:border-b-0"
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\header\CompanyHeader.tsx:14: <div className="flex items-center justify-between">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\layout\AppShell.tsx:16: <div className="grid grid-cols-[300px_1fr_360px] gap-6 p-6">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\layout\AppShell.tsx:18: <aside className="space-y-6">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\layout\AppShell.tsx:22: <main className="space-y-6">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\layout\AppShell.tsx:26: <aside className="space-y-6">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\layout\CenterWorkspace.tsx:10: <div className="space-y-6">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\layout\LeftSidebar.tsx:10: <div className="space-y-6 sticky top-6">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\layout\RightSidebar.tsx:10: <div className="space-y-6 sticky top-6">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\navigation\ResearchIndex.tsx:63: <div className="space-y-0.5">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\navigation\ResearchIndex.tsx:73: className={`flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left text-xs transition-colors ${
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\AdaptiveIntelligencePanel.tsx:44: <div className="mb-2 flex items-center justify-between">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\AdaptiveIntelligencePanel.tsx:73: <div className="mt-2 space-y-1">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\AdaptiveIntelligencePanel.tsx:85: <div className="mt-2 space-y-1">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\AIVerdictRow.tsx:25: <div className="grid gap-3 sm:grid-cols-2">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\AnalystWorkspace.tsx:33: <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4" onClick={onClose}>
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\AnalystWorkspace.tsx:35: className="max-h-[85vh] w-full max-w-2xl overflow-y-auto rounded-xl border border-zinc-800 bg-zinc-950 p-6"
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\AnalystWorkspace.tsx:38: <div className="mb-4 flex items-start justify-between">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\AnalystWorkspace.tsx:48: <div className="mb-4 flex items-center gap-4 text-xs">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\AnalystWorkspace.tsx:64: <div className="space-y-1.5">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\AnalystWorkspace.tsx:66: <div key={i} className="flex items-center justify-between rounded-md bg-zinc-900 px-3 py-1.5 text-xs">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\AnalystWorkspace.tsx:68: <div className="flex items-center gap-2">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\AnalystWorkspace.tsx:83: <div className="space-y-1.5">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\AnalystWorkspace.tsx:85: <div key={i} className="flex items-center justify-between text-xs">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\AnalystWorkspace.tsx:97: <div className="space-y-1.5">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\AnalystWorkspace.tsx:110: <ul className="space-y-1 text-xs text-zinc-400">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\AnalystWorkspace.tsx:119: <div className="space-y-1.5">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\CatalystPanel.tsx:15: <ul className="mt-3 space-y-2">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\CatalystPanel.tsx:17: <li key={i} className="flex items-start gap-2 text-sm text-zinc-300">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\CommitteeAvatarRow.tsx:65: <div className="mb-2 flex items-center justify-between">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\CommitteeAvatarRow.tsx:74: <div className="mb-4 flex flex-wrap gap-4">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\CommitteeAvatarRow.tsx:84: className="flex w-24 flex-col items-center text-center transition hover:opacity-80"
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\CommitteeAvatarRow.tsx:99: <div className="flex h-full w-full items-center justify-center bg-zinc-800">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\CommitteeAvatarRow.tsx:122: <div className="flex h-2 w-full overflow-hidden rounded-full bg-zinc-800">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\CommitteeAvatarRow.tsx:127: <div className="mt-1.5 flex justify-between text-[10px] text-zinc-500">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\CommitteeAvatarRow.tsx:133: <div className="mt-3 flex items-center justify-between border-t border-zinc-800 pt-3 text-xs">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\CommitteePanel.tsx:40: <div className="mb-3 flex items-center justify-between">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\CommitteePanel.tsx:47: <div className="space-y-4">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\CommitteePanel.tsx:51: <div key={r.analyst} className="flex gap-3">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\CommitteePanel.tsx:56: <div className="flex h-full w-full items-center justify-center bg-zinc-800">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\CommitteePanel.tsx:62: <div className="mb-1 flex items-center gap-2 text-xs">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\CommitteePanel.tsx:77: <div className="mt-4 flex items-center justify-between rounded-lg bg-zinc-950 p-3">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\ContinueResearchPanel.tsx:20: <div className="mb-3 flex items-center gap-2 overflow-x-auto pb-1">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\ContinueResearchPanel.tsx:26: className="flex shrink-0 items-center gap-1.5 rounded-full border border-zinc-800 bg-zinc-900 px-2.5 py-1 text-xs hover:border-zinc-700"
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\EarningsPanel.tsx:19: <div className="space-y-4">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\EarningsPreviewPanel.tsx:138: <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-4 space-y-5">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\EarningsPreviewPanel.tsx:140: <div className="flex items-start justify-between gap-4">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\EarningsPreviewPanel.tsx:143: <p className="mt-1 flex items-center gap-1.5 text-sm text-zinc-400">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\EarningsPreviewPanel.tsx:163: <div className="grid grid-cols-2 gap-4">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\EarningsPreviewPanel.tsx:185: <div className="border-t border-zinc-800 pt-4 space-y-5">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\EarningsPreviewPanel.tsx:187: <div className="flex items-center gap-1.5 text-xs font-medium text-violet-400">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\EarningsPreviewPanel.tsx:201: <div className="space-y-1.5">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\EarningsPreviewPanel.tsx:203: <div key={i} className="flex items-center justify-between text-sm">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\EarningsPreviewPanel.tsx:212: <div className="grid grid-cols-2 gap-4">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\EarningsPreviewPanel.tsx:216: <ul className="space-y-1 text-sm text-zinc-300 list-disc list-inside">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\EarningsPreviewPanel.tsx:224: <ul className="space-y-1 text-sm text-zinc-300 list-disc list-inside">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\EarningsPreviewPanel.tsx:236: <div className="space-y-1.5">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\EarningsPreviewPanel.tsx:238: <div key={i} className="flex items-center gap-3 text-sm">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\EarningsPreviewPanel.tsx:258: <div className="space-y-1 text-sm">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\EarningsPreviewPanel.tsx:260: <div key={i} className="flex items-center justify-between">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\EarningsRecapPanel.tsx:47: <span className="flex items-center gap-1 text-xs font-medium text-emerald-400">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\EarningsRecapPanel.tsx:51: <span className="flex items-center gap-1 text-xs font-medium text-red-400">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\EarningsRecapPanel.tsx:98: <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-4 space-y-5">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\EarningsRecapPanel.tsx:100: <div className="flex items-start justify-between gap-4">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\EarningsRecapPanel.tsx:113: <div className="grid grid-cols-2 gap-4">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\EarningsRecapPanel.tsx:115: <div className="flex items-center justify-between">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\EarningsRecapPanel.tsx:129: <div className="flex items-center justify-between">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\EarningsRecapPanel.tsx:150: <div className="border-t border-zinc-800 pt-4 space-y-4">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\EarningsRecapPanel.tsx:151: <div className="flex items-center gap-1.5 text-xs font-medium text-violet-400">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\EarningsRecapPanel.tsx:163: <ul className="space-y-1 text-sm text-zinc-300 list-disc list-inside">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\EarningsRecapPanel.tsx:172: <ul className="space-y-1 text-sm text-zinc-300 list-disc list-inside">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\EvidenceModule.tsx:33: <div className="mb-3 flex items-center justify-between">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\EvidenceModule.tsx:37: <div className="space-y-2">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\EvidencePanel.tsx:41: <div className="mb-3 flex items-center justify-between">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\EvidencePanel.tsx:46: <div className="space-y-2">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\EvidencePanel.tsx:48: <div key={c.category} className="flex items-center justify-between text-sm">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\EvidencePanel.tsx:49: <span className="flex items-center gap-2 text-zinc-300">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\ExecutiveSummaryPanel.tsx:18: <div className="flex items-center justify-between mb-3">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\ExecutiveSummaryPanel.tsx:25: <div className="mb-3 flex gap-6 text-sm">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\InsiderActivityPanel.tsx:37: <div className="mb-3 flex items-center justify-between">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\InsiderActivityPanel.tsx:41: <div className="space-y-2">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\InsiderActivityPanel.tsx:48: className="flex items-center justify-between rounded-md bg-zinc-950 px-3 py-2 text-xs hover:bg-zinc-900"
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\InsiderActivityPanel.tsx:55: <div className="flex items-center gap-2">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\InvestmentThesisPanel.tsx:18: <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\InvestmentThesisPanel.tsx:24: <ul className="space-y-1.5 text-sm text-zinc-300">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\InvestmentThesisPanel.tsx:37: <ul className="space-y-1.5 text-sm text-zinc-300">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\InvestorDecisionCenter.tsx:22: <div className="mb-4 flex gap-2">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\InvestorDecisionCenter.tsx:38: <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\InvestorDecisionCenter.tsx:42: <div className="space-y-1.5">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\InvestorDecisionCenter.tsx:56: <div className="space-y-1.5">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\IPOIntelligenceCenter.tsx:211: <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\IPOIntelligenceCenter.tsx:213: <div className="flex flex-wrap gap-3 text-[11px] text-zinc-400">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\IPOIntelligenceCenter.tsx:231: <table className="w-full text-left text-[11px]">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\IPOIntelligenceCenter.tsx:257: <td className="py-1.5 pr-3 text-zinc-300 line-clamp-1 max-w-md">{row.signal}</td>
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\IPOIntelligenceCenter.tsx:294: <div className="mt-3 flex items-center justify-center gap-2 overflow-x-auto rounded-lg border border-zinc-800 bg-zinc-900/60 px-4 py-3">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\IPOIntelligenceCenter.tsx:296: <span key={stage} className="flex items-center gap-2">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\IPOIntelligenceCenter.tsx:297: <span className="flex items-center gap-1.5 whitespace-nowrap rounded-full border border-zinc-700 bg-zinc-800 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide text-zinc-300">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\IPOIntelligenceCenter.tsx:309: <div className="space-y-2">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\IPOIntelligenceCenter.tsx:314: <div className="flex items-center gap-2">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\IPORadarPanel.tsx:58: <div className="grid grid-cols-1 gap-3">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\IPORadarPanel.tsx:64: <div className="flex items-center justify-between">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\IPORadarPanel.tsx:70: <div className="mt-2 grid grid-cols-2 gap-x-2 gap-y-1 text-[11px]">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\IPORadarPanel.tsx:79: <div className="col-span-2">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\IPORadarPanel.tsx:85: <div className="mt-2 flex gap-3 text-[11px]">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\LiveIntelligenceFeed.tsx:81: <div className="mb-2 flex items-center justify-between">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\LiveIntelligenceFeed.tsx:86: <div className="mb-2 flex flex-wrap gap-1">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\LiveIntelligenceFeed.tsx:107: <div className="thin-scrollbar h-[340px] space-y-0.5 overflow-y-auto pr-1">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\LiveIntelligenceFeed.tsx:110: <div className="flex items-center gap-2.5 rounded px-2 py-1 hover:bg-zinc-900">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\MarketMoversPanel.tsx:50: <div className="flex items-center justify-between text-xs">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\MarketMoversPanel.tsx:58: <div className="mt-0.5 flex items-center justify-between text-[10px] text-zinc-500">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\MarketMoversPanel.tsx:78: <div className="mb-1 flex items-center justify-between">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\MarketMoversPanel.tsx:85: <div className="grid grid-cols-2 gap-4">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\MarketMoversPanel.tsx:88: <div className="space-y-1">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\MarketMoversPanel.tsx:95: <div className="space-y-1">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\MissionControlHeader.tsx:22: <div className="flex flex-wrap items-center gap-x-6 gap-y-2 rounded-lg border border-zinc-800 bg-zinc-950 px-5 py-3 text-xs">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\MissionControlHeader.tsx:23: <div className="flex items-center gap-1.5 text-emerald-400">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\OptionsChainPanel.tsx:69: <div className="mb-3 flex items-center justify-between">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\OptionsChainPanel.tsx:73: <div className="grid grid-cols-2 gap-3">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\OptionsChainPanel.tsx:80: <div className="grid grid-cols-2 gap-1.5 text-xs">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\OptionsChainPanel.tsx:106: <div className="grid grid-cols-2 gap-1.5 text-xs">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\PortfolioExecutionPlaceholder.tsx:22: return <p className="flex h-24 items-center justify-center text-xs text-zinc-700">Equity curve unavailable</p>;
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\PortfolioExecutionPlaceholder.tsx:36: <svg viewBox="0 0 200 60" className="h-24 w-full">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\PortfolioExecutionPlaceholder.tsx:53: <div className="mb-4 grid grid-cols-1 gap-3 lg:grid-cols-2">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\PortfolioExecutionPlaceholder.tsx:60: <div className="mt-2 grid grid-cols-2 gap-3 text-sm">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\PortfolioExecutionPlaceholder.tsx:101: <div className="mt-2 grid grid-cols-2 gap-3 text-sm">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\PortfolioExecutionPlaceholder.tsx:124: <div className="space-y-1">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\PortfolioExecutionPlaceholder.tsx:126: <div key={p.ticker} className="flex items-center justify-between text-xs">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\QuantAwarenessStrip.tsx:45: <div className="flex items-center justify-between">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\QuantAwarenessStrip.tsx:54: <div className="mt-2 flex flex-wrap items-center gap-4">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\QuantAwarenessStrip.tsx:55: <div className="flex items-center gap-1.5">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\QuantLiveDeskPlaceholder.tsx:57: <div className="mb-2 flex items-center justify-between">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\QuantLiveDeskPlaceholder.tsx:66: <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\QuantLiveDeskPlaceholder.tsx:72: <div className="mt-3 grid grid-cols-3 gap-3">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\QuantLiveDeskPlaceholder.tsx:83: <div className="space-y-1.5">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\QuantLiveDeskPlaceholder.tsx:88: <div key={category} className="flex items-center gap-2 text-sm">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\QuantLiveDeskPlaceholder.tsx:102: <div className="space-y-1.5">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\QuantLiveDeskPlaceholder.tsx:104: <div key={event.id} className="flex items-center gap-2 text-sm">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\RecommendationPanel.tsx:38: <div className="flex items-center gap-4">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\RecommendationPanel.tsx:43: <div className="grid flex-1 grid-cols-3 gap-3 text-sm">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\ResearchSnapshotPanel.tsx:27: <div className="mb-3 flex items-center justify-between">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\ResearchSnapshotPanel.tsx:34: <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\ResearchSpotlightPlaceholder.tsx:38: <table className="w-full text-left text-sm">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\RiskPanel.tsx:15: <ul className="mt-3 space-y-2">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\RiskPanel.tsx:17: <li key={i} className="flex items-start gap-2 text-sm text-zinc-300">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\SnapshotPanel.tsx:78: <div className="space-y-2 text-sm">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\SnapshotPanel.tsx:79: <div className="flex justify-between">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\SnapshotPanel.tsx:85: <div className="flex justify-between">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\SnapshotPanel.tsx:91: <div className="flex justify-between">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\SnapshotPanel.tsx:97: <div className="flex justify-between">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\SnapshotPanel.tsx:101: <div className="flex justify-between">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\SystemStatusBar.tsx:11: <div className="mb-4 grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-6">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\WhatCouldChangeThisPanel.tsx:30: <div className="space-y-1">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\WhatCouldChangeThisPanel.tsx:43: <div className="space-y-1">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\WhatCouldChangeThisPanel.tsx:45: <div key={i} className="flex items-center justify-between text-xs">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\WhatMattersNow.tsx:95: <div className="mb-2 flex items-center justify-between">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\WhatMattersNow.tsx:100: <div className="flex items-center gap-3 px-3 py-1 text-[10px] uppercase tracking-wide text-zinc-600">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\WhatMattersNow.tsx:111: <div key={row.label} className="flex items-center gap-3 px-3 py-2.5">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\WhileYouWereAwayHome.tsx:11: <div className="mb-2 flex items-center justify-between">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\WhileYouWereAwayHome.tsx:23: <div className="space-y-1.5">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\WhileYouWereAwayHome.tsx:28: className="flex items-center justify-between rounded-md px-2 py-1.5 text-xs hover:bg-zinc-900"
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\CommandBar\CommandBar.tsx:24: <div className="sticky top-16 z-40 flex flex-wrap items-center gap-x-8 gap-y-3 rounded-xl border border-zinc-800 bg-zinc-950 px-6 py-4 shadow-lg shadow-black/40">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\CommandBar\CommandBar.tsx:27: className="flex items-center gap-2 rounded-lg border border-zinc-700 bg-zinc-900 px-3.5 py-2.5 text-sm font-semibold text-zinc-300 hover:border-violet-600 hover:text-white hover:bg-zinc-800 transition"
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\CommandBar\CommandBar.tsx:79: <div className="ml-auto flex items-center gap-4">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\ConvictionRadar\ConvictionRadar.tsx:42: <div className="mb-2 flex items-center justify-between">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\ConvictionRadar\ConvictionRadar.tsx:49: <div className="h-64 w-full">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\ConvictionRadar\ConvictionRadar.tsx:52: <PolarGrid stroke="#3f3f46" />
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\EarningsPreviewShareCard\EarningsPreviewShareCard.tsx:58: className="flex w-[680px] flex-col gap-4 bg-[#060A12] p-8"
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\EarningsPreviewShareCard\EarningsPreviewShareCard.tsx:61: <div className="flex items-center justify-between">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\EarningsPreviewShareCard\EarningsPreviewShareCard.tsx:62: <div className="flex items-center gap-2.5">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\EarningsPreviewShareCard\EarningsPreviewShareCard.tsx:63: <div className="flex h-8 w-8 items-center justify-center rounded-lg border border-violet-800/50 bg-[#160B3D]">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\EarningsPreviewShareCard\EarningsPreviewShareCard.tsx:78: <div className="flex items-center justify-between rounded-lg border border-violet-900/50 bg-[#160B3D] px-4 py-2.5">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\EarningsPreviewShareCard\EarningsPreviewShareCard.tsx:88: {/* Facts grid -- real, verified consensus figures only */}
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\EarningsPreviewShareCard\EarningsPreviewShareCard.tsx:91: <div className="grid grid-cols-4 gap-2">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\EarningsPreviewShareCard\EarningsPreviewShareCard.tsx:128: <div className="flex gap-2 rounded-lg border border-zinc-800 bg-[#0D111B] p-3">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\EarningsPreviewShareCard\EarningsPreviewShareCard.tsx:139: <div className="grid grid-cols-2 gap-3">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\EarningsPreviewShareCard\EarningsPreviewShareCardButton.tsx:96: className="w-full justify-center"
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\EarningsPreviewShareCard\EarningsPreviewShareCardButton.tsx:101: <div className="space-y-2">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\EarningsPreviewShareCard\EarningsPreviewShareCardButton.tsx:103: <img src={previewUrl} alt="Earnings preview card" className="w-full rounded-lg border border-zinc-800" />
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\EarningsPreviewShareCard\EarningsPreviewShareCardButton.tsx:104: <div className="flex gap-2">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\EvidenceSummaryGrid\EvidenceSummaryGrid.tsx:43: <div className="mb-3 flex items-center justify-between">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\EvidenceSummaryGrid\EvidenceSummaryGrid.tsx:48: <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\FinancialOverviewChart\FinancialOverviewChart.tsx:77: <div className="flex items-center justify-between gap-6 text-xs">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\FinancialOverviewChart\FinancialOverviewChart.tsx:86: <div className="mt-1 flex items-center justify-between gap-6 text-xs">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\FinancialOverviewChart\FinancialOverviewChart.tsx:169: <div className="flex flex-wrap items-start justify-between gap-3">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\FinancialOverviewChart\FinancialOverviewChart.tsx:171: <div className="flex items-center gap-2">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\FinancialOverviewChart\FinancialOverviewChart.tsx:196: <div className="h-72 w-full">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\FinancialOverviewChart\FinancialOverviewChart.tsx:286: <div className="mt-1 flex flex-wrap items-center gap-x-5 gap-y-1 border-t border-zinc-900 pt-2 text-[10px] text-zinc-600">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\FinancialOverviewChart\FinancialOverviewChart.tsx:305: <div className="grid grid-cols-2 border-t border-zinc-800 sm:grid-cols-4">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\InstitutionalOwnershipCard\InstitutionalOwnershipCard.tsx:127: <div className="rounded-xl border border-zinc-800 bg-zinc-900 p-4 space-y-4">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\InstitutionalOwnershipCard\InstitutionalOwnershipCard.tsx:150: <div className="mt-2 space-y-1">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\InstitutionalOwnershipCard\InstitutionalOwnershipCard.tsx:182: <div className="mt-1 space-y-1">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\InstitutionalOwnershipCard\InstitutionalOwnershipCard.tsx:184: <div key={h.filer} className="flex items-center justify-between text-sm">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\MarketContext\MarketContext.tsx:42: <div className="grid grid-cols-2 gap-3 text-sm sm:grid-cols-4">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\MarketContext\MarketContext.tsx:49: <div className="space-y-1">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\MarketContext\MarketContext.tsx:55: <div key={index.symbol} className="flex items-center justify-between">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\MarketContext\MarketContext.tsx:63: <div key={index.symbol} className="flex items-center justify-between">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\MarketContext\MarketContext.tsx:78: <div className="flex items-center justify-between">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\NewsRail\NewsRail.tsx:72: <section className="rounded-xl border border-zinc-800 bg-zinc-900/60 h-full flex flex-col">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\NewsRail\NewsRail.tsx:73: <div className="flex items-center justify-between px-4 pt-4 pb-2">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\NewsRail\NewsRail.tsx:74: <div className="flex items-center gap-2">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\NewsRail\NewsRail.tsx:75: <span className="relative flex h-2 w-2">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\NewsRail\NewsRail.tsx:76: <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-violet-400 opacity-75" />
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\NewsRail\NewsRail.tsx:77: <span className="relative inline-flex rounded-full h-2 w-2 bg-violet-400" />
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\NewsRail\NewsRail.tsx:90: <div className="flex gap-1.5 px-4 pb-3 flex-wrap">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\NewsRail\NewsRail.tsx:106: <div className="flex-1 overflow-y-auto px-4 pb-4 space-y-1 max-h-[420px]">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\NewsRail\NewsRail.tsx:144: className="flex gap-3 py-2.5 px-2 -mx-2 rounded-lg hover:bg-zinc-800/60 transition group"
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\NewsSentimentDonut\NewsSentimentDonut.tsx:52: <div className="flex items-center gap-4">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\NewsSentimentDonut\NewsSentimentDonut.tsx:61: <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\NewsSentimentDonut\NewsSentimentDonut.tsx:67: <div className="space-y-1.5 text-sm">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\NewsSentimentDonut\NewsSentimentDonut.tsx:69: <div key={d.name} className="flex items-center gap-2">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\PortfolioIntelligence\PortfolioIntelligence.tsx:31: <div className="mb-3 flex items-center justify-between">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\PortfolioIntelligence\PortfolioIntelligence.tsx:36: <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\PortfolioIntelligence\PortfolioIntelligence.tsx:42: <ul className="space-y-1 text-sm text-zinc-300">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\PortfolioIntelligence\PortfolioIntelligence.tsx:53: <ul className="space-y-1 text-sm text-zinc-300">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\PortfolioIntelligence\PortfolioIntelligence.tsx:60: <div className="mt-4 flex items-center justify-between rounded-lg bg-zinc-950 p-3">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\PortfolioIntelligence\PortfolioIntelligence.tsx:65: <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-3">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\PortfolioIntelligence\PortfolioIntelligence.tsx:81: <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\PortfolioIntelligence\PortfolioIntelligence.tsx:100: <div className="space-y-1">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\PortfolioIntelligence\PortfolioIntelligence.tsx:102: <div key={i} className="flex items-center justify-between text-sm">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\PriceChart\PriceChart.tsx:81: <div className="flex items-center justify-between mb-2">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\PriceChart\PriceChart.tsx:83: <div className="flex gap-1">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\PriceChart\PriceChart.tsx:100: <div className="h-full flex items-center justify-center text-xs text-zinc-600">Loading-</div>
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\PriceChart\PriceChart.tsx:102: <div className="h-full flex items-center justify-center text-xs text-zinc-600">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\PriceChart\PriceChart.tsx:106: <div className="h-full flex flex-col items-center justify-center gap-1 text-center">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\ProcessStepper\ProcessStepper.tsx:16: <div className="flex items-center gap-2 rounded-xl border border-zinc-800 bg-zinc-950 px-6 py-3">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\ProcessStepper\ProcessStepper.tsx:18: <div key={stage} className="flex items-center gap-2">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\ProcessStepper\ProcessStepper.tsx:19: <div className="flex items-center gap-1.5 text-sm">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\ProcessStepper\ProcessStepper.tsx:29: <span className="ml-auto flex items-center gap-1.5 text-xs text-emerald-400">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\PublishReportButton\PublishReportButton.tsx:48: <div className="flex items-center gap-2">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\ResearchHistory\ResearchHistory.tsx:35: <div className="space-y-2">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\ResearchHistory\ResearchHistory.tsx:40: className="flex items-center justify-between rounded-lg px-2 py-1.5 text-sm hover:bg-zinc-950"
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\ResearchProgress\ResearchProgress.tsx:8: <div className="mb-3 flex items-center justify-between">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\ResearchProgress\ResearchProgress.tsx:15: <ul className="space-y-1.5">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\ResearchProgress\ResearchProgress.tsx:17: <li key={stage} className="flex items-center gap-2 text-sm text-zinc-300">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\ResearchTarget\ResearchTarget.tsx:40: <div className="flex items-center justify-between mb-3">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\ResearchTarget\ResearchTarget.tsx:47: <form onSubmit={handleSubmit} className="flex flex-col gap-3">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\ResearchTarget\ResearchTarget.tsx:57: className="w-full rounded-lg border border-zinc-700 bg-zinc-950 py-2 pl-9 pr-3 text-sm uppercase outline-none focus:border-violet-400"
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\ResearchTarget\ResearchTarget.tsx:66: className="flex items-center justify-center gap-2 rounded-lg bg-violet-600 py-2 text-sm font-semibold text-white transition hover:bg-violet-500 disabled:cursor-not-allowed disabled:opacity-60"
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\ShareCard\ShareCard.tsx:150: className="flex w-[680px] flex-col gap-2.5 bg-[#060A12] p-6"
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\ShareCard\ShareCard.tsx:153: <div className="flex items-center justify-between">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\ShareCard\ShareCard.tsx:176: <div className="mt-1.5 flex items-center justify-center gap-6 text-sm">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\ShareCard\ShareCard.tsx:188: <div className="mb-1.5 flex items-center justify-between text-xs">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\ShareCard\ShareCard.tsx:192: <div className="flex h-2.5 w-full overflow-hidden rounded-full bg-zinc-800">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\ShareCard\ShareCard.tsx:202: <div className="flex flex-wrap justify-center gap-x-4 gap-y-2">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\ShareCard\ShareCard.tsx:207: <div key={r.analyst} className="flex w-20 flex-col items-center text-center">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\ShareCard\ShareCard.tsx:211: <img src={photoSrc} alt={r.analyst} className="h-full w-full object-cover" />
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\ShareCard\ShareCard.tsx:229: {/* Facts grid -- real financial-statement derived values only */}
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\ShareCard\ShareCard.tsx:232: <div className="grid grid-cols-4 gap-2">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\ShareCard\ShareCard.tsx:256: <div className="mb-1.5 flex items-center justify-between text-xs">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\ShareCard\ShareCard.tsx:263: <div className="h-2 w-full overflow-hidden rounded-full bg-zinc-800">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\ShareCard\ShareCard.tsx:274: <div className="flex gap-2 rounded-lg border border-zinc-800 bg-[#0D111B] p-3">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\ShareCard\ShareCard.tsx:292: <div className="grid grid-cols-2 gap-2.5">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\ShareCard\ShareCard.tsx:326: <div className="space-y-1">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\ShareCard\ShareCard.tsx:334: <div className="mt-2 flex items-center justify-between border-t border-violet-900/40 pt-1.5">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\ShareCard\ShareCard.tsx:352: <div className="space-y-1">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\ShareCard\ShareCard.tsx:354: <div key={d.name} className="flex items-center gap-2">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\ShareCard\ShareCard.tsx:369: <div className="space-y-1">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\ShareCard\ShareCard.tsx:371: <div key={r.analyst} className="flex items-center justify-between text-xs">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\ShareCard\ShareCard.tsx:383: <div className="mb-2 flex items-center justify-between">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\ShareCard\ShareCard.tsx:390: <div className="flex flex-col items-center">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\ShareCard\ShareCardButton.tsx:127: <div className="space-y-2">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\ShareCard\ShareCardButton.tsx:132: className="w-full justify-center"
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\ShareCard\ShareCardButton.tsx:140: className="w-full justify-center"
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\ShareCard\ShareCardButton.tsx:146: <div className="space-y-2">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\ShareCard\ShareCardButton.tsx:148: <img src={previewUrl} alt="Research share card preview" className="w-full rounded-lg border border-zinc-800" />
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\ShareCard\ShareCardButton.tsx:149: <div className="flex gap-2">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\ShareCard\ShareCardCompact.tsx:93: className="flex w-[600px] flex-col gap-3 bg-[#060A12] p-7"
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\ShareCard\ShareCardCompact.tsx:96: <div className="flex items-center justify-between">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\ShareCard\ShareCardCompact.tsx:115: <div className="mt-1.5 flex items-center justify-center gap-4 text-xs">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\ShareCard\ShareCardCompact.tsx:122: <div className="mb-1 flex items-center justify-between text-[10px]">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\ShareCard\ShareCardCompact.tsx:126: <div className="flex h-2 w-full overflow-hidden rounded-full bg-zinc-800">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\ShareCard\ShareCardCompact.tsx:132: <div className="flex flex-wrap justify-center gap-2">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\ShareCard\ShareCardCompact.tsx:144: <img src={photoSrc} alt={r.analyst} className="h-full w-full object-cover" />
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\ShareCard\ShareCardCompact.tsx:158: <div className="grid grid-cols-2 gap-2">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\ShareCard\ShareCardCompact.tsx:174: <div className="mb-1 flex items-center justify-between text-[10px]">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\ShareCard\ShareCardCompact.tsx:178: <div className="h-1.5 w-full overflow-hidden rounded-full bg-zinc-800">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\ShareCard\ShareCardCompact.tsx:185: <div className="space-y-1 rounded-lg border border-violet-900/40 bg-[#160B3D] p-3">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\ShareCard\ShareCardCompact.tsx:191: <div className="flex items-center justify-between border-t border-zinc-800 pt-2.5">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\SystemLog\SystemLog.tsx:12: <ul className="space-y-1.5 font-mono text-xs text-zinc-500">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\UpcomingEarnings\UpcomingEarnings.tsx:108: className="flex items-center justify-between gap-2 rounded-lg border border-transparent bg-zinc-950/60 px-3 py-2.5 hover:border-zinc-700 hover:bg-zinc-800/60 transition group"
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\UpcomingEarnings\UpcomingEarnings.tsx:110: <div className="flex min-w-0 items-center gap-2.5">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\UpcomingEarnings\UpcomingEarnings.tsx:128: <div className="flex shrink-0 flex-col items-end whitespace-nowrap text-right">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\UpcomingEarnings\UpcomingEarnings.tsx:144: <div className="flex items-center gap-2 mb-3">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\UpcomingEarnings\UpcomingEarnings.tsx:167: <div className="space-y-3">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\UpcomingEarnings\UpcomingEarnings.tsx:171: <div className="space-y-1.5">{visibleThisWeek.map(renderItem)}</div>
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\UpcomingEarnings\UpcomingEarnings.tsx:177: <div className="space-y-1.5">{visibleNextWeek.map(renderItem)}</div>
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\UpcomingEarnings\UpcomingEarnings.tsx:183: className="w-full rounded-lg border border-zinc-800 py-2 text-xs text-zinc-400 hover:border-zinc-700 hover:text-zinc-200"
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\UpcomingEvents\UpcomingEvents.tsx:49: <div className="space-y-2">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\UpcomingEvents\UpcomingEvents.tsx:51: <div className="flex items-center justify-between text-sm">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\UpcomingEvents\UpcomingEvents.tsx:61: <div className="flex items-center justify-between text-sm">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\session\AnalystLayer.tsx:33: <div key={r.analyst} className="flex items-center justify-between py-2 text-sm">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\session\AnalystLayer.tsx:34: <div className="flex items-center gap-2">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\session\IntelligenceLayer.tsx:3: import EvidenceSummaryGrid from "../panels/EvidenceSummaryGrid/EvidenceSummaryGrid";
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\session\IntelligenceLayer.tsx:28: <section className="space-y-6">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\session\IntelligenceLayer.tsx:29: <EvidenceSummaryGrid research={research} />
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\session\IntelligenceLayer.tsx:33: <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\session\IntelligenceLayer.tsx:52: <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\session\OperationsLayer.tsx:16: <section className="space-y-6">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\session\OperationsLayer.tsx:17: <div className="grid gap-4 sm:grid-cols-2">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\session\ResearchSession.tsx:15: <div className="space-y-8">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\session\ResearchSession.tsx:17: <div className="space-y-6">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\shared\CollapsibleSection.tsx:25: className="flex w-full items-center justify-between px-4 py-3 text-left"
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\shared\CollapsibleSection.tsx:30: {open && <div className="border-t border-zinc-800 p-4 space-y-4">{children}</div>}
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\shared\UnverifiedCard.tsx:17: <div className="mb-1 flex items-center gap-2">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\shell\WorkstationShell.tsx:19: <div className="space-y-4 text-white">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\shell\WorkstationShell.tsx:30: <main className="grid grid-cols-12 gap-4">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\shell\WorkstationShell.tsx:31: <section className="col-span-9 min-w-0">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\shell\WorkstationShell.tsx:35: <aside className="col-span-3 min-w-0">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\sidebar\IntelligenceSidebar.tsx:46: <section className="space-y-4">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\sidebar\IntelligenceSidebar.tsx:106: <ul className="mt-2 space-y-2">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\sidebar\LeftSidebar.tsx:9: <nav className="space-y-3">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\ui\ConfidenceBar.tsx:15: <div className="space-y-1">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\ui\ConfidenceBar.tsx:17: <div className="flex justify-between text-xs">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\ui\MetricRow.tsx:19: <div className="flex justify-between border-b border-zinc-800 py-2">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\ui\ResearchCard.tsx:29: <div className="mb-4 flex items-center justify-between">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\ui\ConfidenceMeter\ConfidenceMeter.tsx:13: <div className="flex justify-between">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\ui\ProgressRing\ProgressRing.tsx:11: <div className="flex h-24 w-24 items-center justify-center rounded-full border-4 border-violet-500 text-xl font-bold">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\ui\StatusBadge\StatusBadge.tsx:19: <div className="flex items-center gap-2">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\viewport\ResearchViewport.tsx:10: <main className="flex flex-col gap-8">
+
+============================================================
+[13] RESEARCH SECTION COMPONENTS
+============================================================
+
+Name                               FullName                                                                                                                                        
+----                               --------                                                                                                                                        
+AdaptiveIntelligencePanel.tsx      C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\AdaptiveIntelligencePanel.tsx                              
+AIVerdictRow.tsx                   C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\AIVerdictRow.tsx                                           
+AnalystWorkspace.tsx               C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\AnalystWorkspace.tsx                                       
+CatalystPanel.tsx                  C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\CatalystPanel.tsx                                          
+CommandBar.tsx                     C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\CommandBar\CommandBar.tsx                                  
+CommitteeAvatarRow.tsx             C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\CommitteeAvatarRow.tsx                                     
+CommitteePanel.tsx                 C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\CommitteePanel.tsx                                         
+ContinueResearchPanel.tsx          C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\ContinueResearchPanel.tsx                                  
+ConvictionRadar.tsx                C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\ConvictionRadar\ConvictionRadar.tsx                        
+EarningsComparisonChart.tsx        C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\EarningsComparisonChart.tsx                                
+EarningsPanel.tsx                  C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\EarningsPanel.tsx                                          
+EarningsPreviewPanel.tsx           C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\EarningsPreviewPanel.tsx                                   
+EarningsPreviewShareCard.tsx       C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\EarningsPreviewShareCard\EarningsPreviewShareCard.tsx      
+EarningsPreviewShareCardButton.tsx C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\EarningsPreviewShareCard\EarningsPreviewShareCardButton.tsx
+EarningsRecapPanel.tsx             C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\EarningsRecapPanel.tsx                                     
+EvidenceModule.tsx                 C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\EvidenceModule.tsx                                         
+EvidencePanel.tsx                  C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\EvidencePanel.tsx                                          
+EvidenceSummaryGrid.tsx            C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\EvidenceSummaryGrid\EvidenceSummaryGrid.tsx                
+ExecutiveSummaryPanel.tsx          C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\ExecutiveSummaryPanel.tsx                                  
+FinancialOverviewChart.tsx         C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\FinancialOverviewChart\FinancialOverviewChart.tsx          
+InsiderActivityPanel.tsx           C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\InsiderActivityPanel.tsx                                   
+InstitutionalOwnershipCard.tsx     C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\InstitutionalOwnershipCard\InstitutionalOwnershipCard.tsx  
+InvestmentThesisPanel.tsx          C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\InvestmentThesisPanel.tsx                                  
+InvestorDecisionCenter.tsx         C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\InvestorDecisionCenter.tsx                                 
+IPOIntelligenceCenter.tsx          C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\IPOIntelligenceCenter.tsx                                  
+IPORadarPanel.tsx                  C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\IPORadarPanel.tsx                                          
+LiveIntelligenceFeed.tsx           C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\LiveIntelligenceFeed.tsx                                   
+MarketContext.tsx                  C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\MarketContext\MarketContext.tsx                            
+MarketMoversPanel.tsx              C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\MarketMoversPanel.tsx                                      
+MissionControlHeader.tsx           C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\MissionControlHeader.tsx                                   
+NewsRail.tsx                       C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\NewsRail\NewsRail.tsx                                      
+NewsSentimentDonut.tsx             C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\NewsSentimentDonut\NewsSentimentDonut.tsx                  
+OptionsChainPanel.tsx              C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\OptionsChainPanel.tsx                                      
+PortfolioExecutionPlaceholder.tsx  C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\PortfolioExecutionPlaceholder.tsx                          
+PortfolioIntelligence.tsx          C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\PortfolioIntelligence\PortfolioIntelligence.tsx            
+PriceChart.tsx                     C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\PriceChart\PriceChart.tsx                                  
+ProcessStepper.tsx                 C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\ProcessStepper\ProcessStepper.tsx                          
+PublishReportButton.tsx            C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\PublishReportButton\PublishReportButton.tsx                
+QuantAwarenessStrip.tsx            C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\QuantAwarenessStrip.tsx                                    
+QuantLiveDeskPlaceholder.tsx       C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\QuantLiveDeskPlaceholder.tsx                               
+RecommendationPanel.tsx            C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\RecommendationPanel.tsx                                    
+ResearchHistory.tsx                C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\ResearchHistory\ResearchHistory.tsx                        
+ResearchProgress.tsx               C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\ResearchProgress\ResearchProgress.tsx                      
+ResearchSnapshotPanel.tsx          C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\ResearchSnapshotPanel.tsx                                  
+ResearchSpotlightPlaceholder.tsx   C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\ResearchSpotlightPlaceholder.tsx                           
+ResearchTarget.tsx                 C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\ResearchTarget\ResearchTarget.tsx                          
+RiskPanel.tsx                      C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\RiskPanel.tsx                                              
+SaveResearchButton.tsx             C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\SaveResearchButton\SaveResearchButton.tsx                  
+ShareCard.tsx                      C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\ShareCard\ShareCard.tsx                                    
+ShareCardButton.tsx                C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\ShareCard\ShareCardButton.tsx                              
+ShareCardCompact.tsx               C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\ShareCard\ShareCardCompact.tsx                             
+SnapshotPanel.tsx                  C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\SnapshotPanel.tsx                                          
+SystemLog.tsx                      C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\SystemLog\SystemLog.tsx                                    
+SystemStatusBar.tsx                C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\SystemStatusBar.tsx                                        
+UpcomingEarnings.tsx               C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\UpcomingEarnings\UpcomingEarnings.tsx                      
+UpcomingEvents.tsx                 C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\UpcomingEvents\UpcomingEvents.tsx                          
+ValuationSummary.tsx               C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\ValuationSummary\ValuationSummary.tsx                      
+WhatCouldChangeThisPanel.tsx       C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\WhatCouldChangeThisPanel.tsx                               
+WhatMattersNow.tsx                 C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\WhatMattersNow.tsx                                         
+WhileYouWereAwayHome.tsx           C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\panels\WhileYouWereAwayHome.tsx                                   
+
+
+
+
+============================================================
+[14] RESEARCH SECTION IDS CURRENTLY REFERENCED
+============================================================
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\session\IntelligenceLayer.tsx:43: <section id="financials" className="scroll-mt-24">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\session\ResearchSession.tsx:16: <section id="overview" className="scroll-mt-24">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\session\ResearchSession.tsx:24: <section id="committee" className="scroll-mt-24">
+C:\Users\inago\dev\IPO_Sniper_AI_v4-workstation-design\components\workstation\session\ResearchSession.tsx:36: <section id="operations" className="scroll-mt-24">
+
+============================================================
+END AUDIT
+============================================================

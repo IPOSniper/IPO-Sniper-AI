@@ -1,4 +1,5 @@
 import { WorkstationPanelProps } from "../contracts/WorkstationPanelProps";
+import AnalystConsensusChart from "../panels/AnalystConsensusChart";
 
 const RECOMMENDATION_DOT: Record<string, string> = {
  STRONG_BUY: "bg-emerald-400",
@@ -24,6 +25,9 @@ const reports = research.committee.reports;
 return(
 <section className="rounded-lg border border-zinc-800 bg-zinc-900 p-4">
  <h2 className="mb-3 text-lg font-semibold">Analyst Activity</h2>
+  <div className="mb-5">
+    <AnalystConsensusChart reports={reports} />
+  </div>
 
  <div className="divide-y divide-zinc-800">
  {reports.map(r => {

@@ -1,0 +1,128 @@
+import type { AnalystReport } from "@/engine/committee/contracts/AnalystReport";
+
+type Props = {
+    reports: AnalystReport[];
+};
+
+const GROUPS = [
+    {
+        key: "buy",
+        label: "BUY / STRONG BUY",
+        recommendations: ["BUY", "STRONG_BUY"],
+        bar: "bg-emerald-400",
+        text: "text-emerald-400",
+    },
+    {
+        key: "hold",
+        label: "HOLD",
+        recommendations: ["HOLD"],
+        bar: "bg-zinc-500",
+        text: "text-zinc-300",
+    },
+    {
+        key: "sell",
+        label: "REDUCE / SELL",
+        recommendations: ["REDUCE", "SELL"],
+        bar: "bg-red-400",
+        text: "text-red-400",
+    },
+] as const;
+
+function recommendationLabel(value: string) {
+    return value.replace("_", " ");
+}
+
+export default function AnalystConsensusChart({ reports }: Props) {
+    const active = reports.filter((report) => report.confidence > 0);
+    const inactive = reports.filter((report) => report.confidence <= 0);
+    const total = active.length || 1;
+
+    const groups = GROUPS.map((group) => ({
+        ...group,
+        count: active.filter((report) =>
+            group.recommendations.includes(report.recommendation as never)
+        ).length,
+    }));
+
+    return (
+        <section className="rounded-lg border border-zinc-800 bg-zinc-900 p-4">
+            <div className="mb-4 flex items-end justify-between gap-4">
+                <div>
+                    <h3 className="text-sm font-semibold text-zinc-200">
+                        Analyst Consensus
+                    </h3>
+                    <p className="mt-1 text-xs text-zinc-500">
+                        Distribution of verified analyst opinions
+                    </p>
+                </div>
+                <div className="text-right">
+                    <div className="text-lg font-semibold text-white">
+                        {active.length} / {reports.length}
+                    </div>
+                    <div className="text-[10px] uppercase tracking-wide text-zinc-600">
+                        active opinions
+                    </div>
+                </div>
+            </div>
+
+            <div className="space-y-4">
+                {groups.map((group) => {
+                    const width = (group.count / total) * 100;
+
+                    return (
+                        <div key={group.key}>
+                            <div className="mb-1 flex items-center justify-between text-xs">
+                                <span className={group.text}>{group.label}</span>
+                                <span className="text-zinc-500">
+                                    {group.count}
+                                </span>
+                            </div>
+                            <div className="h-2 overflow-hidden rounded-full bg-zinc-800">
+                                {group.count > 0 && (
+                                    <div
+                                        className={`h-full ${group.bar}`}
+                                        style={{ width: `${width}%` }}
+                                    />
+                                )}
+                            </div>
+                        </div>
+                    );
+                })}
+            </div>
+
+            <div className="mt-5 border-t border-zinc-800 pt-4">
+                <div className="mb-2 grid grid-cols-[minmax(0,1fr)_100px_64px] gap-3 text-[10px] uppercase tracking-wide text-zinc-600">
+                    <span>Analyst</span>
+                    <span>View</span>
+                    <span className="text-right">Confidence</span>
+                </div>
+
+                <div className="divide-y divide-zinc-800/80">
+                    {active.map((report) => (
+                        <div
+                            key={report.analyst}
+                            className="grid grid-cols-[minmax(0,1fr)_100px_64px] items-center gap-3 py-2 text-xs"
+                        >
+                            <span className="truncate text-zinc-300">
+                                {report.analyst}
+                            </span>
+                            <span className="font-medium text-zinc-400">
+                                {recommendationLabel(report.recommendation)}
+                            </span>
+                            <span className="text-right text-zinc-500">
+                                {report.confidence}%
+                            </span>
+                        </div>
+                    ))}
+                </div>
+            </div>
+
+            {inactive.length > 0 && (
+                <div className="mt-4 border-t border-dashed border-zinc-800 pt-3 text-xs text-zinc-500">
+                    <span className="text-zinc-400">{inactive.length}</span>
+                    {" "}analyst{inactive.length === 1 ? "" : "s"} could not form a verified opinion.
+                </div>
+            )}
+        </section>
+    );
+}

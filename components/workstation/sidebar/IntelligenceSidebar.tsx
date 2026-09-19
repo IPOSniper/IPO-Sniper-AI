@@ -1,4 +1,4 @@
-import React from "react";
+﻿import React from "react";
 
 import { WorkstationPanelProps } from "../contracts/WorkstationPanelProps";
 import type { EvidenceItem } from "@/engine/evidence/types";
@@ -42,7 +42,7 @@ export default async function IntelligenceSidebar({
 
  return (
 
- <section className="space-y-4">
+ <section className="space-y-4 sticky top-24 self-start max-h-[calc(100vh-6rem)] overflow-y-auto">
 
  <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-4">
  <p className="text-xs uppercase tracking-wide text-zinc-500">AI Committee</p>
@@ -128,3 +128,4 @@ export default async function IntelligenceSidebar({
 
  );
 }
+

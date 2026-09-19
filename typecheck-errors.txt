@@ -1,0 +1,27 @@
+﻿
+> frontend@0.1.0 type-check
+> tsc --noEmit
+
+components/workstation/panels/DataFreshnessModule.tsx(8,37): error TS2352: Conversion of type 'NewsEvidence | FinancialEvidence | ManagementEvidence | IPOEvidence | MarketEvidence | IndustryEvidence | SecEvidence | QuoteEvidence' to type 'Record<string, { verified: boolean; collectedAt: string | Date; source: string; }>' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
+  Type 'QuoteEvidence' is not comparable to type 'Record<string, { verified: boolean; collectedAt: string | Date; source: string; }>'.
+    Index signature for type 'string' is missing in type 'QuoteEvidence'.
+components/workstation/panels/InsiderBuySellBalance.tsx(4,63): error TS2339: Property 'insiderTransactions' does not exist on type 'ManagementEvidence'.
+components/workstation/panels/InsiderBuySellBalance.tsx(15,43): error TS7006: Parameter 't' implicitly has an 'any' type.
+components/workstation/panels/InsiderBuySellBalance.tsx(15,85): error TS7006: Parameter 'sum' implicitly has an 'any' type.
+components/workstation/panels/InsiderBuySellBalance.tsx(15,90): error TS7006: Parameter 't' implicitly has an 'any' type.
+components/workstation/panels/InsiderBuySellBalance.tsx(16,44): error TS7006: Parameter 't' implicitly has an 'any' type.
+components/workstation/panels/InsiderBuySellBalance.tsx(16,87): error TS7006: Parameter 'sum' implicitly has an 'any' type.
+components/workstation/panels/InsiderBuySellBalance.tsx(16,92): error TS7006: Parameter 't' implicitly has an 'any' type.
+components/workstation/panels/InsiderTransactionTimeline.tsx(4,63): error TS2339: Property 'insiderTransactions' does not exist on type 'ManagementEvidence'.
+components/workstation/panels/InstitutionsEvidenceTable.tsx(5,54): error TS2339: Property 'notable13F' does not exist on type 'MarketEvidence'.
+components/workstation/panels/InstitutionsEvidenceTable.tsx(16,44): error TS7006: Parameter 'h' implicitly has an 'any' type.
+components/workstation/panels/OpenInterestByStrike.tsx(4,52): error TS2339: Property 'optionsChain' does not exist on type 'MarketEvidence'.
+components/workstation/panels/OpenInterestByStrike.tsx(16,38): error TS7006: Parameter 'r' implicitly has an 'any' type.
+components/workstation/panels/OpenInterestByStrike.tsx(22,27): error TS7006: Parameter 'r' implicitly has an 'any' type.
+components/workstation/panels/OptionsStrikeLadder.tsx(4,52): error TS2339: Property 'optionsChain' does not exist on type 'MarketEvidence'.
+components/workstation/panels/OptionsStrikeLadder.tsx(21,27): error TS7006: Parameter 'r' implicitly has an 'any' type.
+components/workstation/panels/ResearchGapMap.tsx(8,37): error TS2352: Conversion of type 'FinancialEvidence | ManagementEvidence | IPOEvidence | MarketEvidence | IndustryEvidence | NewsEvidence | SecEvidence | QuoteEvidence' to type 'Record<string, { verified: boolean; }>' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
+  Type 'QuoteEvidence' is not comparable to type 'Record<string, { verified: boolean; }>'.
+    Index signature for type 'string' is missing in type 'QuoteEvidence'.
+components/workstation/panels/ResearchGapMap.tsx(23,60): error TS7053: Element implicitly has an 'any' type because expression of type 'string' can't be used to index type '{ full: string; partial: string; missing: string; "no-data": string; }'.
+  No index signature with a parameter of type 'string' was found on type '{ full: string; partial: string; missing: string; "no-data": string; }'.

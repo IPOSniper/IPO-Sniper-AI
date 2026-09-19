@@ -24,7 +24,7 @@ export class FinnhubEarningsProvider {
         // number every time.
         const result =
             await finnhubFetch<FinnhubEarningsResponse[]>(
-                `/stock/earnings?symbol=${symbol}&limit=8`
+                `/stock/earnings?symbol=${symbol}&limit=2`
             );
 
         if (!Array.isArray(result) || result.length === 0) {
@@ -73,36 +73,6 @@ export class FinnhubEarningsProvider {
 
         };
 
-    }
-    /**
-     * Returns the real historical earnings rows available from Finnhub.
-     * No estimates are substituted for missing actuals.
-     */
-    public async getHistory(
-        symbol: string
-    ): Promise<EarningsEvent[]> {
-
-        const result =
-            await finnhubFetch<FinnhubEarningsResponse[]>(
-                `/stock/earnings?symbol=${symbol}&limit=8`
-            );
-
-        if (!Array.isArray(result) || result.length === 0) {
-            return [];
-        }
-
-        return result.map((earnings) => ({
-            company: symbol,
-            fiscalQuarter: `Q${earnings.quarter}`,
-            fiscalYear: earnings.year,
-            reportDate: new Date(earnings.period),
-            estimatedEPS: earnings.estimate,
-            actualEPS: earnings.actual,
-            estimatedRevenue: earnings.revenueEstimate ?? 0,
-            actualRevenue: earnings.revenueActual ?? 0,
-            previousEPS: null,
-            previousRevenue: null,
-        }));
     }
 
 }

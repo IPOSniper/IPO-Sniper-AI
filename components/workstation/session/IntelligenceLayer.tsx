@@ -1,22 +1,39 @@
-import { WorkstationPanelProps } from "../contracts/WorkstationPanelProps";
+﻿import { WorkstationPanelProps } from "../contracts/WorkstationPanelProps";
 
 import EvidenceSummaryGrid from "../panels/EvidenceSummaryGrid/EvidenceSummaryGrid";
+import EvidenceModule from "../panels/EvidenceModule";
+import DataFreshnessModule from "../panels/DataFreshnessModule";
+import ResearchGapMap from "../panels/ResearchGapMap";
 import ExecutiveSummaryPanel from "../panels/ExecutiveSummaryPanel";
 import RecommendationPanel from "../panels/RecommendationPanel";
 import CommitteePanel from "../panels/CommitteePanel";
 import ConvictionRadar from "../panels/ConvictionRadar/ConvictionRadar";
+import ResearchIntelligenceMap from "../panels/ResearchIntelligenceMap";
+import ConsensusBar from "../panels/ConsensusBar";
+import CommitteeConsensusCard from "../panels/CommitteeConsensusCard";
 import InvestmentThesisPanel from "../panels/InvestmentThesisPanel";
+import InvestmentThesisCards from "../panels/InvestmentThesisCards";
 import InvestorDecisionCenter from "../panels/InvestorDecisionCenter";
+import PortfolioIntelligence from "../panels/PortfolioIntelligence/PortfolioIntelligence";
 import FinancialOverviewChart from "../panels/FinancialOverviewChart/FinancialOverviewChart";
+import MarginTrendModule from "../panels/MarginTrendModule";
+import CashDebtModule from "../panels/CashDebtModule";
+import GrowthTrendModule from "../panels/GrowthTrendModule";
+import BalanceSheetTrend from "../panels/BalanceSheetTrend";
+import GrowthVsProfitability from "../panels/GrowthVsProfitability";
 import ValuationSummary from "../panels/ValuationSummary/ValuationSummary";
+import InstitutionalOwnershipCard from "../panels/InstitutionalOwnershipCard/InstitutionalOwnershipCard";
+import InstitutionalOwnershipTable from "../panels/InstitutionalOwnershipTable";
+import InstitutionalEvidenceTable13F from "../panels/InstitutionalEvidenceTable13F";
 import EvidencePanel from "../panels/EvidencePanel";
 import RiskPanel from "../panels/RiskPanel";
 import CatalystPanel from "../panels/CatalystPanel";
 import NewsSentimentDonut from "../panels/NewsSentimentDonut/NewsSentimentDonut";
-import PortfolioIntelligence from "../panels/PortfolioIntelligence/PortfolioIntelligence";
 import ShareCardButton from "../panels/ShareCard/ShareCardButton";
 import EarningsPanel from "../panels/EarningsPanel";
-import CollapsibleSection from "../shared/CollapsibleSection";
+import EarningsComparisonChart from "../panels/EarningsComparisonChart";
+import PriceVolumeModule from "../panels/PriceVolumeModule";
+import DrawdownModule from "../panels/DrawdownModule";
 
 export default function IntelligenceLayer({
 research,
@@ -24,7 +41,12 @@ research,
 
 return(
 <section className="space-y-6">
+<section id="evidence" className="scroll-mt-24 space-y-6">
 <EvidenceSummaryGrid research={research} />
+<EvidenceModule research={research} />
+<DataFreshnessModule research={research} />
+<ResearchGapMap research={research} />
+</section>
 <ExecutiveSummaryPanel research={research} />
 
 <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
@@ -32,37 +54,69 @@ return(
  <RecommendationPanel research={research} />
 </div>
 
+<ResearchIntelligenceMap research={research} />
+
 <CommitteePanel research={research} />
+<ConsensusBar research={research} />
+<CommitteeConsensusCard research={research} />
+
+<div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
 <InvestmentThesisPanel research={research} />
+<InvestmentThesisCards research={research} />
+</div>
+
 <InvestorDecisionCenter research={research} />
 <PortfolioIntelligence research={research} />
 
-<CollapsibleSection title="Financial Overview & Valuation">
-<div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
- <FinancialOverviewChart research={research} />
- <ValuationSummary />
+<section id="financials" className="scroll-mt-24">
+<FinancialOverviewChart research={research} />
+<div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
+<MarginTrendModule research={research} />
+<CashDebtModule research={research} />
+<GrowthTrendModule research={research} />
+<BalanceSheetTrend research={research} />
+<GrowthVsProfitability research={research} />
 </div>
-</CollapsibleSection>
+</section>
 
-<CollapsibleSection title="News Sentiment & Evidence">
+<section id="valuation" className="scroll-mt-24">
+<ValuationSummary />
+</section>
+
+<section id="institutions" className="scroll-mt-24">
+<InstitutionalOwnershipCard ticker={research.company.ticker} />
+<div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
+<InstitutionalOwnershipTable research={research} />
+<InstitutionalEvidenceTable13F research={research} />
+</div>
+</section>
+
+<section id="news" className="scroll-mt-24">
 <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
  <NewsSentimentDonut research={research} />
  <EvidencePanel research={research} />
 </div>
-</CollapsibleSection>
+</section>
 
-<CollapsibleSection title="Risks"><RiskPanel research={research} /></CollapsibleSection>
-<CollapsibleSection title="Catalysts to Watch"><CatalystPanel research={research} /></CollapsibleSection>
-<CollapsibleSection title="Earnings"><EarningsPanel research={research} /></CollapsibleSection>
+<section id="risks" className="scroll-mt-24">
+<RiskPanel research={research} />
+</section>
 
-<div className="rounded-lg border border-zinc-800 bg-zinc-900 p-4">
- <h2 className="mb-1 text-lg font-semibold">Share Research Card</h2>
- <p className="mb-3 text-xs text-zinc-600">
- Excludes News data - NewsAPI&apos;s free tier terms forbid production/public use.
- Recommendation shown is recomputed without the News Analyst&apos;s vote.
- </p>
- <ShareCardButton research={research} />
+<section id="catalysts" className="scroll-mt-24">
+<CatalystPanel research={research} />
+</section>
+
+<section id="earnings" className="scroll-mt-24">
+<EarningsComparisonChart ticker={research.company.ticker} companyName={research.company.name} />
+<EarningsPanel research={research} />
+</section>
+
+<div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+<PriceVolumeModule ticker={research.company.ticker} />
+<DrawdownModule ticker={research.company.ticker} />
 </div>
+
+<ShareCardButton research={research} />
 </section>
 );
 }

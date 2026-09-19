@@ -1,0 +1,99 @@
+warning: in the working copy of 'components/workstation/shell/WorkstationShell.tsx', LF will be replaced by CRLF the next time Git touches it
+[1mdiff --git a/components/workstation/shell/WorkstationShell.tsx b/components/workstation/shell/WorkstationShell.tsx[m
+[1mindex 670fd9b..37a6e1d 100644[m
+[1m--- a/components/workstation/shell/WorkstationShell.tsx[m
+[1m+++ b/components/workstation/shell/WorkstationShell.tsx[m
+[36m@@ -1,12 +1,11 @@[m
+[31m-import React from "react";[m
+[31m-[m
+[32m+[m[32m﻿import React from "react";[m
+ import CommandBar from "../panels/CommandBar/CommandBar";[m
+ import ProcessStepper from "../panels/ProcessStepper/ProcessStepper";[m
+ import PriceChart from "../panels/PriceChart/PriceChart";[m
+ import IntelligenceSidebar from "../sidebar/IntelligenceSidebar";[m
+ import ResearchViewport from "../viewport/ResearchViewport";[m
+ import ResearchTarget from "../panels/ResearchTarget/ResearchTarget";[m
+[31m-[m
+[32m+[m[32mimport ResearchIndex from "../navigation/ResearchIndex";[m
+ import { ResearchObject } from "@/engine/models/ResearchObject";[m
+ [m
+ interface Props {[m
+[36m@@ -15,38 +14,53 @@[m [minterface Props {[m
+ }[m
+ [m
+ export default function WorkstationShell({ research, ticker }: Props) {[m
+[31m-[m
+     return ([m
+[32m+[m[32m        <div className="min-h-screen space-y-4 text-white">[m
+[32m+[m[32m            {/* Persistent workstation command layer */}[m
+[32m+[m[32m            <header className="sticky top-0 z-30 space-y-3 border-b border-zinc-900/80 bg-black/95 pb-3 pt-1 backdrop-blur">[m
+[32m+[m[32m                <CommandBar research={research} />[m
+[32m+[m
+[32m+[m[32m                <div className="space-y-3">[m
+[32m+[m[32m                    <ResearchTarget defaultTicker={ticker} />[m
+[32m+[m[32m                    <ProcessStepper research={research} />[m
+[32m+[m[32m                </div>[m
+[32m+[m[32m            </header>[m
+[32m+[m
+[32m+[m[32m            {/* Market context remains part of the workstation and is not removed. */}[m
+[32m+[m[32m            <section className="min-w-0">[m
+[32m+[m[32m                <PriceChart ticker={research.company.ticker} />[m
+[32m+[m[32m            </section>[m
+[32m+[m
+[32m+[m[32m            {/* Analyst workstation */}[m
+[32m+[m[32m            <main[m
+[32m+[m[32m                className="[m
+[32m+[m[32m                    grid[m
+[32m+[m[32m                    grid-cols-1[m
+[32m+[m[32m                    gap-4[m
+[32m+[m[32m                    lg:grid-cols-[220px_minmax(0,1fr)_280px][m
+[32m+[m[32m                    lg:items-start[m
+[32m+[m[32m                    xl:grid-cols-[240px_minmax(0,1fr)_300px][m
+[32m+[m[32m                "[m
+[32m+[m[32m            >[m
+[32m+[m[32m                {/* Navigation spine */}[m
+[32m+[m[32m                <aside className="hidden min-w-0 lg:block">[m
+[32m+[m[32m                    <div className="sticky top-28 self-start">[m
+[32m+[m[32m                        <ResearchIndex />[m
+[32m+[m[32m                    </div>[m
+[32m+[m[32m                </aside>[m
+ [m
+[31m-        <div className="space-y-4 text-white">[m
+[31m-[m
+[31m-            <h1 className="text-2xl font-bold mb-1">Workstation</h1>[m
+[31m-            <CommandBar research={research} />[m
+[31m-            <PriceChart ticker={research.company.ticker} />[m
+[31m-            <ProcessStepper research={research} />[m
+[31m-[m
+[31m-            <div className="mb-4">[m
+[31m-                <ResearchTarget defaultTicker={ticker} />[m
+[31m-            </div>[m
+[31m-[m
+[31m-            <main className="grid grid-cols-12 gap-4">[m
+[31m-[m
+[31m-                <section className="col-span-9">[m
+[31m-[m
+[32m+[m[32m                {/* Primary research workspace */}[m
+[32m+[m[32m                <section className="min-w-0">[m
+                     <ResearchViewport research={research} />[m
+[31m-[m
+                 </section>[m
+ [m
+[31m-                <aside className="col-span-3">[m
+[31m-[m
+[31m-                    <IntelligenceSidebar research={research} />[m
+[31m-[m
+[32m+[m[32m                {/* Persistent contextual intelligence */}[m
+[32m+[m[32m                <aside className="min-w-0">[m
+[32m+[m[32m                    <div className="sticky top-28 self-start">[m
+[32m+[m[32m                        <IntelligenceSidebar research={research} />[m
+[32m+[m[32m                    </div>[m
+                 </aside>[m
+[31m-[m
+             </main>[m
+[31m-[m
+         </div>[m
+[31m-[m
+     );[m
+[31m-[m
+ }[m

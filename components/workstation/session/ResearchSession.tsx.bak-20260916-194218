@@ -14,14 +14,10 @@ export default function ResearchSession({
     return (
         <div className="space-y-8">
             <section id="overview" className="scroll-mt-24">
-                <div className="space-y-4">
+                <div className="space-y-6">
                     <ResearchSnapshotPanel research={research} />
-
-                    <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-                        <MissionControlHeader research={research} />
-                        <AIVerdictRow research={research} />
-
-                    </div>
+                    <MissionControlHeader research={research} />
+                    <AIVerdictRow research={research} />
                 </div>
             </section>
 
@@ -43,7 +39,3 @@ export default function ResearchSession({
         </div>
     );
 }
-
-
-
-

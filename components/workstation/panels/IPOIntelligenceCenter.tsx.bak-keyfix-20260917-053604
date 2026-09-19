@@ -242,7 +242,7 @@ export default function IPOIntelligenceCenter() {
                         <tbody>
                             {allRows.map(row => (
                                 <>
-                                    <tr className="border-b border-zinc-900 hover:bg-zinc-900/40">
+                                    <tr key={row.key} className="border-b border-zinc-900 hover:bg-zinc-900/40">
                                         <td className="py-1.5 pr-3 font-semibold text-white">
                                             {row.researchUrl ? (
                                                 <Link href={row.researchUrl} className="hover:text-violet-300">{row.company}</Link>

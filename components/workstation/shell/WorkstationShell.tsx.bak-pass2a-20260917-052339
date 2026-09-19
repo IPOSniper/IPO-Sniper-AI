@@ -17,7 +17,7 @@ export default function WorkstationShell({ research, ticker }: Props) {
     return (
         <div className="min-h-screen space-y-4 text-white">
             {/* Persistent workstation command layer */}
-            <header className="space-y-3 border-b border-zinc-900/80 bg-black/95 pb-3 pt-1">
+            <header className="sticky top-0 z-30 space-y-3 border-b border-zinc-900/80 bg-black/95 pb-3 pt-1 backdrop-blur">
                 <CommandBar research={research} />
 
                 <div className="space-y-3">
@@ -44,7 +44,7 @@ export default function WorkstationShell({ research, ticker }: Props) {
             >
                 {/* Navigation spine */}
                 <aside className="hidden min-w-0 lg:block">
-                    <div className="sticky top-12 self-start">
+                    <div className="sticky top-28 self-start">
                         <ResearchIndex />
                     </div>
                 </aside>
@@ -56,7 +56,7 @@ export default function WorkstationShell({ research, ticker }: Props) {
 
                 {/* Persistent contextual intelligence */}
                 <aside className="min-w-0">
-                    <div className="sticky top-12 self-start">
+                    <div className="sticky top-28 self-start">
                         <IntelligenceSidebar research={research} />
                     </div>
                 </aside>
@@ -64,4 +64,3 @@ export default function WorkstationShell({ research, ticker }: Props) {
         </div>
     );
 }
-
