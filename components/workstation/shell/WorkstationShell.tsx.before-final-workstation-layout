@@ -1,0 +1,67 @@
+﻿import React from "react";
+import CommandBar from "../panels/CommandBar/CommandBar";
+import ProcessStepper from "../panels/ProcessStepper/ProcessStepper";
+import PriceChart from "../panels/PriceChart/PriceChart";
+import IntelligenceSidebar from "../sidebar/IntelligenceSidebar";
+import ResearchViewport from "../viewport/ResearchViewport";
+import ResearchTarget from "../panels/ResearchTarget/ResearchTarget";
+import ResearchIndex from "../navigation/ResearchIndex";
+import { ResearchObject } from "@/engine/models/ResearchObject";
+
+interface Props {
+    research: ResearchObject;
+    ticker?: string;
+}
+
+export default function WorkstationShell({ research, ticker }: Props) {
+    return (
+        <div className="min-h-screen space-y-4 text-white">
+            {/* Persistent workstation command layer */}
+            <header className="space-y-3 border-b border-zinc-900/80 bg-black/95 pb-3 pt-1">
+                <CommandBar research={research} />
+
+                <div className="space-y-3">
+                    <ResearchTarget defaultTicker={ticker} />
+                    <ProcessStepper research={research} />
+                </div>
+            </header>
+
+            {/* Market context remains part of the workstation and is not removed. */}
+            <section className="min-w-0">
+                <PriceChart ticker={research.company.ticker} />
+            </section>
+
+            {/* Analyst workstation */}
+            <main
+                className="
+                    grid
+                    grid-cols-1
+                    gap-4
+                    lg:grid-cols-[220px_minmax(0,1fr)_280px]
+                    lg:items-start
+                    xl:grid-cols-[240px_minmax(0,1fr)_300px]
+                "
+            >
+                {/* Navigation spine */}
+                <aside className="hidden min-w-0 lg:block">
+                    <div className="sticky top-12 self-start">
+                        <ResearchIndex />
+                    </div>
+                </aside>
+
+                {/* Primary research workspace */}
+                <section className="min-w-0">
+                    <ResearchViewport research={research} />
+                </section>
+
+                {/* Persistent contextual intelligence */}
+                <aside className="min-w-0">
+                    <div className="sticky top-12 self-start">
+                        <IntelligenceSidebar research={research} />
+                    </div>
+                </aside>
+            </main>
+        </div>
+    );
+}
+
