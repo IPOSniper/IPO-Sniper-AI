@@ -10,6 +10,11 @@ import CommitteePanel from "../panels/CommitteePanel";
 import ConvictionRadar from "../panels/ConvictionRadar/ConvictionRadar";
 import ResearchIntelligenceMap from "../panels/ResearchIntelligenceMap";
 import ConsensusBar from "../panels/ConsensusBar";
+import AnalystEvidenceCards from "../panels/AnalystEvidenceCards";
+import FiveTierVoteDistribution from "../panels/FiveTierVoteDistribution";
+import QualityRiskGauges from "../panels/QualityRiskGauges";
+import InstitutionalFilingFreshness from "../panels/InstitutionalFilingFreshness";
+import OptionsGreeksSummary from "../panels/OptionsGreeksSummary";
 import CommitteeConsensusCard from "../panels/CommitteeConsensusCard";
 import InvestmentThesisPanel from "../panels/InvestmentThesisPanel";
 import InvestmentThesisCards from "../panels/InvestmentThesisCards";
@@ -47,6 +52,7 @@ return(
 <DataFreshnessModule research={research} />
 <ResearchGapMap research={research} />
 </section>
+<QualityRiskGauges research={research} />
 <ExecutiveSummaryPanel research={research} />
 
 <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
@@ -59,14 +65,20 @@ return(
 <CommitteePanel research={research} />
 <ConsensusBar research={research} />
 <CommitteeConsensusCard research={research} />
+<div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+<AnalystEvidenceCards research={research} />
+<FiveTierVoteDistribution research={research} />
+</div>
 
 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
 <InvestmentThesisPanel research={research} />
 <InvestmentThesisCards research={research} />
 </div>
 
+<div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
 <InvestorDecisionCenter research={research} />
 <PortfolioIntelligence research={research} />
+</div>
 
 <section id="financials" className="scroll-mt-24">
 <FinancialOverviewChart research={research} />
@@ -89,6 +101,7 @@ return(
 <InstitutionalOwnershipTable research={research} />
 <InstitutionalEvidenceTable13F research={research} />
 </div>
+<InstitutionalFilingFreshness research={research} />
 </section>
 
 <section id="news" className="scroll-mt-24">
@@ -99,16 +112,18 @@ return(
 </section>
 
 <section id="risks" className="scroll-mt-24">
+<div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
 <RiskPanel research={research} />
-</section>
-
-<section id="catalysts" className="scroll-mt-24">
+<div id="catalysts">
 <CatalystPanel research={research} />
+</div>
+</div>
 </section>
 
 <section id="earnings" className="scroll-mt-24">
 <EarningsComparisonChart ticker={research.company.ticker} companyName={research.company.name} />
 <EarningsPanel research={research} />
+<OptionsGreeksSummary ticker={research.company.ticker} />
 </section>
 
 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
