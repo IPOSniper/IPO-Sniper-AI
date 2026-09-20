@@ -1,4 +1,4 @@
-import { EvidenceEngine } from "../evidence/evidenceEngine";
+﻿import { EvidenceEngine } from "../evidence/evidenceEngine";
 import type { EvidencePackage } from "../evidence/package";
 
 import { CommitteeEngine } from "../committee/committeeEngine";
@@ -17,7 +17,7 @@ import { RiskAnalyst } from "../committee/analysts/RiskAnalyst";
 import { VerificationAnalyst } from "../committee/analysts/VerificationAnalyst";
 import { NewsAnalyst } from "../committee/analysts/NewsAnalyst";
 import { SECAnalyst } from "../committee/analysts/SECAnalyst";
-// KnowledgeAnalyst is intentionally NOT imported — unlike News/SEC,
+// KnowledgeAnalyst is intentionally NOT imported â€” unlike News/SEC,
 // it doesn't just need a data source, it needs a product decision on
 // what "Knowledge" evidence even means for a single-company analyst.
 // See the comment at the top of KnowledgeAnalyst.ts.
@@ -28,6 +28,8 @@ import type { InvestmentDecisionReport } from "../models/InvestmentDecisionRepor
 
 import { ResearchReportBuilder } from "../report/ResearchReportBuilder";
 import { InvestmentDecisionBuilder } from "../investment/InvestmentDecisionBuilder";
+
+import { recordResearchCall } from "@/engine/ledger/ResearchCallLedger";
 
 export class ResearchEngine {
 
@@ -109,7 +111,7 @@ export class ResearchEngine {
      * Builds evidence and runs the committee ONCE, then produces
      * both reports from that single pass. .analyze() and
      * .analyzeInvestmentDecision() above each independently rebuild
-     * evidence and rerun the committee — calling both back to back
+     * evidence and rerun the committee â€” calling both back to back
      * (as ResearchCapability used to only call .analyze(), and
      * nothing called .analyzeInvestmentDecision() at all) would
      * double every real API call (Finnhub/SEC/NewsAPI) per research
@@ -143,6 +145,12 @@ export class ResearchEngine {
                 evidence.company,
                 committee
             );
+
+        recordResearchCall({
+            company: evidence.company,
+            report,
+            committee,
+        }).catch(err => console.error("Ledger write failed (non-blocking):", err));
 
         return { report, investmentDecision };
 

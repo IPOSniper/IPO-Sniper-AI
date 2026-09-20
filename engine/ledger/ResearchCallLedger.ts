@@ -1,6 +1,6 @@
 ﻿import { createHash } from "crypto";
 import { createClient } from "@/lib/supabase/server";
-import { ResearchObject } from "@/engine/models/ResearchObject";
+
 
 interface LedgerSnapshot {
     ticker: string;
@@ -18,7 +18,13 @@ interface LedgerSnapshot {
     generatedAt: string;
 }
 
-function buildDeterministicSnapshot(research: ResearchObject): LedgerSnapshot {
+interface LedgerInput {
+    company: { ticker: string; name: string };
+    report: { recommendation: string; conviction: number; confidence: number };
+    committee: { agreement: number; reports: { analyst: string; recommendation: string; confidence: number; thesis: string }[] };
+}
+
+function buildDeterministicSnapshot(research: LedgerInput): LedgerSnapshot {
     return {
         ticker: research.company.ticker,
         companyName: research.company.name,
@@ -43,7 +49,7 @@ function hashSnapshot(snapshot: LedgerSnapshot): string {
     return createHash("sha256").update(canonical).digest("hex");
 }
 
-export async function recordResearchCall(research: ResearchObject): Promise<{ hash: string } | null> {
+export async function recordResearchCall(research: LedgerInput): Promise<{ hash: string } | null> {
     const supabase = await createClient();
     if (!supabase) return null;
 
