@@ -138,7 +138,7 @@ export default function ResearchIndex() {
 
                                 return (
                                     <button
-                                        key={section.id}
+                                        key={section.label}
                                         type="button"
                                         onClick={() =>
                                             navigateTo(section.id)
