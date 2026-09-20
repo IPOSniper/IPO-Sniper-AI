@@ -70,15 +70,19 @@ return(
 <FiveTierVoteDistribution research={research} />
 </div>
 
+<section id="thesis" className="scroll-mt-24">
 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
 <InvestmentThesisPanel research={research} />
 <InvestmentThesisCards research={research} />
 </div>
 
-<div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+</section>
+<section id="decision" className="scroll-mt-24">
 <InvestorDecisionCenter research={research} />
+</section>
+<section id="portfolio" className="scroll-mt-24">
 <PortfolioIntelligence research={research} />
-</div>
+</section>
 
 <section id="financials" className="scroll-mt-24">
 <FinancialOverviewChart research={research} />
