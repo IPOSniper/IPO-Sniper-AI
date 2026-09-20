@@ -21,10 +21,10 @@ const SECTIONS: ResearchSectionGroup[] = [
     {
         label: "AI Research",
         items: [
-            { id: "assessment", label: "AI Assessment" },
+            { id: "overview", label: "AI Assessment" },
             { id: "committee", label: "Committee" },
             { id: "analysts", label: "Analysts" },
-            { id: "consensus", label: "Consensus" },
+            { id: "committee", label: "Consensus" },
         ],
     },
     {

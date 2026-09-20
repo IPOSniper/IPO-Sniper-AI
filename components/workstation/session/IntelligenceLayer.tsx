@@ -4,6 +4,7 @@ import EvidenceSummaryGrid from "../panels/EvidenceSummaryGrid/EvidenceSummaryGr
 import EvidenceModule from "../panels/EvidenceModule";
 import DataFreshnessModule from "../panels/DataFreshnessModule";
 import ResearchGapMap from "../panels/ResearchGapMap";
+import MarketContext from "../panels/MarketContext/MarketContext";
 import ExecutiveSummaryPanel from "../panels/ExecutiveSummaryPanel";
 import RecommendationPanel from "../panels/RecommendationPanel";
 import CommitteePanel from "../panels/CommitteePanel";
@@ -46,6 +47,12 @@ research,
 
 return(
 <section className="space-y-6">
+<section id="market" className="scroll-mt-24">
+<MarketContext />
+</section>
+<section id="market" className="scroll-mt-24">
+<MarketContext />
+</section>
 <section id="evidence" className="scroll-mt-24 space-y-6">
 <EvidenceSummaryGrid research={research} />
 <EvidenceModule research={research} />
