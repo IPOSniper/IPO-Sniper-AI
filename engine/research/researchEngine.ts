@@ -150,6 +150,7 @@ export class ResearchEngine {
             company: evidence.company,
             report,
             committee,
+            evidence,
         }).catch(err => console.error("Ledger write failed (non-blocking):", err));
 
         return { report, investmentDecision };

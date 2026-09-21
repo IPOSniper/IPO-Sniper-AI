@@ -25,7 +25,7 @@ interface LedgerInput {
     report: { recommendation: string; conviction: number; confidence: number };
     committee: { agreement: number; reports: { analyst: string; recommendation: string; confidence: number; thesis: string }[] };
     quote?: { price: number } | null;
-    evidence?: Record<string, Record<string, { verified: boolean }>>;
+    evidence?: unknown;
 }
 
 function buildDeterministicSnapshot(research: LedgerInput): LedgerSnapshot {
@@ -33,14 +33,19 @@ function buildDeterministicSnapshot(research: LedgerInput): LedgerSnapshot {
         ticker: research.company.ticker,
         companyName: research.company.name,
         priceAtCall: research.quote?.price ?? null,
-        evidenceCoverage: research.evidence
-            ? Object.fromEntries(
-                Object.entries(research.evidence).map(([category, items]) => {
-                    const values = Object.values(items);
-                    return [category, { verified: values.filter(i => i.verified).length, total: values.length }];
-                })
-              )
-            : {},
+        evidenceCoverage: (() => {
+            const categories = ["financial", "management", "ipo", "market", "industry", "news", "sec", "quote"] as const;
+            const result: Record<string, { verified: number; total: number }> = {};
+            const ev = research.evidence as Record<string, Record<string, { verified: boolean }>> | undefined;
+            if (!ev) return result;
+            for (const category of categories) {
+                const items = ev[category];
+                if (!items) continue;
+                const values = Object.values(items);
+                result[category] = { verified: values.filter(i => i.verified).length, total: values.length };
+            }
+            return result;
+        })(),
         recommendation: research.report.recommendation,
         conviction: research.report.conviction,
         confidence: research.report.confidence,
