@@ -1,5 +1,5 @@
-﻿import { createHash } from "crypto";
-import { createClient } from "@/lib/supabase/server";
+import { createHash } from "crypto";
+import { createServiceRoleClient, isServiceRoleConfigured } from "@/lib/supabase/serviceRole";
 
 
 interface LedgerSnapshot {
@@ -45,12 +45,16 @@ function buildDeterministicSnapshot(research: LedgerInput): LedgerSnapshot {
 }
 
 function hashSnapshot(snapshot: LedgerSnapshot): string {
-    const canonical = JSON.stringify(snapshot, Object.keys(snapshot).sort());
+    const canonical = canonicalStringify(snapshot);
     return createHash("sha256").update(canonical).digest("hex");
 }
 
 export async function recordResearchCall(research: LedgerInput): Promise<{ hash: string } | null> {
-    const supabase = await createClient();
+    if (!(await isServiceRoleConfigured())) {
+        console.error("Ledger write skipped: service-role Supabase client is not configured");
+        return null;
+    }
+    const supabase = await createServiceRoleClient();
     if (!supabase) return null;
 
     const snapshot = buildDeterministicSnapshot(research);
@@ -77,4 +81,17 @@ export async function recordResearchCall(research: LedgerInput): Promise<{ hash:
 
 export function verifySnapshotHash(snapshot: LedgerSnapshot, expectedHash: string): boolean {
     return hashSnapshot(snapshot) === expectedHash;
+}
+
+/** Deterministic JSON: keys sorted at every depth, nothing filtered out.
+ * (JSON.stringify with a key-array replacer silently drops nested fields
+ * whose names are not also top-level keys, which weakened the hash.) */
+function canonicalStringify(value: unknown): string {
+    if (value === null || typeof value !== "object") return JSON.stringify(value) ?? "null";
+    if (Array.isArray(value)) return "[" + value.map(v => canonicalStringify(v)).join(",") + "]";
+    const obj = value as Record<string, unknown>;
+    return "{" + Object.keys(obj).sort()
+        .filter(k => obj[k] !== undefined)
+        .map(k => JSON.stringify(k) + ":" + canonicalStringify(obj[k]))
+        .join(",") + "}";
 }
