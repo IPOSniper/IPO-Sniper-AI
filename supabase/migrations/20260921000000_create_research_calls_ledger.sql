@@ -1,4 +1,4 @@
-﻿create table if not exists research_calls_ledger (
+create table if not exists research_calls_ledger (
     id uuid primary key default gen_random_uuid(),
     ticker text not null,
     company_name text not null,
@@ -15,8 +15,10 @@ create index if not exists research_calls_ledger_ticker_idx on research_calls_le
 
 alter table research_calls_ledger enable row level security;
 
+drop policy if exists "Public read access" on research_calls_ledger;
 create policy "Public read access" on research_calls_ledger
     for select using (true);
 
+drop policy if exists "Service role can insert" on research_calls_ledger;
 create policy "Service role can insert" on research_calls_ledger
-    for insert with check (true);
+    for insert to service_role with check (true);
