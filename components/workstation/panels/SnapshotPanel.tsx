@@ -60,14 +60,54 @@ async function fetchMarketMetrics(ticker: string): Promise<MarketMetrics> {
  }
 }
 
+interface ProfileFigures {
+ marketCapUsd: number | null;
+ sharesOutstandingM: number | null;
+}
+
+/**
+ * Finnhub /stock/profile2 reports marketCapitalization and shareOutstanding in
+ * millions. The statement-derived share count is 0 for filers whose XBRL tag
+ * is not mapped, which made this card show "$0.0B" / "0.0M" while the page
+ * header (which uses the same profile2 data) showed the real market cap.
+ */
+async function fetchProfileFigures(ticker: string): Promise<ProfileFigures> {
+ const empty: ProfileFigures = { marketCapUsd: null, sharesOutstandingM: null };
+ const apiKey = process.env.FINNHUB_API_KEY;
+ if (!apiKey) return empty;
+
+ try {
+ const response = await fetch(
+ `https://finnhub.io/api/v1/stock/profile2?symbol=${encodeURIComponent(ticker)}&token=${apiKey}`,
+ { next: { revalidate: 3600 } }
+ );
+ if (!response.ok) return empty;
+
+ const data = await response.json();
+ const capMillions = typeof data.marketCapitalization === "number" && data.marketCapitalization > 0 ? data.marketCapitalization : null;
+ const sharesMillions = typeof data.shareOutstanding === "number" && data.shareOutstanding > 0 ? data.shareOutstanding : null;
+
+ return {
+ marketCapUsd: capMillions !== null ? capMillions * 1_000_000 : null,
+ sharesOutstandingM: sharesMillions,
+ };
+ } catch {
+ return empty;
+ }
+}
+
 export default async function SnapshotPanel({ research }: WorkstationPanelProps) {
  const { quote, financialStatements, company } = research.report.evidence;
  const statements = financialStatements.statements.verified ? financialStatements.statements.value : [];
  const latest = statements.length > 0 ? [...statements].sort((a, b) => b.fiscalYear - a.fiscalYear)[0] : null;
 
- const marketCap = quote.price.verified && latest
- ? quote.price.value * latest.sharesOutstanding
- : null;
+ const profile = await fetchProfileFigures(company.ticker);
+ const statementShares = latest && latest.sharesOutstanding > 0 ? latest.sharesOutstanding : null;
+
+ const marketCap = profile.marketCapUsd
+ ?? (quote.price.verified && statementShares !== null ? quote.price.value * statementShares : null);
+ const sharesOutstandingM = profile.sharesOutstandingM
+ ?? (statementShares !== null ? statementShares / 1_000_000 : null);
 
  const metrics = await fetchMarketMetrics(company.ticker);
  const anyMetricAvailable = metrics.beta !== null || metrics.week52High !== null || metrics.avgVolume10Day !== null;
@@ -85,7 +125,7 @@ export default async function SnapshotPanel({ research }: WorkstationPanelProps)
  <div className="flex justify-between">
  <span className="text-zinc-500">Shares outstanding</span>
  <span className="text-white">
- {latest ? `${(latest.sharesOutstanding / 1_000_000).toFixed(1)}M` : "-"}
+ {sharesOutstandingM !== null ? `${sharesOutstandingM.toFixed(1)}M` : "-"}
  </span>
  </div>
  <div className="flex justify-between">

@@ -1,4 +1,4 @@
-﻿import { FinancialStatement } from "../../types/FinancialStatement";
+import { FinancialStatement } from "../../types/FinancialStatement";
 
 
 
@@ -56,6 +56,42 @@ export class FinnhubFinancialStatementMapper {
 
     return 0;
 
+  }
+
+  /**
+   * Total debt = long-term portion + current portion. Each portion tries the
+   * common us-gaap tags in order and only falls through when the earlier tag
+   * is absent, so filers that already mapped correctly keep the same
+   * long-term figure. If only the all-in LongTermDebt tag exists (it already
+   * includes the current portion), current maturities are not added twice.
+   */
+  private computeDebt(bs: FinnhubStatementItem[]): number {
+    const longTerm = this.getFirstValue(bs, [
+      "us-gaap_LongTermDebtNoncurrent",
+      "us-gaap_LongTermDebtAndCapitalLeaseObligations",
+      "us-gaap_LongTermNotesPayable",
+      "us-gaap_SeniorLongTermNotes"
+    ]);
+
+    const shortBorrowings = this.getValue(bs, "us-gaap_ShortTermBorrowings");
+    const current =
+      this.getValue(bs, "us-gaap_DebtCurrent") ||
+      shortBorrowings +
+        this.getFirstValue(bs, [
+          "us-gaap_LongTermDebtCurrent",
+          "us-gaap_LongTermDebtAndCapitalLeaseObligationsCurrent"
+        ]);
+
+    if (longTerm !== 0) {
+      return longTerm + current;
+    }
+
+    const allInLongTerm = this.getValue(bs, "us-gaap_LongTermDebt");
+    if (allInLongTerm !== 0) {
+      return allInLongTerm + shortBorrowings;
+    }
+
+    return current;
   }
 
   map(data: FinnhubFinancialResponse): FinancialStatement[] {
@@ -155,21 +191,13 @@ export class FinnhubFinancialStatementMapper {
             "us-gaap_CashAndCashEquivalentsAtCarryingValue"
           ),
 
-        debt:
-          this.getValue(
-            bs,
-            "us-gaap_LongTermDebtNoncurrent"
-          ) +
-          this.getValue(
-            bs,
-            "us-gaap_ShortTermBorrowings"
-          ),
+        debt: this.computeDebt(bs),
 
-        sharesOutstanding:
-          this.getValue(
-            ic,
-            "us-gaap_WeightedAverageNumberOfDilutedSharesOutstanding"
-          ),
+        sharesOutstanding: this.getFirstValue(ic, [
+          "us-gaap_WeightedAverageNumberOfDilutedSharesOutstanding",
+          "us-gaap_WeightedAverageNumberOfSharesOutstandingBasic",
+          "us-gaap_WeightedAverageNumberOfShareOutstandingBasicAndDiluted"
+        ]),
 
         fiscalYear:
           filing.year

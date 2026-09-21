@@ -21,6 +21,14 @@ import { FinnhubEarningsCalendarProvider } from "@/engine/earnings/providers/Fin
  * universal, lock-up length - see EvidenceSummaryGrid's comment on
  * the same calculation).
  */
+/** Finnhub returns date-only strings such as "2026-09-21". new Date() reads
+ * those as UTC midnight, and toLocaleDateString() then shifts them back a day
+ * in US time zones. Format date-only values in UTC instead. */
+function formatDateOnly(value: string): string {
+    const d = new Date(/^\d{4}-\d{2}-\d{2}$/.test(value) ? `${value}T00:00:00Z` : value);
+    return Number.isNaN(d.getTime()) ? value : d.toLocaleDateString(undefined, { timeZone: "UTC" });
+}
+
 export default async function UpcomingEvents({ research }: WorkstationPanelProps) {
  const { ipo } = research.report.evidence;
 
@@ -51,7 +59,7 @@ export default async function UpcomingEvents({ research }: WorkstationPanelProps
  <div className="flex items-center justify-between text-sm">
  <span className="text-zinc-300">Earnings Report</span>
  <span className="text-zinc-500">
- {new Date(earnings.reportDate).toLocaleDateString()}
+ {formatDateOnly(earnings.reportDate)}
  {earnings.session === "bmo" && " (before open)"}
  {earnings.session === "amc" && " (after close)"}
  </span>
@@ -60,7 +68,7 @@ export default async function UpcomingEvents({ research }: WorkstationPanelProps
  {lockUpDate && !lockUpPassed && (
  <div className="flex items-center justify-between text-sm">
  <span className="text-zinc-300">Lock-Up Expiration (est.)</span>
- <span className="text-zinc-500">{lockUpDate.toLocaleDateString()}</span>
+ <span className="text-zinc-500">{lockUpDate.toLocaleDateString(undefined, { timeZone: "UTC" })}</span>
  </div>
  )}
  </div>
