@@ -70,14 +70,16 @@ export default async function AdaptiveIntelligencePanel({ userId, ticker, commit
  )}
 
  {contradictions.hasSignificantContradiction && (
- <div className="mt-2 space-y-1">
- <p className="text-xs text-amber-400">Real analyst contradictions detected:</p>
+ <div className="mt-2">
+ <p className="mb-1 text-xs text-amber-400">Real analyst contradictions detected:</p>
+ <div className="grid grid-cols-1 gap-x-6 gap-y-1 md:grid-cols-2 xl:grid-cols-3">
  {contradictions.contradictions.map((c, i) => (
  <p key={i} className="text-xs text-zinc-400">
  {c.analystA} ({c.recommendationA}) vs. {c.analystB} ({c.recommendationB})
  {c.severity === "critical" && <span className="ml-1 text-red-400">critical</span>}
  </p>
  ))}
+ </div>
  </div>
  )}
 

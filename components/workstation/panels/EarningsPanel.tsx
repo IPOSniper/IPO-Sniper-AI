@@ -16,7 +16,7 @@ export default function EarningsPanel({ research }: WorkstationPanelProps) {
  const { company } = research.report.evidence;
 
  return (
- <div className="space-y-4">
+ <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
  <EarningsRecapPanel ticker={company.ticker} companyName={company.name} />
  <EarningsPreviewPanel
  ticker={company.ticker}
@@ -24,12 +24,14 @@ export default function EarningsPanel({ research }: WorkstationPanelProps) {
  sector={company.sector}
  industry={company.industry}
  />
- <EarningsPreviewShareCardButton
+ <div className="lg:col-span-2">
+<EarningsPreviewShareCardButton
  ticker={company.ticker}
  companyName={company.name}
  sector={company.sector}
  industry={company.industry}
  />
+</div>
  </div>
  );
 }

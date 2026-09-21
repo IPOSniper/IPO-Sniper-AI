@@ -44,8 +44,8 @@ export default function CommitteePanel({ research }: WorkstationPanelProps) {
  </span>
  </div>
 
- <div className="space-y-4">
- {scoredReports.map(r => {
+ <div className="grid grid-cols-1 gap-x-6 gap-y-3 xl:grid-cols-2">
+{scoredReports.map(r => {
  const photoSrc = photoAssignments.get(r.analyst) ?? null;
  return (
  <div key={r.analyst} className="flex gap-3">

@@ -54,29 +54,37 @@ research,
 
 return(
 <section className="space-y-6">
+<div data-layout="dense" className="grid grid-cols-1 gap-6 lg:grid-cols-2">
 <section id="market" className="scroll-mt-24">
 <MarketContext />
 </section>
+<QualityRiskGauges research={research} />
+</div>
 <section id="evidence" className="scroll-mt-24 space-y-6">
 <EvidenceSummaryGrid research={research} />
+<div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
 <EvidenceModule research={research} />
 <DataFreshnessModule research={research} />
+</div>
+<div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
 <ResearchGapMap research={research} />
 <IPOTimeline research={research} />
+</div>
 </section>
-<QualityRiskGauges research={research} />
-<ExecutiveSummaryPanel research={research} />
-
 <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
- <ConvictionRadar research={research} />
- <RecommendationPanel research={research} />
+<ExecutiveSummaryPanel research={research} />
+<RecommendationPanel research={research} />
+</div>
+<div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+<ConvictionRadar research={research} />
+<ResearchIntelligenceMap research={research} />
 </div>
 
-<ResearchIntelligenceMap research={research} />
-
 <CommitteePanel research={research} />
+<div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
 <ConsensusBar research={research} />
 <CommitteeConsensusCard research={research} />
+</div>
 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
 <AnalystEvidenceCards research={research} />
 <FiveTierVoteDistribution research={research} />
@@ -89,28 +97,34 @@ return(
 </div>
 
 </section>
+<div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
 <section id="decision" className="scroll-mt-24">
 <InvestorDecisionCenter research={research} />
 </section>
 <section id="portfolio" className="scroll-mt-24">
 <PortfolioIntelligence research={research} />
 </section>
+</div>
 
 <section id="financials" className="scroll-mt-24">
 <FinancialOverviewChart research={research} />
-<div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
+<div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
 <MarginTrendModule research={research} />
-<CashDebtModule research={research} />
 <GrowthTrendModule research={research} />
 <BalanceSheetTrend research={research} />
+<CashDebtModule research={research} />
+<div className="sm:col-span-2 xl:col-span-2">
 <GrowthVsProfitability research={research} />
+</div>
 </div>
 </section>
 
 <section id="valuation" className="scroll-mt-24">
-<ValuationSummary />
-<div className="mt-4 space-y-4">
+<div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
+<div className="empty:hidden lg:col-span-3">
 <ComparableCompaniesTable research={research} />
+</div>
+<ValuationSummary />
 <ProspectusRiskFactors research={research} />
 <UseOfProceedsPanel research={research} />
 </div>
@@ -118,12 +132,12 @@ return(
 
 <section id="institutions" className="scroll-mt-24">
 <InstitutionalOwnershipCard ticker={research.company.ticker} />
-<div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
+<div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-3">
 <InstitutionalOwnershipTable research={research} />
 <InstitutionalEvidenceTable13F research={research} />
-</div>
 <InstitutionalFilingFreshness research={research} />
-<div className="mt-4 space-y-4">
+</div>
+<div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-3">
 <InsiderOwnershipConcentration research={research} />
 <LockUpExposurePanel research={research} />
 <QuietPeriodCountdown research={research} />
@@ -147,9 +161,13 @@ return(
 </section>
 
 <section id="earnings" className="scroll-mt-24">
+<div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
 <EarningsComparisonChart ticker={research.company.ticker} companyName={research.company.name} />
-<EarningsPanel research={research} />
 <OptionsGreeksSummary ticker={research.company.ticker} />
+</div>
+<div className="mt-4">
+<EarningsPanel research={research} />
+</div>
 </section>
 
 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
