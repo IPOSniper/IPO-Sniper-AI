@@ -1,4 +1,4 @@
-import { FinancialStatement } from "../../types/FinancialStatement";
+﻿import { FinancialStatement } from "../../types/FinancialStatement";
 
 
 
@@ -70,6 +70,8 @@ export class FinnhubFinancialStatementMapper {
         ic,
         [
           "us-gaap_RevenueFromContractWithCustomerExcludingAssessedTax",
+            "us-gaap_RevenueFromContractWithCustomerIncludingAssessedTax",
+            "us-gaap_RevenueFromContractWithCustomerIncludingAssessedTax",
           "us-gaap_SalesRevenueNet",
           "us-gaap_Revenues",
           "us-gaap_Revenue",
