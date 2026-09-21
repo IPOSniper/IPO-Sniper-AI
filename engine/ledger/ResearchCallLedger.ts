@@ -1,4 +1,4 @@
-import { createHash } from "crypto";
+﻿import { createHash } from "crypto";
 import { createServiceRoleClient, isServiceRoleConfigured } from "@/lib/supabase/serviceRole";
 
 
@@ -6,6 +6,7 @@ interface LedgerSnapshot {
     ticker: string;
     companyName: string;
     recommendation: string;
+    priceAtCall: number | null;
     conviction: number;
     confidence: number;
     agreement: number;
@@ -15,6 +16,7 @@ interface LedgerSnapshot {
         confidence: number;
         thesis: string;
     }[];
+    evidenceCoverage: Record<string, { verified: number; total: number }>;
     generatedAt: string;
 }
 
@@ -22,12 +24,23 @@ interface LedgerInput {
     company: { ticker: string; name: string };
     report: { recommendation: string; conviction: number; confidence: number };
     committee: { agreement: number; reports: { analyst: string; recommendation: string; confidence: number; thesis: string }[] };
+    quote?: { price: number } | null;
+    evidence?: Record<string, Record<string, { verified: boolean }>>;
 }
 
 function buildDeterministicSnapshot(research: LedgerInput): LedgerSnapshot {
     return {
         ticker: research.company.ticker,
         companyName: research.company.name,
+        priceAtCall: research.quote?.price ?? null,
+        evidenceCoverage: research.evidence
+            ? Object.fromEntries(
+                Object.entries(research.evidence).map(([category, items]) => {
+                    const values = Object.values(items);
+                    return [category, { verified: values.filter(i => i.verified).length, total: values.length }];
+                })
+              )
+            : {},
         recommendation: research.report.recommendation,
         conviction: research.report.conviction,
         confidence: research.report.confidence,
