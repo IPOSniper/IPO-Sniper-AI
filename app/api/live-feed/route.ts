@@ -227,8 +227,15 @@ const GDELT_IPO_WATCHLIST = ["OpenAI", "Anthropic"];
 async function buildGdeltEvents(): Promise<FeedEvent[]> {
     const events: FeedEvent[] = [];
 
-    for (const company of GDELT_IPO_WATCHLIST) {
-        const result = await searchGdelt(buildIpoRelevanceQuery(company));
+    // Run all GDELT searches concurrently. Awaiting them one at a time made the
+    // worst case 2 x 8s = 16s, which is what /api/live-feed was taking.
+    const results = await Promise.all(
+        GDELT_IPO_WATCHLIST.map(company => searchGdelt(buildIpoRelevanceQuery(company)))
+    );
+
+    for (let index = 0; index < GDELT_IPO_WATCHLIST.length; index++) {
+        const company = GDELT_IPO_WATCHLIST[index];
+        const result = results[index];
 
         if (result.status === "error") {
             events.push({
@@ -272,14 +279,25 @@ async function buildGdeltEvents(): Promise<FeedEvent[]> {
     return events;
 }
 
+/** Caps how long any one provider can hold up the whole feed. A slow or dead
+ * provider contributes no events instead of delaying every other panel. */
+function withDeadline(work: Promise<FeedEvent[]>, ms = 6000): Promise<FeedEvent[]> {
+    return new Promise(resolve => {
+        const timer = setTimeout(() => resolve([]), ms);
+        work
+            .then(result => { clearTimeout(timer); resolve(result); })
+            .catch(() => { clearTimeout(timer); resolve([]); });
+    });
+}
+
 export async function GET() {
     const [news, movers, ipoWatch, ipoRadar, earnings, gdelt] = await Promise.all([
-        buildNewsEvents(),
-        buildMoverEvents(),
-        buildIpoWatchEvents(),
-        buildIpoRadarEvents(),
-        buildEarningsEvents(),
-        buildGdeltEvents(),
+        withDeadline(buildNewsEvents()),
+        withDeadline(buildMoverEvents()),
+        withDeadline(buildIpoWatchEvents()),
+        withDeadline(buildIpoRadarEvents()),
+        withDeadline(buildEarningsEvents()),
+        withDeadline(buildGdeltEvents()),
     ]);
 
     const events = [...news, ...movers, ...ipoWatch, ...ipoRadar, ...earnings, ...gdelt]
