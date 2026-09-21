@@ -1,4 +1,4 @@
-﻿import { WorkstationPanelProps } from "../contracts/WorkstationPanelProps";
+import { WorkstationPanelProps } from "../contracts/WorkstationPanelProps";
 
 import EvidenceSummaryGrid from "../panels/EvidenceSummaryGrid/EvidenceSummaryGrid";
 import EvidenceModule from "../panels/EvidenceModule";
@@ -40,6 +40,13 @@ import EarningsPanel from "../panels/EarningsPanel";
 import EarningsComparisonChart from "../panels/EarningsComparisonChart";
 import PriceVolumeModule from "../panels/PriceVolumeModule";
 import DrawdownModule from "../panels/DrawdownModule";
+import IPOTimeline from "../panels/IPOTimeline";
+import ComparableCompaniesTable from "../panels/ComparableCompaniesTable";
+import ProspectusRiskFactors from "../panels/ProspectusRiskFactors";
+import UseOfProceedsPanel from "../panels/UseOfProceedsPanel";
+import InsiderOwnershipConcentration from "../panels/InsiderOwnershipConcentration";
+import LockUpExposurePanel from "../panels/LockUpExposurePanel";
+import QuietPeriodCountdown from "../panels/QuietPeriodCountdown";
 
 export default function IntelligenceLayer({
 research,
@@ -50,14 +57,12 @@ return(
 <section id="market" className="scroll-mt-24">
 <MarketContext />
 </section>
-<section id="market" className="scroll-mt-24">
-<MarketContext />
-</section>
 <section id="evidence" className="scroll-mt-24 space-y-6">
 <EvidenceSummaryGrid research={research} />
 <EvidenceModule research={research} />
 <DataFreshnessModule research={research} />
 <ResearchGapMap research={research} />
+<IPOTimeline research={research} />
 </section>
 <QualityRiskGauges research={research} />
 <ExecutiveSummaryPanel research={research} />
@@ -104,6 +109,11 @@ return(
 
 <section id="valuation" className="scroll-mt-24">
 <ValuationSummary />
+<div className="mt-4 space-y-4">
+<ComparableCompaniesTable research={research} />
+<ProspectusRiskFactors research={research} />
+<UseOfProceedsPanel research={research} />
+</div>
 </section>
 
 <section id="institutions" className="scroll-mt-24">
@@ -113,6 +123,11 @@ return(
 <InstitutionalEvidenceTable13F research={research} />
 </div>
 <InstitutionalFilingFreshness research={research} />
+<div className="mt-4 space-y-4">
+<InsiderOwnershipConcentration research={research} />
+<LockUpExposurePanel research={research} />
+<QuietPeriodCountdown research={research} />
+</div>
 </section>
 
 <section id="news" className="scroll-mt-24">
