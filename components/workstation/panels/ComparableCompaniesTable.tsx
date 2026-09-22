@@ -1,4 +1,4 @@
-﻿import { WorkstationPanelProps } from "../contracts/WorkstationPanelProps";
+import { WorkstationPanelProps } from "../contracts/WorkstationPanelProps";
 import { ComparableCompaniesEngine } from "@/engine/valuation/ComparableCompaniesEngine";
 import { getMultiplesForTicker } from "@/engine/valuation/getMultiplesForTicker";
 
@@ -20,6 +20,12 @@ export default async function ComparableCompaniesTable({ research }: Workstation
 
     const fmt = (n: number | null) => (n !== null ? `${n.toFixed(1)}x` : "-");
 
+    const isOutlier = (value: number | null, median: number | null) => {
+        if (value === null || median === null || median === 0) return false;
+        const ratio = value / median;
+        return ratio > 3 || ratio < 1 / 3;
+    };
+
     return (
         <div className="rounded-xl border border-zinc-800 bg-zinc-950 p-4">
             <h3 className="mb-3 text-xs font-semibold uppercase tracking-wide text-zinc-500">Comparable Companies</h3>
@@ -39,16 +45,16 @@ export default async function ComparableCompaniesTable({ research }: Workstation
                 {result.peers.map((p, i) => (
                     <div key={i} className="grid grid-cols-4 gap-2 border-b border-zinc-900 px-2 py-1.5 text-[10px] text-zinc-400 last:border-b-0">
                         <div>{p.ticker}</div>
-                        <div className="text-right">{fmt(p.peRatio)}</div>
-                        <div className="text-right">{fmt(p.evToRevenue)}</div>
+                        <div className={`text-right ${isOutlier(p.peRatio, result.medianPE) ? "text-zinc-700" : ""}`}>{fmt(p.peRatio)}</div>
+                        <div className={`text-right ${isOutlier(p.evToRevenue, result.medianEvToRevenue) ? "text-zinc-700" : ""}`}>{fmt(p.evToRevenue)}</div>
                         <div className="text-right">{fmt(p.evToEbitda)}</div>
                     </div>
                 ))}
                 <div className="grid grid-cols-4 gap-2 bg-zinc-900/60 px-2 py-1.5 text-[10px] font-semibold text-zinc-300">
-                    <div>Peer Average</div>
-                    <div className="text-right">{fmt(result.averagePE)}</div>
-                    <div className="text-right">{fmt(result.averageEvToRevenue)}</div>
-                    <div className="text-right">{fmt(result.averageEvToEbitda)}</div>
+                    <div>Peer Median ({result.peerCount} peer{result.peerCount === 1 ? "" : "s"})</div>
+                    <div className="text-right">{fmt(result.medianPE)}</div>
+                    <div className="text-right">{fmt(result.medianEvToRevenue)}</div>
+                    <div className="text-right">{fmt(result.medianEvToEbitda)}</div>
                 </div>
             </div>
             <p className="mt-2 text-[9px] text-zinc-600">EV/EBITDA unavailable - no depreciation/amortization data source integrated yet.</p>

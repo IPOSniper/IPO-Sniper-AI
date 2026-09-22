@@ -1,4 +1,4 @@
-﻿export interface PeerMultiples {
+export interface PeerMultiples {
     ticker: string;
     peRatio: number | null;
     evToRevenue: number | null;
@@ -11,6 +11,10 @@ export interface ComparableCompaniesResult {
     averagePE: number | null;
     averageEvToRevenue: number | null;
     averageEvToEbitda: number | null;
+    medianPE: number | null;
+    medianEvToRevenue: number | null;
+    medianEvToEbitda: number | null;
+    peerCount: number;
 }
 
 export class ComparableCompaniesEngine {
@@ -36,6 +40,13 @@ export class ComparableCompaniesEngine {
         return real.reduce((sum, v) => sum + v, 0) / real.length;
     }
 
+    private median(values: (number | null)[]): number | null {
+        const real = values.filter((v): v is number => v !== null && !isNaN(v)).sort((a, b) => a - b);
+        if (real.length === 0) return null;
+        const mid = Math.floor(real.length / 2);
+        return real.length % 2 !== 0 ? real[mid] : (real[mid - 1] + real[mid]) / 2;
+    }
+
     async build(ticker: string, getMultiplesForTicker: (t: string) => Promise<PeerMultiples>): Promise<ComparableCompaniesResult | null> {
         const peerTickers = await this.getPeers(ticker);
         if (peerTickers.length === 0) return null;
@@ -48,6 +59,10 @@ export class ComparableCompaniesEngine {
             averagePE: this.average(peers.map(p => p.peRatio)),
             averageEvToRevenue: this.average(peers.map(p => p.evToRevenue)),
             averageEvToEbitda: this.average(peers.map(p => p.evToEbitda)),
+            medianPE: this.median(peers.map(p => p.peRatio)),
+            medianEvToRevenue: this.median(peers.map(p => p.evToRevenue)),
+            medianEvToEbitda: this.median(peers.map(p => p.evToEbitda)),
+            peerCount: peers.length,
         };
     }
 }
