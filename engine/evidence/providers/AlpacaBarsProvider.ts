@@ -59,7 +59,20 @@ export class AlpacaBarsProvider {
         if (!normalizedTicker) return [];
 
         try {
-            const url = `${MARKET_DATA_BASE_URL}/v2/stocks/${normalizedTicker}/bars?timeframe=${timeframe}&limit=${limit}&adjustment=raw&feed=iex`;
+            // Real bug found and confirmed live: without an explicit start
+            // date, Alpaca's bars endpoint returns only the single most
+            // recent bar -- it does NOT use `limit` to look backward in
+            // time. Confirmed via a direct live call: limit=90 with no
+            // start/end returned exactly 1 bar (today only); adding
+            // start/end for the same 90-day window returned 63 real bars.
+            // This is what produced "New listing - 1 trading day of
+            // history" for AAPL, a company with decades of real history.
+            const end = new Date();
+            const lookbackDays = Math.ceil(limit * 1.5); // padding for weekends/holidays so `limit` real trading days actually come back
+            const start = new Date(end.getTime() - lookbackDays * 24 * 60 * 60 * 1000);
+            const isoDate = (d: Date) => d.toISOString().slice(0, 10);
+
+            const url = `${MARKET_DATA_BASE_URL}/v2/stocks/${normalizedTicker}/bars?timeframe=${timeframe}&start=${isoDate(start)}&end=${isoDate(end)}&limit=${limit}&adjustment=raw&feed=iex`;
             const response = await fetch(url, { headers: this.headers(), cache: "no-store" });
 
             if (!response.ok) {
