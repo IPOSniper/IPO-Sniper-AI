@@ -3,6 +3,18 @@ import type { AnalystReport } from "../contracts/AnalystReport";
 import type { EvidencePackage } from "../../evidence/package";
 import { MIN_USABLE_CONFIDENCE, insufficientDataReport } from "./shared/insufficientData";
 
+/**
+ * Real fix: this analyst used to gate on revenueGuidance.confidence
+ * alone, which depends on Finnhub's estimates endpoint (explicitly
+ * documented as "untested live" in FinnhubEstimatesProvider.ts) --
+ * so a real, verified, 16-year revenue history sitting right in the
+ * same evidence package went unused whenever that one external
+ * consensus-estimate call failed or returned nothing. Real historical
+ * YoY growth (from financialStatementsBuilder, backfilled from real
+ * SEC filings) is now the primary, always-checked signal. Guidance
+ * is layered on top as a real enhancement when it's actually
+ * available, never a blocking requirement.
+ */
 export class GrowthAnalyst implements Analyst<EvidencePackage> {
 
   readonly name = "Growth Analyst";
@@ -14,42 +26,55 @@ export class GrowthAnalyst implements Analyst<EvidencePackage> {
 
     const history = input.financial.revenueHistory.value;
     const guidance = input.financial.revenueGuidance.value;
+    const hasGuidance = input.financial.revenueGuidance.confidence >= MIN_USABLE_CONFIDENCE;
 
-    if (input.financial.revenueGuidance.confidence < MIN_USABLE_CONFIDENCE) {
-      return insufficientDataReport(this.name, ["revenueHistory", "revenueGuidance"]);
+    if (input.financial.revenueHistory.confidence < MIN_USABLE_CONFIDENCE || history.length < 2) {
+      return insufficientDataReport(this.name, ["revenueHistory"]);
     }
 
+    const lastActual = history[history.length - 1];
+    const priorActual = history[history.length - 2];
 
-    const lastActual = history.length > 0
-      ? history[history.length - 1]
+    const yoyGrowth = priorActual !== 0
+      ? ((lastActual - priorActual) / Math.abs(priorActual)) * 100
       : 0;
 
-    // Guidance expressed as expected next-period revenue; compare
-    // against the last actual period to get an implied growth rate.
-    const impliedGrowth = lastActual !== 0
+    // Guidance, when available, blends in as a secondary signal --
+    // weighted less than the real historical trend, never required.
+    const impliedGuidanceGrowth = hasGuidance && lastActual !== 0
       ? ((guidance - lastActual) / Math.abs(lastActual)) * 100
-      : 0;
+      : null;
+
+    const blendedGrowth = impliedGuidanceGrowth !== null
+      ? (yoyGrowth * 0.6) + (impliedGuidanceGrowth * 0.4)
+      : yoyGrowth;
 
     const recommendation =
-      impliedGrowth >= 40
+      blendedGrowth >= 40
         ? "STRONG_BUY"
-        : impliedGrowth >= 20
+        : blendedGrowth >= 20
         ? "BUY"
-        : impliedGrowth >= 5
+        : blendedGrowth >= 5
         ? "HOLD"
-        : impliedGrowth >= -5
+        : blendedGrowth >= -5
         ? "REDUCE"
         : "SELL";
 
     const score = Math.max(
       0,
-      Math.min(100, Math.round(50 + impliedGrowth))
+      Math.min(100, Math.round(50 + blendedGrowth))
     );
 
-    const confidence = Math.round(
-      (input.financial.revenueHistory.confidence +
-        input.financial.revenueGuidance.confidence) / 2
-    );
+    const confidence = hasGuidance
+      ? Math.round(
+          (input.financial.revenueHistory.confidence * 0.6) +
+          (input.financial.revenueGuidance.confidence * 0.4)
+        )
+      : input.financial.revenueHistory.confidence;
+
+    const thesis = impliedGuidanceGrowth !== null
+      ? `Revenue grew ${yoyGrowth.toFixed(1)}% YoY (real historical data, ${history.length} periods). Consensus estimates imply ${impliedGuidanceGrowth.toFixed(1)}% forward growth.`
+      : `Revenue grew ${yoyGrowth.toFixed(1)}% YoY across ${history.length} reported periods (real historical data). Forward consensus estimates not currently available -- verdict based on historical trend only.`;
 
     return {
 
@@ -63,18 +88,17 @@ export class GrowthAnalyst implements Analyst<EvidencePackage> {
 
       evidenceStrength: confidence,
 
-      thesis:
-        `Guidance implies ${impliedGrowth.toFixed(1)}% revenue growth versus the last reported period, across ${history.length} periods of history.`,
+      thesis,
 
       evidence: [
         {
           category: "Growth",
-          metric: "Implied Guidance Growth",
-          value: impliedGrowth,
-          source: input.financial.revenueGuidance.source,
-          confidence: input.financial.revenueGuidance.confidence,
-          verified: input.financial.revenueGuidance.verified,
-          collectedAt: input.financial.revenueGuidance.collectedAt
+          metric: "YoY Revenue Growth",
+          value: yoyGrowth,
+          source: input.financial.revenueHistory.source,
+          confidence: input.financial.revenueHistory.confidence,
+          verified: input.financial.revenueHistory.verified,
+          collectedAt: input.financial.revenueHistory.collectedAt
         },
         {
           category: "Growth",
@@ -84,36 +108,45 @@ export class GrowthAnalyst implements Analyst<EvidencePackage> {
           confidence: input.financial.revenueHistory.confidence,
           verified: input.financial.revenueHistory.verified,
           collectedAt: input.financial.revenueHistory.collectedAt
-        }
+        },
+        ...(impliedGuidanceGrowth !== null ? [{
+          category: "Growth",
+          metric: "Consensus-Implied Forward Growth",
+          value: impliedGuidanceGrowth,
+          source: input.financial.revenueGuidance.source,
+          confidence: input.financial.revenueGuidance.confidence,
+          verified: input.financial.revenueGuidance.verified,
+          collectedAt: input.financial.revenueGuidance.collectedAt
+        }] : [])
       ],
 
-      assumptions: [
+      assumptions: hasGuidance ? [
         {
-          statement: "Revenue guidance reflects management's most current outlook.",
+          statement: "Revenue guidance reflects Wall Street consensus estimates, not company-issued guidance.",
           confidence: input.financial.revenueGuidance.confidence
         }
-      ],
+      ] : [],
 
       risks:
-        impliedGrowth < 5
+        yoyGrowth < 5
           ? [
               {
                 category: "Growth",
-                severity: impliedGrowth < 0 ? "HIGH" : "MEDIUM",
-                description: "Forward guidance implies decelerating growth."
+                severity: yoyGrowth < 0 ? "HIGH" : "MEDIUM",
+                description: "Historical revenue growth is slowing."
               }
             ]
           : [],
 
-      unknowns:
-        history.length < 4
-          ? ["Limited revenue history reduces trend reliability."]
-          : [],
+      unknowns: [
+        ...(history.length < 4 ? ["Limited revenue history reduces trend reliability."] : []),
+        ...(!hasGuidance ? ["Forward consensus estimates not currently available."] : [])
+      ],
 
       monitoring: [
         {
-          title: "Guidance vs Actuals",
-          description: "Monitor whether the company meets or misses its own guidance.",
+          title: "Revenue Trend",
+          description: "Monitor whether YoY revenue growth accelerates or decelerates in the next reported period.",
           priority: "HIGH"
         }
       ]
