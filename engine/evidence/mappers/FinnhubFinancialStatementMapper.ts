@@ -200,7 +200,25 @@ export class FinnhubFinancialStatementMapper {
         ]),
 
         fiscalYear:
-          filing.year
+          filing.year,
+
+        currentAssets:
+          this.getFirstValue(
+            bs,
+            ["us-gaap_AssetsCurrent"]
+          ),
+
+        currentLiabilities:
+          this.getFirstValue(
+            bs,
+            ["us-gaap_LiabilitiesCurrent"]
+          ),
+
+        inventory:
+          this.getFirstValue(
+            bs,
+            ["us-gaap_InventoryNet", "us-gaap_InventoryGross"]
+          )
 
       } as FinancialStatement;
 

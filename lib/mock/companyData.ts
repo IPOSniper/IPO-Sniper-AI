@@ -32,6 +32,9 @@ export const sampleStatements: FinancialStatement[] = [
     debt: 30_000_000,
     sharesOutstanding: 50_000_000,
     fiscalYear: 2022,
+    currentAssets: 90_000_000,
+    currentLiabilities: 50_000_000,
+    inventory: 12_000_000,
   },
   {
     revenue: 120_000_000,
@@ -46,6 +49,9 @@ export const sampleStatements: FinancialStatement[] = [
     debt: 35_000_000,
     sharesOutstanding: 50_000_000,
     fiscalYear: 2023,
+    currentAssets: 108_000_000,
+    currentLiabilities: 55_000_000,
+    inventory: 14_000_000,
   },
 ];
 

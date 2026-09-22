@@ -79,9 +79,10 @@ export class EvidenceEngine {
       quote
     );
 
+    const financialWithLiquidity = backfillLiquidity(financialAfterStatements, financialStatements);
+
     const [financial, market] = await Promise.all([
-      backfillLiquidity(financialAfterStatements, symbol)
-        .then(f => backfillGrowthGuidance(f, symbol)),
+      backfillGrowthGuidance(financialWithLiquidity, symbol),
       backfillMarketVolatility(marketRaw, symbol),
     ]);
 

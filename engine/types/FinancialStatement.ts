@@ -11,4 +11,7 @@ export interface FinancialStatement {
   debt: number;
   sharesOutstanding: number;
   fiscalYear: number;
+  currentAssets: number;
+  currentLiabilities: number;
+  inventory: number;
 }
