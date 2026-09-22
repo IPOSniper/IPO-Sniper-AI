@@ -97,14 +97,14 @@ return(
 </div>
 
 </section>
-<div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+{/* prose-fix-v1: un-paired -- Portfolio Intelligence's Bull/Base/Bear text
+    is long-form prose, wrong shape for a half-width column */}
 <section id="decision" className="scroll-mt-24">
 <InvestorDecisionCenter research={research} />
 </section>
 <section id="portfolio" className="scroll-mt-24">
 <PortfolioIntelligence research={research} />
 </section>
-</div>
 
 <section id="financials" className="scroll-mt-24">
 <FinancialOverviewChart research={research} />
@@ -120,14 +120,12 @@ return(
 </section>
 
 <section id="valuation" className="scroll-mt-24">
-<div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
-<div className="empty:hidden lg:col-span-3">
+<div className="empty:hidden">
 <ComparableCompaniesTable research={research} />
 </div>
 <ValuationSummary />
 <ProspectusRiskFactors research={research} />
 <UseOfProceedsPanel research={research} />
-</div>
 </section>
 
 <section id="institutions" className="scroll-mt-24">
