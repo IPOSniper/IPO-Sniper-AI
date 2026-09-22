@@ -59,9 +59,9 @@ export default function BalanceSheetTrend({ research }: WorkstationPanelProps) {
                     <span className="text-amber-400">Liabilities</span>
                 </div>
             </div>
-            <div className="flex items-end gap-1">
+            <div className="flex overflow-x-auto items-end gap-1">
                 {rows.map(r => (
-                    <div key={r.key} className="flex flex-1 flex-col items-center gap-0.5" title={String(r.year)}>
+                    <div key={r.key} className="flex min-w-0 flex-1 flex-col items-center gap-0.5" title={String(r.year)}>
                         <div className="flex items-end justify-center gap-0.5" style={{ height: BAR_AREA_PX }}>
                             {bar(r.assets, "bg-blue-500", "Assets")}
                             {bar(r.liabilities, "bg-amber-500", "Liabilities")}

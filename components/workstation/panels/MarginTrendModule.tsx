@@ -61,9 +61,9 @@ export default function MarginTrendModule({ research }: WorkstationPanelProps) {
                     <span className="text-violet-400">Net</span>
                 </div>
             </div>
-            <div className="flex gap-1">
+            <div className="flex overflow-x-auto gap-1">
                 {rows.map(r => (
-                    <div key={r.key} className="flex flex-1 flex-col items-center gap-0.5" title={String(r.year)}>
+                    <div key={r.key} className="flex min-w-0 flex-1 flex-col items-center gap-0.5" title={String(r.year)}>
                         <div className="flex flex-col" style={{ height: BAR_AREA_PX }}>
                             <div className="flex items-end justify-center gap-0.5" style={{ height: HALF_PX }}>
                                 {segment(r.gross, "bg-emerald-500", "Gross", "up")}

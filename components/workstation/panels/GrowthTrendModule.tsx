@@ -59,9 +59,9 @@ export default function GrowthTrendModule({ research }: WorkstationPanelProps) {
     return (
         <div className="rounded-xl border border-zinc-800 bg-zinc-950 p-4">
             <h3 className="mb-3 text-xs font-semibold uppercase tracking-wide text-zinc-500">Revenue Growth (YoY)</h3>
-            <div className="flex gap-1">
+            <div className="flex overflow-x-auto gap-1">
                 {rows.map(r => (
-                    <div key={r.key} className="flex flex-1 flex-col items-center gap-0.5" title={String(r.year)}>
+                    <div key={r.key} className="flex min-w-0 flex-1 flex-col items-center gap-0.5" title={String(r.year)}>
                         <div className="flex flex-col" style={{ height: BAR_AREA_PX }}>
                             <div className="flex items-end justify-center" style={{ height: HALF_PX }}>
                                 {segment(r.growth, "up")}
