@@ -36,6 +36,33 @@ interface CompanyTickerEntry {
     title: string;
 }
 
+/**
+ * SEC filings are HTML, so extracted text is full of named and numeric HTML
+ * entities (curly quotes, em-dashes, ampersands, non-breaking spaces) that
+ * getFilingText's tag-stripping regex passes through untouched. Only &nbsp;
+ * was previously decoded, so text like "we" and "our" rendered literally as
+ * "&ldquo;we&rdquo;" and "&ldquo;our&rdquo;" -- fixed here, once, for every
+ * caller of getFilingText rather than patching each extractor separately.
+ */
+const NAMED_ENTITIES: Record<string, string> = {
+    "&amp;": "&", "&nbsp;": " ", "&quot;": "\"", "&apos;": "'",
+    "&ldquo;": "\u201C", "&rdquo;": "\u201D",
+    "&lsquo;": "\u2018", "&rsquo;": "\u2019",
+    "&mdash;": "\u2014", "&ndash;": "\u2013",
+    "&hellip;": "\u2026", "&lt;": "<", "&gt;": ">",
+};
+
+function decodeHtmlEntities(text: string): string {
+    let result = text;
+    for (const [entity, char] of Object.entries(NAMED_ENTITIES)) {
+        result = result.split(entity).join(char);
+    }
+    // Numeric entities: &#8220; and hex &#x2019;
+    result = result.replace(/&#(\d+);/g, (_, code) => String.fromCharCode(parseInt(code, 10)));
+    result = result.replace(/&#x([0-9a-fA-F]+);/g, (_, code) => String.fromCharCode(parseInt(code, 16)));
+    return result;
+}
+
 export class SECEdgarProvider {
 
     private readonly userAgent: string;
@@ -159,11 +186,13 @@ export class SECEdgarProvider {
 
         const html = await response.text();
 
-        return html
+        const stripped = html
             .replace(/<[^>]*>/g, " ")
             .replace(/&nbsp;/g, " ")
             .replace(/\s+/g, " ")
             .trim();
+
+        return decodeHtmlEntities(stripped);
     }
 
     buildFilingUrl(cik: string, filing: SECFiling): string {
