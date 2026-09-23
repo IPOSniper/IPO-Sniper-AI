@@ -20,6 +20,12 @@ export async function GET(
         "1M": 30 * 86400,
         "3M": 90 * 86400,
         "1Y": 365 * 86400,
+        "5Y": 5 * 365 * 86400,
+        // "Max" requests a real 20-year lookback -- Finnhub/Alpaca
+        // return whatever real history actually exists within that
+        // window (never fabricated), which for most listings is the
+        // company's full trading history.
+        "Max": 20 * 365 * 86400,
     };
     const from = now - (rangeSeconds[range] ?? rangeSeconds["3M"]);
 
@@ -47,7 +53,12 @@ export async function GET(
     // restricts /stock/candle, which has shown up honestly,
     // repeatedly, throughout this app's real usage.
     try {
-        const bars = await new AlpacaBarsProvider().getBars(ticker, "1Day", range === "1Y" ? 365 : range === "3M" ? 90 : 30);
+                const alpacaLimit =
+            range === "Max" ? 5200 :
+            range === "5Y" ? 1300 :
+            range === "1Y" ? 365 :
+            range === "3M" ? 90 : 30;
+        const bars = await new AlpacaBarsProvider().getBars(ticker, "1Day", alpacaLimit);
         if (bars.length > 0) {
             const points = bars.map(bar => ({
                 date: bar.timestamp.slice(0, 10),

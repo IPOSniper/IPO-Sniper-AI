@@ -13,7 +13,12 @@ interface ChartPoint extends Point {
  ema9: number | null;
 }
 
-const RANGES = ["1M", "3M", "1Y"] as const;
+// Added 5Y/Max: a new user researching a company's real long-term
+// story previously had no way to see anything past 1 year -- the
+// underlying data source (Finnhub, falling back to Alpaca) can
+// return real multi-year history, the range picker just never
+// offered it.
+const RANGES = ["1M", "3M", "1Y", "5Y", "Max"] as const;
 type Range = typeof RANGES[number];
 
 const SMA_PERIOD = 20;
@@ -95,7 +100,7 @@ export default function PriceChart({ ticker }: { ticker: string }) {
  </div>
  </div>
 
- <div className="h-48">
+ <div className="h-56">
  {loading ? (
  <div className="h-full flex items-center justify-center text-xs text-zinc-600">Loading-</div>
  ) : !available || points.length === 0 ? (
@@ -118,7 +123,14 @@ export default function PriceChart({ ticker }: { ticker: string }) {
  </linearGradient>
  </defs>
  <XAxis dataKey="date" hide />
- <YAxis domain={["auto", "auto"]} hide />
+ <YAxis
+ domain={["auto", "auto"]}
+ width={54}
+ tick={{ fill: "#71717a", fontSize: 10 }}
+ tickFormatter={(v: number) => `$${v.toFixed(v < 10 ? 2 : 0)}`}
+ axisLine={{ stroke: "#3f3f46" }}
+ tickLine={false}
+ />
  <Tooltip
  contentStyle={{ background: "#18181b", border: "1px solid #3f3f46", fontSize: 12 }}
  labelStyle={{ color: "#a1a1aa" }}
@@ -155,6 +167,15 @@ export default function PriceChart({ ticker }: { ticker: string }) {
 
  {!loading && available && points.length > 1 && !hasEnoughForSma && (
  <p className="mt-1 text-[10px] text-zinc-600">SMA 20 needs at least 20 real data points - only {points.length} available for this range.</p>
+ )}
+
+ {!loading && available && points.length > 1 && (
+ <p className="mt-2 border-t border-zinc-900 pt-2 text-[10px] leading-relaxed text-zinc-600">
+ <span className="text-red-400">What am I looking at?</span>{" "}
+ <span className="text-emerald-400 font-medium">Close price</span> is the real daily closing price.{" "}
+ <span className="font-medium" style={{ color: "#fbbf24" }}>EMA 9</span> is a 9-day average weighted toward recent days, showing short-term direction.{" "}
+ <span className="font-medium" style={{ color: "#60a5fa" }}>SMA 20</span> is a plain 20-day average, showing the slower, longer-term trend.
+ </p>
  )}
  </section>
  );
