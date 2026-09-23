@@ -1,4 +1,4 @@
-﻿import { WorkstationPanelProps } from "../contracts/WorkstationPanelProps";
+import { WorkstationPanelProps } from "../contracts/WorkstationPanelProps";
 
 export default function CommitteeConsensusCard({ research }: WorkstationPanelProps) {
     const voting = research.committee.reports.filter(r => r.confidence > 0);
@@ -31,6 +31,9 @@ export default function CommitteeConsensusCard({ research }: WorkstationPanelPro
             <div className="mt-3 border-t border-zinc-800 pt-2 text-center text-[10px] text-zinc-500">
                 {voting.length}/{research.committee.reports.length} analysts &middot; {Math.round(voting.reduce((s, r) => s + r.confidence, 0) / (voting.length || 1))}% avg. confidence
             </div>
+            <p className="mt-2 text-[9px] leading-relaxed text-zinc-600">
+                Verdict reflects the weighted severity of each analyst&rsquo;s findings, not a simple majority vote &mdash; a few analysts flagging severe issues can outweigh a larger number reporting mild positives.
+            </p>
         </div>
     );
 }
