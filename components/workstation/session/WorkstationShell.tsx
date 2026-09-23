@@ -179,7 +179,7 @@ export default function WorkstationShell({ research, ticker }: Props) {
                             </div>
 
                             <div className="p-2">
-                                <ResearchIndex />
+                                <ResearchIndex research={research} />
                             </div>
 
                             <div className="border-t border-zinc-900 px-3 py-3">
