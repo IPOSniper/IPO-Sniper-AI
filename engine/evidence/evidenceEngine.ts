@@ -45,9 +45,12 @@ export class EvidenceEngine {
 
     const company = await this.companyBuilder.build(symbol);
 
+    // management is intentionally NOT in this first parallel batch --
+    // it needs sharesOutstanding from financialStatements (below) to
+    // compute a real insiderOwnership, so it's built afterward,
+    // sequentially, rather than in parallel with everything else.
     const [
       financialRaw,
-      management,
       ipo,
       marketRaw,
       industry,
@@ -57,7 +60,6 @@ export class EvidenceEngine {
       financialStatements,
     ] = await Promise.all([
       this.financialBuilder.build(symbol),
-      this.managementBuilder.build(),
       this.ipoBuilder.build(symbol),
       this.marketBuilder.build(),
       this.industryBuilder.build(),
@@ -66,6 +68,9 @@ export class EvidenceEngine {
       this.quoteBuilder.build(symbol),
       this.financialStatementsBuilder.build(symbol),
     ]);
+
+    const latestStatement = financialStatements.statements.value[financialStatements.statements.value.length - 1];
+    const management = await this.managementBuilder.build(symbol, latestStatement?.sharesOutstanding);
 
     // Backfill chain: each step fills specific fields from data
     // that's either already fetched above (financialBackfill) or a

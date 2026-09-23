@@ -39,6 +39,7 @@ export interface InsiderTransaction {
     acquiredOrDisposed: "A" | "D" | null; // A=acquired, D=disposed
     shares: number | null;
     pricePerShare: number | null;
+    sharesOwnedFollowingTransaction: number | null;
     filingUrl: string;
 }
 
@@ -75,6 +76,8 @@ function parseForm4Xml(xml: string, filingUrl: string): InsiderTransaction[] {
         const priceStr = extractNestedValue(block, "transactionAmounts", "transactionPricePerShare");
         const acquiredDisposed = extractNestedValue(block, "transactionAmounts", "transactionAcquiredDisposedCode");
 
+        const sharesOwnedStr = extractNestedValue(block, "postTransactionAmounts", "sharesOwnedFollowingTransaction");
+
         return {
             insiderName,
             isDirector,
@@ -100,6 +103,7 @@ function parseForm4Xml(xml: string, filingUrl: string): InsiderTransaction[] {
             acquiredOrDisposed: (acquiredDisposed === "A" ? "A" : acquiredDisposed === "D" ? "D" : null) as "A" | "D" | null,
             shares: sharesStr ? Number(sharesStr) : null,
             pricePerShare: priceStr ? Number(priceStr) : null,
+            sharesOwnedFollowingTransaction: sharesOwnedStr ? Number(sharesOwnedStr) : null,
             filingUrl,
         };
     }).filter(t => t.transactionDate && t.shares !== null);

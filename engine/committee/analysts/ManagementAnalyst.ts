@@ -21,11 +21,21 @@ export class ManagementAnalyst implements Analyst<EvidencePackage> {
     }
 
 
+    // Real bug fixed: this used to read founderLed/executiveTenure
+    // even when THEIR OWN confidence was 0 (no real data), silently
+    // treating "unknown" as "confirmed false/0" and penalizing every
+    // company on two axes it never actually had data for. Now each
+    // sub-field only contributes to the score when it clears the
+    // same MIN_USABLE_CONFIDENCE bar the top-level gate uses.
+    const founderLedConfident = input.management.founderLed.confidence >= MIN_USABLE_CONFIDENCE;
+    const executiveTenureConfident = input.management.executiveTenure.confidence >= MIN_USABLE_CONFIDENCE;
+    const maxPoints = 3 + (founderLedConfident ? 2 : 0) + (executiveTenureConfident ? 1 : 0);
+
     let points = 0;
-    if (founderLed) points += 2;
+    if (founderLedConfident && founderLed) points += 2;
     if (insiderOwnership >= 15) points += 2;
     else if (insiderOwnership >= 5) points += 1;
-    if (executiveTenure >= 5) points += 1;
+    if (executiveTenureConfident && executiveTenure >= 5) points += 1;
 
     const recommendation =
       points >= 4
@@ -40,7 +50,7 @@ export class ManagementAnalyst implements Analyst<EvidencePackage> {
 
     const score = Math.max(
       0,
-      Math.min(100, Math.round((points / 5) * 100))
+      Math.min(100, Math.round((points / Math.max(maxPoints, 1)) * 100))
     );
 
     const confidence = Math.round(
@@ -62,7 +72,9 @@ export class ManagementAnalyst implements Analyst<EvidencePackage> {
       evidenceStrength: confidence,
 
       thesis:
-        `${founderLed ? "Founder-led" : "Non-founder-led"} with ${insiderOwnership.toFixed(1)}% insider ownership and an average executive tenure of ${executiveTenure.toFixed(1)} years.`,
+        `${insiderOwnership.toFixed(1)}% insider ownership (real, from recent Form 4 filings).` +
+        (founderLedConfident ? ` ${founderLed ? "Founder-led" : "Non-founder-led"}.` : ` Founder-led status: not currently available.`) +
+        (executiveTenureConfident ? ` Average executive tenure ${executiveTenure.toFixed(1)} years.` : ` Executive tenure: not currently available.`),
 
       evidence: [
         {
