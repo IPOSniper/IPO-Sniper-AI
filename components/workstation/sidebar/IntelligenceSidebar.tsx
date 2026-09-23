@@ -1,9 +1,8 @@
-﻿import React from "react";
+import React from "react";
 
 import { WorkstationPanelProps } from "../contracts/WorkstationPanelProps";
 import type { EvidenceItem } from "@/engine/evidence/types";
 import MarketContext from "../panels/MarketContext/MarketContext";
-import ResearchHistory from "../panels/ResearchHistory/ResearchHistory";
 import { SECForm4Provider } from "@/engine/evidence/providers/SECForm4Provider";
 
 const RECOMMENDATION_COLOR: Record<string, string> = {
@@ -13,6 +12,23 @@ const RECOMMENDATION_COLOR: Record<string, string> = {
  REDUCE: "text-amber-400",
  SELL: "text-red-400",
 };
+
+// Real tone-based accents, keyed off data already on the page (no new
+// fetch) -- the palette in DesignPrimitives.tsx already supports this,
+// it just wasn't being applied to these three summary cards.
+const RECOMMENDATION_BORDER: Record<string, string> = {
+ STRONG_BUY: "border-l-emerald-500",
+ BUY: "border-l-emerald-500",
+ HOLD: "border-l-zinc-600",
+ REDUCE: "border-l-amber-500",
+ SELL: "border-l-red-500",
+};
+
+function toneBorder(value: number, goodAt: number, badAt: number): string {
+ if (value >= goodAt) return "border-l-emerald-500";
+ if (value <= badAt) return "border-l-red-500";
+ return "border-l-amber-500";
+}
 
 export default async function IntelligenceSidebar({
  research,
@@ -44,7 +60,7 @@ export default async function IntelligenceSidebar({
 
  <section className="space-y-4 sticky top-24 self-start max-h-[calc(100vh-6rem)] overflow-y-auto">
 
- <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-4">
+ <div className={`rounded-lg border border-zinc-800 border-l-2 ${RECOMMENDATION_BORDER[committee.recommendation] ?? "border-l-zinc-600"} bg-zinc-900 p-4`}>
  <p className="text-xs uppercase tracking-wide text-zinc-500">AI Committee</p>
  <p className={`mt-1 text-lg font-semibold ${RECOMMENDATION_COLOR[committee.recommendation] ?? "text-zinc-300"}`}>
  {committee.recommendation.replace("_", " ")}
@@ -52,12 +68,12 @@ export default async function IntelligenceSidebar({
  <p className="text-xs text-zinc-500">{committee.agreement}% agreement</p>
  </div>
 
- <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-4">
+ <div className={`rounded-lg border border-zinc-800 border-l-2 ${toneBorder(committee.confidence, 65, 35)} bg-zinc-900 p-4`}>
  <p className="text-xs uppercase tracking-wide text-zinc-500">Confidence</p>
  <p className="mt-1 text-lg font-semibold text-white">{committee.confidence}%</p>
  </div>
 
- <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-4">
+ <div className={`rounded-lg border border-zinc-800 border-l-2 ${toneBorder(verifiedShare, 60, 30)} bg-zinc-900 p-4`}>
  <p className="text-xs uppercase tracking-wide text-zinc-500">Evidence Feed</p>
  <p className="mt-1 text-lg font-semibold text-white">{verifiedShare}% verified</p>
  <p className="text-xs text-zinc-500">{allItems.length} fields tracked</p>
@@ -80,10 +96,17 @@ export default async function IntelligenceSidebar({
  <span className="text-red-400">{sells} sale{sells === 1 ? "" : "s"}</span>
  {" "}in last {insiderTransactions.length} filings
  </p>
- {mostRecent && (
- <p className="mt-1 text-xs text-zinc-600">
- Most recent: {mostRecent.insiderName} - {mostRecent.transactionDate}
- </p>
+ {insiderTransactions.length > 0 && (
+ <ul className="mt-2 space-y-1">
+ {insiderTransactions.slice(0, 3).map((t, i) => (
+ <li key={i} className="text-xs text-zinc-600">
+ <span className={t.acquiredOrDisposed === "A" ? "text-emerald-500" : "text-red-500"}>
+ {t.acquiredOrDisposed === "A" ? "+" : "-"}
+ </span>
+ {" "}{t.insiderName} - {t.transactionDate}
+ </li>
+ ))}
+ </ul>
  )}
  </>
  )}
@@ -101,7 +124,7 @@ export default async function IntelligenceSidebar({
  </p>
  ) : (
  <ul className="mt-2 space-y-2">
- {articles.slice(0, 6).map((a, i) => (
+ {articles.slice(0, 9).map((a, i) => (
  <li key={i} className="text-sm">
  <a href={a.url} target="_blank" rel="noopener noreferrer" className="block hover:text-violet-300">
  <p className="text-zinc-300 line-clamp-2 hover:underline">{a.title}</p>
@@ -121,9 +144,6 @@ export default async function IntelligenceSidebar({
  {topThesis ? `"${topThesis}"` : "No analyst had enough verified data to form a thesis."}
  </p>
  </div>
-
- <ResearchHistory />
-
  </section>
 
  );
