@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
 
 interface ScheduledItem {
@@ -241,7 +241,7 @@ export default function IPOIntelligenceCenter() {
                         </thead>
                         <tbody>
                             {allRows.map(row => (
-                                <>
+                                <React.Fragment key={row.key}>
                                     <tr className="border-b border-zinc-900 hover:bg-zinc-900/40">
                                         <td className="py-1.5 pr-3 font-semibold text-white">
                                             {row.researchUrl ? (
@@ -269,7 +269,7 @@ export default function IPOIntelligenceCenter() {
                                         <td className="py-1.5 pr-3 text-zinc-400">{row.exchange}</td>
                                     </tr>
                                     {row.whySurfaced && (
-                                        <tr key={`${row.key}-why`} className="border-b border-zinc-900">
+                                        <tr className="border-b border-zinc-900">
                                             <td colSpan={5} className="px-3 pb-1.5 pt-0">
                                                 <p className="text-[10px] text-zinc-600">
                                                     {row.whySurfaced}
@@ -280,7 +280,7 @@ export default function IPOIntelligenceCenter() {
                                             </td>
                                         </tr>
                                     )}
-                                </>
+                                </React.Fragment>
                             ))}
                         </tbody>
                     </table>
