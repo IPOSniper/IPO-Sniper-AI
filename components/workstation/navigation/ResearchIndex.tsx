@@ -132,11 +132,40 @@ export default function ResearchIndex({ research }: Props) {
         return () => observer.disconnect();
     }, []);
 
+    const HIGHLIGHT_CLASSES = [
+        "ring-2",
+        "ring-violet-400",
+        "ring-offset-4",
+        "ring-offset-[#03070c]",
+        "!bg-violet-950/30",
+        "transition-all",
+        "duration-500",
+    ];
+
     const navigateTo = (id: string) => {
-        document.getElementById(id)?.scrollIntoView({
+        const el = document.getElementById(id);
+        if (!el) return;
+
+        el.scrollIntoView({
             behavior: "smooth",
             block: "start",
         });
+
+        // Real highlight-on-arrival: flash the exact target section,
+        // not just scroll near it -- clears any previous flash first
+        // so rapid clicks between sections don't stack.
+        document.querySelectorAll("[data-research-index-flash]").forEach((prev) => {
+            prev.classList.remove(...HIGHLIGHT_CLASSES);
+            prev.removeAttribute("data-research-index-flash");
+        });
+
+        el.setAttribute("data-research-index-flash", "true");
+        el.classList.add(...HIGHLIGHT_CLASSES);
+
+        window.setTimeout(() => {
+            el.classList.remove(...HIGHLIGHT_CLASSES);
+            el.removeAttribute("data-research-index-flash");
+        }, 1600);
     };
 
     const scrollToTop = () => {
