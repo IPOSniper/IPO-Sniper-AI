@@ -83,8 +83,9 @@ function summaryFor(id: string, research?: ResearchObject): string | null {
 
     switch (id) {
         case "committee":
-        case "assessment":
             return snap ? `${snap.recommendation} - ${snap.agreement}% agree` : null;
+        case "assessment":
+            return snap ? `${snap.recommendation} - ${snap.conviction}/100 conviction` : null;
         case "consensus":
             return snap ? `${snap.votingAnalystCount}/${snap.analystCount} voting` : null;
         case "analysts":
