@@ -13,7 +13,7 @@ export default function AppShell({ children }: AppShellProps) {
       <div className="flex flex-1 flex-col">
         <Header />
 
-        <main className="flex-1 overflow-auto p-6">
+        <main className="flex-1 p-6"> {/* SCROLL_CONTAINER_FIX_V1: removed overflow-auto -- this div was the real scroll container for the whole app, breaking position:sticky computations deeper in the tree; the real page body now scrolls instead */}
           {children}
         </main>
       </div>
