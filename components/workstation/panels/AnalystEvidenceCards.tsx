@@ -1,7 +1,8 @@
-﻿import { WorkstationPanelProps } from "../contracts/WorkstationPanelProps";
+import { WorkstationPanelProps } from "../contracts/WorkstationPanelProps";
 
 export default function AnalystEvidenceCards({ research }: WorkstationPanelProps) {
     const voting = research.committee.reports.filter(r => r.confidence > 0);
+    const latestFiling = research.report.evidence.sec.latestFiling;
 
     if (voting.length === 0) {
         return (
@@ -26,6 +27,11 @@ export default function AnalystEvidenceCards({ research }: WorkstationPanelProps
                     </div>
                 ))}
             </div>
+            {latestFiling.verified && latestFiling.value && (
+                <a href={latestFiling.value.url} target="_blank" rel="noopener noreferrer" className="mt-3 block border-t border-zinc-900 pt-2 text-[10px] text-zinc-600 hover:text-zinc-400 hover:underline">
+                    Evidence source: real {latestFiling.value.formType} filed {latestFiling.value.filedAt} (SEC EDGAR) &rarr;
+                </a>
+            )}
         </div>
     );
 }
