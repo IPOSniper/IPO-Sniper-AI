@@ -39,7 +39,7 @@ export default async function MarketContext() {
     return (
         <div className="rounded-xl border border-zinc-800 bg-zinc-950 p-3">
             <h2 className="mb-2 text-sm font-semibold uppercase tracking-wide text-zinc-500">Market Context</h2>
-            <div className="grid grid-cols-2 gap-3 text-sm sm:grid-cols-4">
+            <div className="grid grid-cols-2 gap-3 text-sm">
                 <div>
                     <p className="mb-1 text-[10px] uppercase tracking-wide text-zinc-600">Regime</p>
                     <p className="text-zinc-700">Not yet computed</p>
