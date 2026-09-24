@@ -1,5 +1,6 @@
 import { WorkstationPanelProps } from "../contracts/WorkstationPanelProps";
 import { AlpacaOptionsProvider, type OptionContract } from "@/engine/trading/providers/AlpacaOptionsProvider";
+import OptionsExplainer from "./OptionsExplainer";
 
 /**
  * Real Alpaca options chain data -- see AlpacaOptionsProvider.ts's
@@ -126,7 +127,9 @@ export default async function OptionsChainPanel({ research }: WorkstationPanelPr
  </div>
  <p className="mt-2 text-[10px] text-zinc-600">
  Real Alpaca options data. This is the data foundation only - no prediction, valuation, or strategy layer is built on top of it yet.
- </p>
+ </p> {nearestCall && nearestPut && (
+ <OptionsExplainer ticker={company.ticker} spotPrice={spotPrice} call={nearestCall} put={nearestPut} />
+ )}
  </div>
  );
 }

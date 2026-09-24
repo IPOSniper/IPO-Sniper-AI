@@ -6,6 +6,7 @@ interface CandleResponse {
     c: number[]; // close
     t: number[]; // unix seconds
     s: string; // "ok" | "no_data"
+    v?: number[]; // volume -- real field Finnhub returns, was missing from this type
 }
 
 export async function GET(
@@ -38,6 +39,7 @@ export async function GET(
             const points = data.t.map((t, i) => ({
                 date: new Date(t * 1000).toISOString().slice(0, 10),
                 close: data.c[i],
+                volume: data.v?.[i] ?? null,
             }));
             return NextResponse.json({ points, available: true, source: "finnhub" });
         }
@@ -63,6 +65,7 @@ export async function GET(
             const points = bars.map(bar => ({
                 date: bar.timestamp.slice(0, 10),
                 close: bar.close,
+                volume: bar.volume ?? null,
             }));
             return NextResponse.json({ points, available: true, source: "alpaca" });
         }
