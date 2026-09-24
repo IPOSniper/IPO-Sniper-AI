@@ -191,7 +191,9 @@ export default function WorkstationShell({ research, ticker }: Props) {
                 >
                     {/* LEFT ANALYST NAVIGATION */}
                     <aside className="hidden lg:block">
-                        <div className="sticky top-[102px] overflow-hidden rounded-lg border border-zinc-800/80 bg-[#070b11]">
+                        {/* STICKY_FIX_V2 */}
+                        <div className="sticky top-[102px]">
+                        <div className="overflow-hidden rounded-lg border border-zinc-800/80 bg-[#070b11]">
                             <div className="border-b border-zinc-900 px-3 py-2.5">
                                 <div className="text-[8px] font-bold uppercase tracking-[0.18em] text-cyan-500/70">
                                     Research Index
@@ -215,6 +217,7 @@ export default function WorkstationShell({ research, ticker }: Props) {
                                     <div>Market intelligence</div>
                                 </div>
                             </div>
+                        </div>
                         </div>
                     </aside>
 
