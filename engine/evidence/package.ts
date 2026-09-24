@@ -120,6 +120,18 @@ export interface QuoteEvidence {
   marketCap: EvidenceItem<number>;
 }
 
+export interface AnalystConsensusEvidence {
+  strongBuy: EvidenceItem<number>;
+  buy: EvidenceItem<number>;
+  hold: EvidenceItem<number>;
+  sell: EvidenceItem<number>;
+  strongSell: EvidenceItem<number>;
+  priceTargetHigh: EvidenceItem<number>;
+  priceTargetLow: EvidenceItem<number>;
+  priceTargetMean: EvidenceItem<number>;
+  priceTargetMedian: EvidenceItem<number>;
+}
+
 export interface FinancialStatementsEvidence {
   // One EvidenceItem wrapping the whole multi-year array, not one
   // per field — this is a single fetch producing historical data,
@@ -139,5 +151,6 @@ export interface EvidencePackage {
   news: NewsEvidence;
   sec: SecEvidence;
   quote: QuoteEvidence;
+  analystConsensus: AnalystConsensusEvidence;
   financialStatements: FinancialStatementsEvidence;
 }

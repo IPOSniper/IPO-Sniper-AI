@@ -10,6 +10,7 @@ import { NewsBuilder } from "./builders/newsBuilder";
 import { SecBuilder } from "./builders/secBuilder";
 import { QuoteBuilder } from "./builders/quoteBuilder";
 import { FinancialStatementsBuilder } from "./builders/financialStatementsBuilder";
+import { AnalystConsensusBuilder } from "./builders/analystConsensusBuilder";
 import { backfillFinancialFromStatements } from "./backfill/financialBackfill";
 import { backfillLiquidity } from "./backfill/liquidityBackfill";
 import { backfillGrowthGuidance } from "./backfill/growthBackfill";
@@ -37,7 +38,9 @@ export class EvidenceEngine {
 
     private readonly quoteBuilder = new QuoteBuilder(),
 
-    private readonly financialStatementsBuilder = new FinancialStatementsBuilder()
+    private readonly financialStatementsBuilder = new FinancialStatementsBuilder(),
+
+    private readonly analystConsensusBuilder = new AnalystConsensusBuilder()
 
   ) {}
 
@@ -45,10 +48,6 @@ export class EvidenceEngine {
 
     const company = await this.companyBuilder.build(symbol);
 
-    // management is intentionally NOT in this first parallel batch --
-    // it needs sharesOutstanding from financialStatements (below) to
-    // compute a real insiderOwnership, so it's built afterward,
-    // sequentially, rather than in parallel with everything else.
     const [
       financialRaw,
       ipo,
@@ -58,6 +57,7 @@ export class EvidenceEngine {
       sec,
       quote,
       financialStatements,
+      analystConsensus,
     ] = await Promise.all([
       this.financialBuilder.build(symbol),
       this.ipoBuilder.build(symbol),
@@ -67,17 +67,12 @@ export class EvidenceEngine {
       this.secBuilder.build(symbol),
       this.quoteBuilder.build(symbol),
       this.financialStatementsBuilder.build(symbol),
+      this.analystConsensusBuilder.build(symbol),
     ]);
 
     const latestStatement = financialStatements.statements.value[financialStatements.statements.value.length - 1];
     const management = await this.managementBuilder.build(symbol, latestStatement?.sharesOutstanding);
 
-    // Backfill chain: each step fills specific fields from data
-    // that's either already fetched above (financialBackfill) or a
-    // small additional real fetch (liquidity/growth/market), never
-    // overwriting an already-verified value. Each is independent and
-    // fails closed to a no-op, not a crash, if its provider/key
-    // isn't available. Run the independent ones in parallel.
     const financialAfterStatements = backfillFinancialFromStatements(
       financialRaw,
       financialStatements,
@@ -112,6 +107,8 @@ export class EvidenceEngine {
       quote,
 
       financialStatements,
+
+      analystConsensus,
 
     };
 

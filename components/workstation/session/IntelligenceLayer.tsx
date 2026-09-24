@@ -42,6 +42,7 @@ import PriceVolumeModule from "../panels/PriceVolumeModule";
 import DrawdownModule from "../panels/DrawdownModule";
 import IPOTimeline from "../panels/IPOTimeline";
 import ComparableCompaniesTable from "../panels/ComparableCompaniesTable";
+import AnalystConsensusPanel from "../panels/AnalystConsensusPanel";
 import ProspectusRiskFactors from "../panels/ProspectusRiskFactors";
 import UseOfProceedsPanel from "../panels/UseOfProceedsPanel";
 import InsiderOwnershipConcentration from "../panels/InsiderOwnershipConcentration";
@@ -122,7 +123,8 @@ return(
 </section>
 
 <section id="valuation" className="scroll-mt-24">
-<div className="empty:hidden">
+<AnalystConsensusPanel research={research} />
+<div className="mt-4 empty:hidden">
 <ComparableCompaniesTable research={research} />
 </div>
 <ValuationSummary />

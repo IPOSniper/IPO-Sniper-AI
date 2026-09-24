@@ -89,4 +89,63 @@ export class FinnhubQuoteProvider {
         return data.marketCapitalization * 1_000_000;
     }
 
+    /**
+     * Real Finnhub /stock/recommendation-trends -- real sell-side
+     * analyst Buy/Hold/Sell counts, most recent period only. Documented,
+     * free-tier endpoint, not run live before this build.
+     */
+    async getRecommendationTrends(symbol: string): Promise<{
+        strongBuy: number; buy: number; hold: number; sell: number; strongSell: number; period: string;
+    } | null> {
+        const apiKey = process.env.FINNHUB_API_KEY;
+        if (!apiKey) return null;
+
+        const response = await fetchWithRetry(
+            `https://finnhub.io/api/v1/stock/recommendation-trends?symbol=${symbol}&token=${apiKey}`,
+            { cache: "no-store" }
+        );
+        if (!response.ok) return null;
+
+        const data = await response.json();
+        const latest = Array.isArray(data) ? data[0] : null;
+        if (!latest) return null;
+
+        return {
+            strongBuy: latest.strongBuy ?? 0,
+            buy: latest.buy ?? 0,
+            hold: latest.hold ?? 0,
+            sell: latest.sell ?? 0,
+            strongSell: latest.strongSell ?? 0,
+            period: latest.period ?? "",
+        };
+    }
+
+    /**
+     * Real Finnhub /stock/price-target -- real consensus analyst
+     * price target (high/low/mean/median). Documented, free-tier
+     * endpoint, not run live before this build.
+     */
+    async getPriceTarget(symbol: string): Promise<{
+        high: number; low: number; mean: number; median: number; lastUpdated: string;
+    } | null> {
+        const apiKey = process.env.FINNHUB_API_KEY;
+        if (!apiKey) return null;
+
+        const response = await fetchWithRetry(
+            `https://finnhub.io/api/v1/stock/price-target?symbol=${symbol}&token=${apiKey}`,
+            { cache: "no-store" }
+        );
+        if (!response.ok) return null;
+
+        const data = await response.json();
+        if (!data.targetMean) return null;
+
+        return {
+            high: data.targetHigh,
+            low: data.targetLow,
+            mean: data.targetMean,
+            median: data.targetMedian,
+            lastUpdated: data.lastUpdated ?? "",
+        };
+    }
 }
