@@ -1,4 +1,4 @@
-﻿import { WorkstationPanelProps } from "../contracts/WorkstationPanelProps";
+import { WorkstationPanelProps } from "../contracts/WorkstationPanelProps";
 
 import MissionControlHeader from "../panels/MissionControlHeader";
 import ResearchSnapshotPanel from "../panels/ResearchSnapshotPanel";
@@ -19,7 +19,9 @@ export default function ResearchSession({
 
                     <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
                         <MissionControlHeader research={research} />
-                        <AIVerdictRow research={research} />
+                        <section id="assessment" className="scroll-mt-24">
+                            <AIVerdictRow research={research} />
+                        </section>
 
                     </div>
                 </div>

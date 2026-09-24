@@ -1,4 +1,4 @@
-﻿import { WorkstationPanelProps } from "../contracts/WorkstationPanelProps";
+import { WorkstationPanelProps } from "../contracts/WorkstationPanelProps";
 
 import ResearchProgress from "../panels/ResearchProgress";
 import SystemLog from "../panels/SystemLog";
@@ -7,6 +7,7 @@ import SnapshotPanel from "../panels/SnapshotPanel";
 import WhatCouldChangeThisPanel from "../panels/WhatCouldChangeThisPanel";
 import InsiderActivityPanel from "../panels/InsiderActivityPanel";
 import OptionsChainPanel from "../panels/OptionsChainPanel";
+import UnverifiedCard from "../shared/UnverifiedCard";
 
 export default function OperationsLayer({
 research,
@@ -28,6 +29,9 @@ return(
 <SystemLog research={research} />
 <section id="events" className="scroll-mt-24">
 <UpcomingEvents research={research} />
+</section>
+<section id="history" className="scroll-mt-24">
+<UnverifiedCard title="History" reason="A per-research-call history view isn't built yet for this workstation page -- your saved research list is available from the Dashboard's Research History panel." />
 </section>
 </section>
 );

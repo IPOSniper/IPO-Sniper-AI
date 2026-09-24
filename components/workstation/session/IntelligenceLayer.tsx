@@ -81,10 +81,12 @@ return(
 </div>
 
 <CommitteePanel research={research} />
+<section id="consensus" className="scroll-mt-24">
 <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
 <ConsensusBar research={research} />
 <CommitteeConsensusCard research={research} />
 </div>
+</section>
 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
 <AnalystEvidenceCards research={research} />
 <FiveTierVoteDistribution research={research} />
@@ -149,14 +151,14 @@ return(
 </div>
 </section>
 
-<section id="risks" className="scroll-mt-24">
 <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+<section id="risks" className="scroll-mt-24">
 <RiskPanel research={research} />
-<div id="catalysts">
-<CatalystPanel research={research} />
-</div>
-</div>
 </section>
+<section id="catalysts" className="scroll-mt-24">
+<CatalystPanel research={research} />
+</section>
+</div>
 
 <section id="earnings" className="scroll-mt-24">
 <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
