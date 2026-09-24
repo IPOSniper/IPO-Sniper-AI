@@ -47,8 +47,9 @@ export default async function AdaptiveIntelligencePanel({ userId, ticker, commit
  </div>
 
  {hasAdjustment && (
+ <>
  <p className="mb-2 text-sm text-white">
- Committee confidence {adaptiveConviction.baseConfidence} - adjusted conviction{" "}
+ Committee confidence {adaptiveConviction.baseConfidence} - adjusted confidence{" "}
  <span className={adaptiveConviction.adjustment >= 0 ? "text-emerald-400" : "text-amber-400"}>
  {adaptiveConviction.adjustedConviction}
  </span>
@@ -56,6 +57,10 @@ export default async function AdaptiveIntelligencePanel({ userId, ticker, commit
  ({adaptiveConviction.adjustment >= 0 ? "+" : ""}{adaptiveConviction.adjustment})
  </span>
  </p>
+ {adaptiveConviction.reasons.filter(r => r.includes("capped at")).map((cappedReason, i) => (
+ <p key={i} className="mb-2 text-xs text-zinc-500">{cappedReason}</p>
+ ))}
+ </>
  )}
 
  {thesisReassessment && thesisReassessment.result !== "insufficient-history" && (
