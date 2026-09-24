@@ -1,6 +1,5 @@
-import React, { useState } from "react";
-
-const RESEARCH_HEADER_LOGO_BASE = "https://images.financialmodelingprep.com/symbol/";
+import React from "react";
+import CompanyLogo from "./CompanyLogo";
 import CommandBar from "../panels/CommandBar/CommandBar";
 import ProcessStepper from "../panels/ProcessStepper/ProcessStepper";
 import PriceChart from "../panels/PriceChart/PriceChart";
@@ -31,7 +30,6 @@ const workspaceSections = [
 ];
 
 export default function WorkstationShell({ research, ticker }: Props) {
-    const [headerLogoFailed, setHeaderLogoFailed] = useState(false);
     const quote = research.report.evidence.quote;
     const symbol = research.company.ticker;
     const companyName = research.company.name;
@@ -113,15 +111,7 @@ export default function WorkstationShell({ research, ticker }: Props) {
                                 Company
                             </div>
                             <div className="mt-1 flex items-center gap-1.5">
-                                {!headerLogoFailed && (
-                                    // eslint-disable-next-line @next/next/no-img-element
-                                    <img
-                                        src={`${RESEARCH_HEADER_LOGO_BASE}${symbol}.png`}
-                                        alt=""
-                                        className="h-4 w-4 shrink-0 rounded-sm bg-white/5 object-contain"
-                                        onError={() => setHeaderLogoFailed(true)}
-                                    />
-                                )}
+                                <CompanyLogo symbol={symbol} companyName={companyName} />
                                 <div className="truncate text-[11px] font-semibold text-zinc-200">
                                     {companyName}
                                 </div>
