@@ -1,5 +1,6 @@
 import React from "react";
 import CompanyLogo from "./CompanyLogo";
+import CondensingHeaderBar from "./CondensingHeaderBar";
 import CommandBar from "../panels/CommandBar/CommandBar";
 import ProcessStepper from "../panels/ProcessStepper/ProcessStepper";
 import PriceChart from "../panels/PriceChart/PriceChart";
@@ -73,8 +74,10 @@ export default function WorkstationShell({ research, ticker }: Props) {
                 </div>
             </header>
 
+            <CondensingHeaderBar symbol={symbol} companyName={companyName} />
+
             {/* RESEARCH IDENTITY */}
-            <section className="border-b border-cyan-950/50 bg-[#050a11]">
+            <section id="research-identity" className="border-b border-cyan-950/50 bg-[#050a11]">
                 <div className="px-4 py-3 lg:px-6">
                     <ResearchTarget defaultTicker={ticker} />
 
