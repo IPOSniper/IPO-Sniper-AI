@@ -1,11 +1,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { ComposedChart, Area, Line, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer } from "recharts";
+import { ComposedChart, BarChart, Bar, Area, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
 
 interface Point {
  date: string;
  close: number;
+ volume: number | null;
 }
 
 interface ChartPoint extends Point {
@@ -13,16 +14,13 @@ interface ChartPoint extends Point {
  ema9: number | null;
 }
 
-// Added 5Y/Max: a new user researching a company's real long-term
-// story previously had no way to see anything past 1 year -- the
-// underlying data source (Finnhub, falling back to Alpaca) can
-// return real multi-year history, the range picker just never
-// offered it.
 const RANGES = ["1M", "3M", "1Y", "5Y", "Max"] as const;
 type Range = typeof RANGES[number];
 
 const SMA_PERIOD = 20;
 const EMA_PERIOD = 9;
+
+const PRICE_CHART_LOGO_BASE = "https://images.financialmodelingprep.com/symbol/";
 
 function computeSmaSeries(closes: number[], period: number): (number | null)[] {
  return closes.map((_, i) => {
@@ -45,11 +43,33 @@ function computeEmaSeries(closes: number[], period: number): (number | null)[] {
  return result;
 }
 
+function formatDateTick(dateStr: string, pointCount: number): string {
+ const d = new Date(dateStr);
+ if (Number.isNaN(d.getTime())) return dateStr;
+ if (pointCount > 400) return d.toLocaleDateString(undefined, { month: "short", year: "2-digit" });
+ return d.toLocaleDateString(undefined, { month: "short", day: "numeric" });
+}
+
+// Real fix for the Recharts type-check failure: labelFormatter/formatter
+// receive params typed as possibly-undefined ReactNode/ValueType, not
+// plain string/number -- accept `unknown` and coerce at runtime instead
+// of typing the parameter narrowly (which is what broke the build).
+function formatTooltipLabel(label: unknown): string {
+ const d = new Date(String(label));
+ if (Number.isNaN(d.getTime())) return String(label ?? "");
+ return d.toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" });
+}
+
 export default function PriceChart({ ticker }: { ticker: string }) {
  const [range, setRange] = useState<Range>("3M");
  const [points, setPoints] = useState<Point[]>([]);
  const [loading, setLoading] = useState(true);
  const [available, setAvailable] = useState(true);
+ const [logoFailed, setLogoFailed] = useState(false);
+
+ useEffect(() => {
+ setLogoFailed(false);
+ }, [ticker]);
 
  useEffect(() => {
  let cancelled = false;
@@ -80,11 +100,23 @@ export default function PriceChart({ ticker }: { ticker: string }) {
  const chartData: ChartPoint[] = points.map((p, i) => ({ ...p, sma20: sma20Series[i], ema9: ema9Series[i] }));
  const hasEnoughForSma = points.length >= SMA_PERIOD;
  const hasEnoughForEma = points.length >= EMA_PERIOD;
+ const hasVolume = points.some(p => p.volume !== null);
 
  return (
  <section className="rounded-xl border border-zinc-800 bg-zinc-950 p-4">
  <div className="flex items-center justify-between mb-2">
+ <div className="flex items-center gap-2">
+ {!logoFailed && (
+ // eslint-disable-next-line @next/next/no-img-element
+ <img
+ src={`${PRICE_CHART_LOGO_BASE}${ticker}.png`}
+ alt=""
+ className="h-5 w-5 rounded-sm bg-white/5 object-contain"
+ onError={() => setLogoFailed(true)}
+ />
+ )}
  <h2 className="text-sm font-semibold text-zinc-300">Price</h2>
+ </div>
  <div className="flex gap-1">
  {RANGES.map(r => (
  <button
@@ -100,7 +132,7 @@ export default function PriceChart({ ticker }: { ticker: string }) {
  </div>
  </div>
 
- <div className="h-56">
+ <div className={hasVolume ? "h-52" : "h-56"}>
  {loading ? (
  <div className="h-full flex items-center justify-center text-xs text-zinc-600">Loading-</div>
  ) : !available || points.length === 0 ? (
@@ -122,7 +154,15 @@ export default function PriceChart({ ticker }: { ticker: string }) {
  <stop offset="100%" stopColor={isUp ? "#34d399" : "#f87171"} stopOpacity={0} />
  </linearGradient>
  </defs>
- <XAxis dataKey="date" hide />
+ <XAxis
+ dataKey="date"
+ tick={{ fill: "#71717a", fontSize: 9 }}
+ tickFormatter={(d: string) => formatDateTick(d, points.length)}
+ axisLine={{ stroke: "#3f3f46" }}
+ tickLine={false}
+ minTickGap={40}
+ hide={hasVolume}
+ />
  <YAxis
  domain={["auto", "auto"]}
  width={54}
@@ -134,48 +174,89 @@ export default function PriceChart({ ticker }: { ticker: string }) {
  <Tooltip
  contentStyle={{ background: "#18181b", border: "1px solid #3f3f46", fontSize: 12 }}
  labelStyle={{ color: "#a1a1aa" }}
- formatter={(value, name) => {
+ labelFormatter={formatTooltipLabel}
+ formatter={(value: unknown, name: unknown) => {
  const n = typeof value === "number" ? value : Number(value);
- if (!Number.isFinite(n)) return ["-", name];
- const label = name === "close" ? "Close" : name === "sma20" ? "SMA 20" : name === "ema9" ? "EMA 9" : name;
+ if (!Number.isFinite(n)) return ["-", String(name)];
+ const label = name === "close" ? "Close" : name === "sma20" ? "SMA 20" : name === "ema9" ? "EMA 9" : String(name);
  return [`$${n.toFixed(2)}`, label];
  }}
  />
  <Area
  type="monotone"
  dataKey="close"
+ name="close"
  stroke={isUp ? "#34d399" : "#f87171"}
  strokeWidth={1.5}
  fill="url(#priceFill)"
  />
  {hasEnoughForSma && (
- <Line type="monotone" dataKey="sma20" stroke="#60a5fa" strokeWidth={1} dot={false} connectNulls isAnimationActive={false} />
+ <Line type="monotone" dataKey="sma20" name="sma20" stroke="#60a5fa" strokeWidth={1} dot={false} connectNulls isAnimationActive={false} />
  )}
  {hasEnoughForEma && (
- <Line type="monotone" dataKey="ema9" stroke="#fbbf24" strokeWidth={1} dot={false} connectNulls isAnimationActive={false} />
- )}
- {(hasEnoughForSma || hasEnoughForEma) && (
- <Legend
- wrapperStyle={{ fontSize: 10 }}
- formatter={(value) => (value === "sma20" ? "SMA 20" : value === "ema9" ? "EMA 9" : value)}
- />
+ <Line type="monotone" dataKey="ema9" name="ema9" stroke="#fbbf24" strokeWidth={1} dot={false} connectNulls isAnimationActive={false} />
  )}
  </ComposedChart>
  </ResponsiveContainer>
  )}
  </div>
 
+ {!loading && available && points.length > 1 && hasVolume && (
+ <div className="h-10 mt-0.5">
+ <ResponsiveContainer width="100%" height="100%">
+ <BarChart data={chartData} margin={{ top: 0, right: 4, left: 4, bottom: 0 }}>
+ <XAxis
+ dataKey="date"
+ tick={{ fill: "#71717a", fontSize: 9 }}
+ tickFormatter={(d: string) => formatDateTick(d, points.length)}
+ axisLine={{ stroke: "#3f3f46" }}
+ tickLine={false}
+ minTickGap={40}
+ />
+ <Tooltip
+ contentStyle={{ background: "#18181b", border: "1px solid #3f3f46", fontSize: 12 }}
+ labelStyle={{ color: "#a1a1aa" }}
+ labelFormatter={formatTooltipLabel}
+ formatter={(value: unknown) => {
+ const n = typeof value === "number" ? value : Number(value);
+ return [Number.isFinite(n) ? n.toLocaleString() : "-", "Volume"];
+ }}
+ />
+ <Bar dataKey="volume" fill="#3f3f46" />
+ </BarChart>
+ </ResponsiveContainer>
+ </div>
+ )}
+
  {!loading && available && points.length > 1 && !hasEnoughForSma && (
  <p className="mt-1 text-[10px] text-zinc-600">SMA 20 needs at least 20 real data points - only {points.length} available for this range.</p>
  )}
 
  {!loading && available && points.length > 1 && (
- <p className="mt-2 border-t border-zinc-900 pt-2 text-[10px] leading-relaxed text-zinc-600">
- <span className="text-red-400">What am I looking at?</span>{" "}
- <span className="text-emerald-400 font-medium">Close price</span> is the real daily closing price.{" "}
- <span className="font-medium" style={{ color: "#fbbf24" }}>EMA 9</span> is a 9-day average weighted toward recent days, showing short-term direction.{" "}
- <span className="font-medium" style={{ color: "#60a5fa" }}>SMA 20</span> is a plain 20-day average, showing the slower, longer-term trend.
- </p>
+ <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 border-t border-zinc-900 pt-2 text-[10px] leading-relaxed">
+ <span className="flex items-center gap-1.5">
+ <span className="h-2 w-2 rounded-full" style={{ background: isUp ? "#34d399" : "#f87171" }} />
+ <span className="text-zinc-400"><span className="font-medium text-zinc-200">Close</span> - the real daily closing price.</span>
+ </span>
+ {hasEnoughForEma && (
+ <span className="flex items-center gap-1.5">
+ <span className="h-2 w-2 rounded-full bg-amber-400" />
+ <span className="text-zinc-400"><span className="font-medium text-zinc-200">EMA 9</span> - 9-day average weighted toward recent days, short-term direction.</span>
+ </span>
+ )}
+ {hasEnoughForSma && (
+ <span className="flex items-center gap-1.5">
+ <span className="h-2 w-2 rounded-full bg-blue-400" />
+ <span className="text-zinc-400"><span className="font-medium text-zinc-200">SMA 20</span> - plain 20-day average, longer-term trend.</span>
+ </span>
+ )}
+ {hasVolume && (
+ <span className="flex items-center gap-1.5">
+ <span className="h-2 w-2 rounded-sm bg-zinc-600" />
+ <span className="text-zinc-400"><span className="font-medium text-zinc-200">Volume</span> - shares traded each day.</span>
+ </span>
+ )}
+ </div>
  )}
  </section>
  );
