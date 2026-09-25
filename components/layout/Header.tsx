@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 import Link from "next/link";
 import { useState, useEffect, useRef, FormEvent } from "react";
 import { useRouter } from "next/navigation";
@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { useProfile } from "@/hooks/useProfile";
 import type { SearchResult } from "@/app/api/search/route";
+import { searchSicByName } from "@/engine/evidence/providers/SicCodeMap";
 
 export default function Header() {
   const router = useRouter();
@@ -54,10 +55,28 @@ export default function Header() {
 
   function handleSearch(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    const cleaned = query.trim().toUpperCase();
-    if (!cleaned) return;
+    const trimmed = query.trim();
+    if (!trimmed) return;
+
+    // Real fix (Sector Search item 5): this handler previously
+    // validated the strict ticker regex on Enter and pushed
+    // immediately, without ever checking a real sector/industry
+    // name (e.g. "software"). Real fix: check for a real sector
+    // match first via SicCodeMap real SEC data, before falling
+    // through to the existing ticker-regex path.
+    const sectorMatches = searchSicByName(trimmed);
+    if (sectorMatches.length > 0) {
+      const sorted = [...sectorMatches].sort((a, b) => a.code.localeCompare(b.code));
+      setError(null);
+      setShowDropdown(false);
+      router.push(`/sector/${sorted[0].code}`);
+      setQuery("");
+      return;
+    }
+
+    const cleaned = trimmed.toUpperCase();
     if (!/^[A-Z.]{1,10}$/.test(cleaned)) {
-      setError("That doesn't look like a valid ticker.");
+      setError("That does not look like a valid ticker or a known sector name.");
       return;
     }
     setError(null);
