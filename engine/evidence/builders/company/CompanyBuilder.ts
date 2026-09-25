@@ -1,5 +1,6 @@
 import type { Company } from "../../../models/Company";
 import { fetchWithRetry } from "../../../api/fetchWithRetry";
+import { FMPProfileProvider } from "../../providers/FMPProfileProvider";
 
 /**
  * Real Finnhub /stock/profile2 client, following the same pattern as
@@ -52,11 +53,13 @@ export class CompanyBuilder {
             throw new Error(`No Finnhub profile found for ${ticker}.${hint}`);
         }
 
+        const fmpSector = await new FMPProfileProvider().getSector(ticker);
+
         return {
             ticker: data.ticker ?? ticker,
             name: data.name ?? ticker,
             exchange: data.exchange ?? "Unknown",
-            sector: "Unknown", // see class comment — not available from profile2
+            sector: fmpSector ?? "Unknown",
             industry: data.finnhubIndustry ?? "Unknown",
         };
 
