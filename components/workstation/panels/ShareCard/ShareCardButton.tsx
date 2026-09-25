@@ -143,7 +143,8 @@ export default function ShareCardButton({ research }: WorkstationPanelProps) {
  </Button>
  </div>
  ) : (
- <div className="space-y-2">
+ <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm">
+ <div className="max-h-[90vh] w-full max-w-2xl space-y-3 overflow-y-auto">
  {/* eslint-disable-next-line @next/next/no-img-element -- data URL preview, not a static asset */}
  <img src={previewUrl} alt="Research share card preview" className="w-full rounded-lg border border-zinc-800" />
  <div className="flex gap-2">
@@ -153,6 +154,7 @@ export default function ShareCardButton({ research }: WorkstationPanelProps) {
  <Button variant="outline" onClick={() => setPreviewUrl(null)} className="flex-1 justify-center">
  Regenerate
  </Button>
+ </div>
  </div>
  </div>
  )}
