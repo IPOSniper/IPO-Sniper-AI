@@ -175,8 +175,15 @@ export class SECEdgarProvider {
 
         const cikNoLeadingZeros = String(Number(cik));
         const accessionNoDashes = filing.accessionNumber.replace(/-/g, "");
+        // REAL BUG FIX (confirmed via a live SEC directory listing for a real DNA filing):
+        // primaryDocument often points into an xslF345X06/-style stylesheet subfolder that
+        // renders the filing as human-readable HTML, NOT the real machine-readable XML.
+        // The real raw XML sits at the top level of the accession folder under the same
+        // filename, one directory up - stripping any such subfolder prefix here fixes
+        // every real caller (getFilingText, buildFilingUrl, and therefore SECForm4Provider).
+        const realDocumentName = filing.primaryDocument.includes("/") ? filing.primaryDocument.split("/").pop()! : filing.primaryDocument;
 
-        const url = `https://www.sec.gov/Archives/edgar/data/${cikNoLeadingZeros}/${accessionNoDashes}/${filing.primaryDocument}`;
+        const url = `https://www.sec.gov/Archives/edgar/data/${cikNoLeadingZeros}/${accessionNoDashes}/${realDocumentName}`;
 
         const response = await fetch(url, { headers: this.headers(), cache: "no-store" });
 
@@ -198,7 +205,14 @@ export class SECEdgarProvider {
     buildFilingUrl(cik: string, filing: SECFiling): string {
         const cikNoLeadingZeros = String(Number(cik));
         const accessionNoDashes = filing.accessionNumber.replace(/-/g, "");
-        return `https://www.sec.gov/Archives/edgar/data/${cikNoLeadingZeros}/${accessionNoDashes}/${filing.primaryDocument}`;
+        // REAL BUG FIX (confirmed via a live SEC directory listing for a real DNA filing):
+        // primaryDocument often points into an xslF345X06/-style stylesheet subfolder that
+        // renders the filing as human-readable HTML, NOT the real machine-readable XML.
+        // The real raw XML sits at the top level of the accession folder under the same
+        // filename, one directory up - stripping any such subfolder prefix here fixes
+        // every real caller (getFilingText, buildFilingUrl, and therefore SECForm4Provider).
+        const realDocumentName = filing.primaryDocument.includes("/") ? filing.primaryDocument.split("/").pop()! : filing.primaryDocument;
+        return `https://www.sec.gov/Archives/edgar/data/${cikNoLeadingZeros}/${accessionNoDashes}/${realDocumentName}`;
     }
 
 }
