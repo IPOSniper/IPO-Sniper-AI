@@ -29,7 +29,6 @@ import BalanceSheetTrend from "../panels/BalanceSheetTrend";
 import GrowthVsProfitability from "../panels/GrowthVsProfitability";
 import ValuationSummary from "../panels/ValuationSummary/ValuationSummary";
 import InstitutionalOwnershipCard from "../panels/InstitutionalOwnershipCard/InstitutionalOwnershipCard";
-import InstitutionalOwnershipTable from "../panels/InstitutionalOwnershipTable";
 import InstitutionalEvidenceTable13F from "../panels/InstitutionalEvidenceTable13F";
 import EvidencePanel from "../panels/EvidencePanel";
 import RiskPanel from "../panels/RiskPanel";
@@ -135,7 +134,6 @@ return(
 <section id="institutions" className="scroll-mt-24">
 <InstitutionalOwnershipCard ticker={research.company.ticker} />
 <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-3">
-<InstitutionalOwnershipTable research={research} />
 <InstitutionalEvidenceTable13F research={research} />
 <InstitutionalFilingFreshness research={research} />
 </div>

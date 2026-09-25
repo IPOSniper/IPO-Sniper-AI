@@ -1,4 +1,4 @@
-﻿import { WorkstationPanelProps } from "../contracts/WorkstationPanelProps";
+import { WorkstationPanelProps } from "../contracts/WorkstationPanelProps";
 import { SECEdgarProvider } from "@/engine/evidence/providers/SECEdgarProvider";
 import { FinnhubEarningsCalendarProvider } from "@/engine/earnings/providers/FinnhubEarningsCalendarProvider";
 
@@ -38,6 +38,7 @@ export default async function QuietPeriodCountdown({ research }: WorkstationPane
 
     const now = new Date();
     const daysUntilQuietPeriodEnd = Math.ceil((quietPeriodEnd.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+    const isLikelyFirstEarnings = daysUntilQuietPeriodEnd > -60;
 
     const earningsProvider = new FinnhubEarningsCalendarProvider();
     let firstEarningsDate: string | null = null;
@@ -65,7 +66,7 @@ export default async function QuietPeriodCountdown({ research }: WorkstationPane
                     </span>
                 </div>
                 <div className="flex justify-between">
-                    <span className="text-zinc-500">First post-IPO earnings report</span>
+                    <span className="text-zinc-500">{isLikelyFirstEarnings ? "First post-IPO earnings report" : "Next earnings report"}</span>
                     <span className="text-zinc-300">{firstEarningsDate ?? "Not yet scheduled"}</span>
                 </div>
             </div>
