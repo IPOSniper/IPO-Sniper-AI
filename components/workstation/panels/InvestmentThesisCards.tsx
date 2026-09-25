@@ -1,4 +1,21 @@
-﻿import { WorkstationPanelProps } from "../contracts/WorkstationPanelProps";
+import { WorkstationPanelProps } from "../contracts/WorkstationPanelProps";
+
+// Real, compact per-case catalyst list -- scenarios.bull/base/bear.catalysts
+// were already computed (same real, restored descriptions from the earlier
+// catalyst-context fix) but never displayed here. Adding them gives this
+// column real, proportional content instead of 3 fixed-height cards that
+// leave a large gap under the longer per-analyst thesis list beside it.
+function CatalystList({ catalysts, tone }: { catalysts: string[]; tone: "red" | "zinc" | "emerald" }) {
+    if (catalysts.length === 0) return null;
+    const color = tone === "red" ? "text-red-400/80" : tone === "emerald" ? "text-emerald-400/80" : "text-zinc-500";
+    return (
+        <ul className={`mt-2 space-y-1 text-left text-[10px] ${color}`}>
+            {catalysts.slice(0, 3).map((c, i) => (
+                <li key={i}>- {c}</li>
+            ))}
+        </ul>
+    );
+}
 
 export default function InvestmentThesisCards({ research }: WorkstationPanelProps) {
     const scenarios = research.investmentDecision?.scenarios;
@@ -20,16 +37,19 @@ export default function InvestmentThesisCards({ research }: WorkstationPanelProp
                     <div className="text-[10px] uppercase text-red-400">Bear Case</div>
                     <div className="mt-1 text-xs text-red-300">{scenarios.bear.summary}</div>
                     <div className="mt-1 text-[10px] text-red-500">{scenarios.bear.probability}%</div>
+                    <CatalystList catalysts={scenarios.bear.catalysts} tone="red" />
                 </div>
                 <div className="rounded-lg border border-zinc-700 bg-zinc-900/50 p-3 text-center">
                     <div className="text-[10px] uppercase text-zinc-400">Base Case</div>
                     <div className="mt-1 text-xs text-zinc-200">{scenarios.base.summary}</div>
                     <div className="mt-1 text-[10px] text-zinc-500">{scenarios.base.probability}%</div>
+                    <CatalystList catalysts={scenarios.base.catalysts} tone="zinc" />
                 </div>
                 <div className="rounded-lg border border-emerald-900/40 bg-emerald-950/20 p-3 text-center">
                     <div className="text-[10px] uppercase text-emerald-400">Bull Case</div>
                     <div className="mt-1 text-xs text-emerald-300">{scenarios.bull.summary}</div>
                     <div className="mt-1 text-[10px] text-emerald-500">{scenarios.bull.probability}%</div>
+                    <CatalystList catalysts={scenarios.bull.catalysts} tone="emerald" />
                 </div>
             </div>
         </div>
