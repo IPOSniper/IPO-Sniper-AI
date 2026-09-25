@@ -79,7 +79,7 @@ export default async function IntelligenceSidebar({
  <p className="text-xs text-zinc-500">{allItems.length} fields tracked</p>
  </div>
 
- <MarketContext />
+ <MarketContext ticker={report.evidence.company.ticker} fallbackVolatility={report.evidence.market.volatilityIndex} />
 
  {/* Real, compact insider-activity summary -- fills real
  space with real data, doesn't duplicate the full list
