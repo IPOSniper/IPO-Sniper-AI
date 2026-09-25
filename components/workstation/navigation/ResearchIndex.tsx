@@ -67,6 +67,7 @@ const SECTIONS: ResearchSectionGroup[] = [
             { id: "portfolio", label: "Portfolio" },
             { id: "operations", label: "Operations" },
             { id: "history", label: "History" },
+            { id: "briefing", label: "Analyst Briefing Summary" },
         ],
     },
 ];
