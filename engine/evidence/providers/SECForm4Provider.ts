@@ -54,6 +54,26 @@ function extractNestedValue(xml: string, parentTag: string, childTag = "value"):
     return extractTag(parentMatch[1], childTag);
 }
 
+/**
+ * Real bug fixed: `rawStr ? Number(rawStr) : null` only checked
+ * whether the string was non-empty, never whether Number() actually
+ * succeeded. Real SEC Form 4 filings commonly format share counts
+ * with commas (e.g. "1,234,567") -- Number() returns NaN for that,
+ * not an error, and NaN silently passed every downstream `!== null`
+ * check as if it were a real number. Confirmed live: this was the
+ * exact, direct cause of "NaN sh @ $NaN" rendering in real insider
+ * transactions, AND of "NaN% insider ownership" in the Management
+ * Analyst thesis (managementBuilder.ts sums these same values).
+ * Strips commas first, then requires Number.isFinite() before
+ * accepting the result -- any genuinely unparseable value now
+ * correctly becomes null, failing closed instead of leaking NaN.
+ */
+function parseNumericField(rawStr: string | null): number | null {
+    if (!rawStr) return null;
+    const parsed = Number(rawStr.replace(/,/g, ""));
+    return Number.isFinite(parsed) ? parsed : null;
+}
+
 function parseForm4Xml(xml: string, filingUrl: string): InsiderTransaction[] {
     const ownerBlock = xml.match(/<reportingOwner>([\s\S]*?)<\/reportingOwner>/i)?.[1] ?? "";
     const insiderName = extractNestedValue(ownerBlock, "reportingOwnerId", "rptOwnerName") ?? "Unknown";
@@ -101,9 +121,9 @@ function parseForm4Xml(xml: string, filingUrl: string): InsiderTransaction[] {
             // entirely instead of depending on literal-narrowing
             // behavior that turned out not to apply here.
             acquiredOrDisposed: (acquiredDisposed === "A" ? "A" : acquiredDisposed === "D" ? "D" : null) as "A" | "D" | null,
-            shares: sharesStr ? Number(sharesStr) : null,
-            pricePerShare: priceStr ? Number(priceStr) : null,
-            sharesOwnedFollowingTransaction: sharesOwnedStr ? Number(sharesOwnedStr) : null,
+            shares: parseNumericField(sharesStr),
+            pricePerShare: parseNumericField(priceStr),
+            sharesOwnedFollowingTransaction: parseNumericField(sharesOwnedStr),
             filingUrl,
         };
     }).filter(t => t.transactionDate && t.shares !== null);
