@@ -56,9 +56,6 @@ export default function WorkstationShell({ research, ticker, userId }: Props) {
                         </div>
                     </div>
 
-                    <div className="min-w-0 flex-1">
-                        <CommandBar research={research} />
-                    </div>
 
                     <div className="hidden items-center gap-3 lg:flex">
                         <div className="flex items-center gap-2 rounded-md border border-emerald-900/60 bg-emerald-950/20 px-3 py-1.5">
@@ -80,6 +77,9 @@ export default function WorkstationShell({ research, ticker, userId }: Props) {
             {/* RESEARCH IDENTITY */}
             <section id="research-identity" className="border-b border-cyan-950/50 bg-[#050a11]">
                 <div className="px-4 py-3 lg:px-6">
+                    <div className="mb-3">
+                        <CommandBar research={research} />
+                    </div>
                     <ResearchTarget defaultTicker={ticker} />
 
                     <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4 lg:grid-cols-6">
