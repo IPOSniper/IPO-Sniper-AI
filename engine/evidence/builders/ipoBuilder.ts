@@ -1,6 +1,7 @@
 import { EvidenceBuilder } from "../types";
 import { IPOEvidence } from "../package";
 import { FinnhubIPOProvider } from "../providers/FinnhubIPOProvider";
+import { FinnhubQuoteProvider } from "../providers/FinnhubQuoteProvider";
 
 export class IPOBuilder
   implements EvidenceBuilder<IPOEvidence>
@@ -69,10 +70,14 @@ export class IPOBuilder
       };
 
     } catch {
+      const fallbackIpoDate = await new FinnhubQuoteProvider().getIpoDate(ticker);
+
       return {
         floatShares: { value: 0, source, confidence: 0, verified: false, collectedAt: now },
         ipoPrice: { value: 0, source, confidence: 0, verified: false, collectedAt: now },
-        ipoDate: { value: null, source, confidence: 0, verified: false, collectedAt: now },
+        ipoDate: fallbackIpoDate
+          ? { value: fallbackIpoDate, source, confidence: 90, verified: true, collectedAt: now }
+          : { value: null, source, confidence: 0, verified: false, collectedAt: now },
         underwriters: { value: [], source, confidence: 0, verified: false, collectedAt: now },
       };
     }

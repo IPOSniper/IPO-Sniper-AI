@@ -148,4 +148,22 @@ export class FinnhubQuoteProvider {
             lastUpdated: data.lastUpdated ?? "",
         };
     }
+
+    async getIpoDate(symbol: string): Promise<string | null> {
+        const apiKey = process.env.FINNHUB_API_KEY;
+        if (!apiKey) return null;
+
+        try {
+            const response = await fetchWithRetry(
+                `https://finnhub.io/api/v1/stock/profile2?symbol=${symbol}&token=${apiKey}`,
+                { cache: "no-store" }
+            );
+            if (!response.ok) return null;
+
+            const data = await response.json();
+            return data.ipo ?? null;
+        } catch {
+            return null;
+        }
+    }
 }
