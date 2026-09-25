@@ -1,4 +1,4 @@
-﻿import { SECEdgarProvider } from "@/engine/evidence/providers/SECEdgarProvider";
+import { SECEdgarProvider } from "@/engine/evidence/providers/SECEdgarProvider";
 
 export interface UseOfProceedsExtraction {
     found: boolean;
@@ -27,7 +27,18 @@ export async function extractUseOfProceeds(ticker: string): Promise<UseOfProceed
 
         // "Use of Proceeds" is a standard, mandated S-1 section heading.
         // It typically runs until "Dividend Policy" or "Capitalization" follows.
-        const startMatch = text.match(/use\s+of\s+proceeds/i);
+        // Real bug fixed: .match() only finds the FIRST occurrence
+        // of this heading anywhere in the filing - and a real S-1's
+        // own Table of Contents lists this exact heading (confirmed
+        // live: "USE OF PROCEEDS ... 38", a real page number, not
+        // real body text), which sits BEFORE the actual section.
+        // That TOC hit was what got captured, producing a broken
+        // one-word "excerpt" like "38". Real fix: find every real
+        // occurrence and use the LAST one - a filing lists a heading
+        // once in its TOC, but the real section body is the other
+        // (typically final) place that exact heading text appears.
+        const allMatches1 = [...text.matchAll(/use\s+of\s+proceeds/gi)];
+        const startMatch = allMatches1.length > 0 ? allMatches1[allMatches1.length - 1] : null;
         if (!startMatch || startMatch.index === undefined) {
             return { found: false, excerpt: null, filingUrl: provider.buildFilingUrl(cik, s1), filingDate: s1.filedAt };
         }
@@ -49,4 +60,4 @@ export async function extractUseOfProceeds(ticker: string): Promise<UseOfProceed
     } catch {
         return { found: false, excerpt: null, filingUrl: null, filingDate: null };
     }
-}
+}
