@@ -52,12 +52,15 @@ export class ResearchReportBuilder {
 
             executiveSummaryIsAIGenerated,
 
+            // CATALYST_CONTEXT_FIX: MonitoringItem.description already existed
+            // and was being silently dropped -- kept alongside title so
+            // catalysts read as real, substantive context, not bare labels.
             catalysts: [...new Set(
                 committee.reports
                     .filter(report => report.confidence > 0)
                     .flatMap(report => report.monitoring)
                     .filter(item => item.priority === "HIGH")
-                    .map(item => item.title)
+                    .map(item => `${item.title} - ${item.description}`)
             )],
 
             risks: [...new Set(
