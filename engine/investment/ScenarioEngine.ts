@@ -37,7 +37,22 @@ export class ScenarioEngine {
         const baseProbability =
             100 - bullProbability - bearProbability;
 
-        const highPriorityMonitoring = committee.reports
+        // Real bug fixed: bull.catalysts and bear.catalysts both used
+        // this SAME shared array, direction-agnostic - confirmed live
+        // on SPCE, the identical 5 items appeared twice (once green,
+        // once red). Real fix, mirroring the topTheses/topConcerns
+        // split just below: each side's real monitoring items now
+        // come only from analysts who actually recommended that
+        // direction, same as every other direction-specific field
+        // in this file.
+        const bullMonitoring = committee.reports
+            .filter(report => report.recommendation === "STRONG_BUY" || report.recommendation === "BUY")
+            .flatMap(report => report.monitoring)
+            .filter(item => item.priority === "HIGH")
+            .map(item => item.title);
+
+        const bearMonitoring = committee.reports
+            .filter(report => report.recommendation === "REDUCE" || report.recommendation === "SELL")
             .flatMap(report => report.monitoring)
             .filter(item => item.priority === "HIGH")
             .map(item => item.title);
@@ -63,7 +78,7 @@ export class ScenarioEngine {
                 summary: `${company.name} outperforms if ${
                     topTheses[0]?.toLowerCase() ?? "current fundamentals hold"
                 }`,
-                catalysts: [...new Set(highPriorityMonitoring)]
+                catalysts: [...new Set(bullMonitoring)]
             },
 
             base: {
@@ -77,7 +92,7 @@ export class ScenarioEngine {
                 summary: `${company.name} underperforms if ${
                     topConcerns[0]?.toLowerCase() ?? "growth or margin trends deteriorate"
                 }`,
-                catalysts: [...new Set(highPriorityMonitoring)]
+                catalysts: [...new Set(bearMonitoring)]
             }
 
         };
