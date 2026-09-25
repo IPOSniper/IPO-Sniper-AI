@@ -255,9 +255,10 @@ export default function WorkstationShell({ research, ticker, userId }: Props) {
                         </div>
                     </section>
 
-                    {/* RIGHT INTELLIGENCE RAIL */}
+                    {/* RIGHT INTELLIGENCE RAIL - NOT sticky, per explicit correction: only the
+                        left Research Index should be sticky. This column scrolls normally. */}
                     <aside className="min-w-0">
-                        <div className="sticky top-[102px]">
+                        <div>
                             <div className="mb-2 flex items-center justify-between px-1">
                                 <div>
                                     <div className="text-[8px] font-bold uppercase tracking-[0.18em] text-violet-400/80">
