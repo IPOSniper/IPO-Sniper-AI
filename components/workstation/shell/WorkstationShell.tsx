@@ -13,6 +13,7 @@ import { ResearchObject } from "@/engine/models/ResearchObject";
 interface Props {
     research: ResearchObject;
     ticker?: string;
+    userId?: string | null;
 }
 
 const workspaceSections = [
@@ -30,7 +31,7 @@ const workspaceSections = [
     ["operations", "Operations"],
 ];
 
-export default function WorkstationShell({ research, ticker }: Props) {
+export default function WorkstationShell({ research, ticker, userId }: Props) {
     const quote = research.report.evidence.quote;
     const symbol = research.company.ticker;
     const companyName = research.company.name;
@@ -249,7 +250,7 @@ export default function WorkstationShell({ research, ticker }: Props) {
 
                             {/* RESEARCH CONTENT */}
                             <div className="rounded-lg border border-zinc-900/80 bg-[#05080d] p-2 sm:p-3 lg:p-4">
-                                <ResearchViewport research={research} />
+                                <ResearchViewport research={research} userId={userId} />
                             </div>
                         </div>
                     </section>

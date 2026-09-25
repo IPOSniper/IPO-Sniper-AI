@@ -3,7 +3,6 @@ import { ResearchService } from "@/engine/services/ResearchService";
 import { createClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/client";
 import { ingestRecentEvents } from "@/engine/intelligence/EventIngestionEngine";
-import AdaptiveIntelligencePanel from "@/components/workstation/panels/AdaptiveIntelligencePanel";
 
 interface PageProps {
     params: Promise<{ ticker: string }>;
@@ -44,14 +43,16 @@ export default async function ResearchPage({ params }: PageProps) {
             console.error("Research-page event ingestion failed:", err instanceof Error ? err.message : err);
         }
 
+        // ZONE2_MOVE: AdaptiveIntelligencePanel moved from here (rendered
+        // above the entire branded header/global nav) into ResearchSession,
+        // next to AnalystBriefingSummary, forming one cohesive early
+        // "Zone 2" section per the agreed Workstation Blueprint v1.
         return (
-            <>
-                <AdaptiveIntelligencePanel userId={userId} ticker={ticker} committee={research.committee} />
-                <WorkstationShell
-                    research={research}
-                    ticker={ticker}
-                />
-            </>
+            <WorkstationShell
+                research={research}
+                ticker={ticker}
+                userId={userId}
+            />
         );
     } catch (error) {
         return (

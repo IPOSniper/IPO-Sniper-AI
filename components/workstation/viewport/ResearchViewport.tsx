@@ -4,11 +4,12 @@ import { ResearchSession } from "../session";
 
 export default function ResearchViewport({
  research,
-}: WorkstationPanelProps){
+ userId,
+}: WorkstationPanelProps & { userId?: string | null }){
 
 return(
 <main className="flex flex-col gap-8">
-<ResearchSession research={research} />
+<ResearchSession research={research} userId={userId} />
 </main>
 );
 }
