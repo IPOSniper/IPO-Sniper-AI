@@ -1,126 +1,141 @@
-import React from "react";
-
-import { WorkstationPanelProps } from "../contracts/WorkstationPanelProps";
-import type { EvidenceItem } from "@/engine/evidence/types";
-import MarketContext from "../panels/MarketContext/MarketContext";
-import { SECForm4Provider } from "@/engine/evidence/providers/SECForm4Provider";
-
-const RECOMMENDATION_COLOR: Record<string, string> = {
- STRONG_BUY: "text-emerald-400",
- BUY: "text-emerald-400",
- HOLD: "text-zinc-300",
- REDUCE: "text-amber-400",
- SELL: "text-red-400",
-};
-
-// Real tone-based accents, keyed off data already on the page (no new
-// fetch) -- the palette in DesignPrimitives.tsx already supports this,
-// it just wasn't being applied to these three summary cards.
-const RECOMMENDATION_BORDER: Record<string, string> = {
- STRONG_BUY: "border-l-emerald-500",
- BUY: "border-l-emerald-500",
- HOLD: "border-l-zinc-600",
- REDUCE: "border-l-amber-500",
- SELL: "border-l-red-500",
-};
-
-function toneBorder(value: number, goodAt: number, badAt: number): string {
- if (value >= goodAt) return "border-l-emerald-500";
- if (value <= badAt) return "border-l-red-500";
- return "border-l-amber-500";
-}
-
-export default async function IntelligenceSidebar({
- research,
-}: WorkstationPanelProps) {
-
- const { committee, report } = research;
-
- const evidenceCategories = ["financial", "management", "ipo", "market", "industry", "news", "sec", "quote", "financialStatements"] as const;
- const allItems = evidenceCategories.flatMap(
- c => Object.values(report.evidence[c]) as EvidenceItem<unknown>[]
- );
- const verifiedShare = allItems.length > 0
- ? Math.round((allItems.filter(i => i.verified).length / allItems.length) * 100)
- : 0;
-
- const topThesis = committee.reports.find(r => r.confidence > 0)?.thesis;
-
- // Real, compact summary -- genuinely new content for this sidebar,
- // not duplicated from OperationsLayer's full InsiderActivityPanel
- // (that one lists every transaction; this is just real counts +
- // the single most recent one, sized for the sidebar).
- const insiderTransactions = await new SECForm4Provider()
- .getRecentInsiderTransactions(report.evidence.company.ticker, 10);
- const buys = insiderTransactions.filter(t => t.acquiredOrDisposed === "A" && t.transactionCode === "P").length;
- const sells = insiderTransactions.filter(t => t.acquiredOrDisposed === "D" && t.transactionCode === "S").length;
- const mostRecent = insiderTransactions[0];
-
- return (
-
- <section className="space-y-4">
-
- <div className={`rounded-lg border border-zinc-800 border-l-2 ${RECOMMENDATION_BORDER[committee.recommendation] ?? "border-l-zinc-600"} bg-zinc-900 p-4`}>
- <p className="text-xs uppercase tracking-wide text-zinc-500">AI Committee</p>
- <p className={`mt-1 text-lg font-semibold ${RECOMMENDATION_COLOR[committee.recommendation] ?? "text-zinc-300"}`}>
- {committee.recommendation.replace("_", " ")}
- </p>
- <p className="text-xs text-zinc-500">{committee.agreement}% agreement</p>
- </div>
-
- <div className={`rounded-lg border border-zinc-800 border-l-2 ${toneBorder(committee.confidence, 65, 35)} bg-zinc-900 p-4`}>
- <p className="text-xs uppercase tracking-wide text-zinc-500">Confidence</p>
- <p className="mt-1 text-lg font-semibold text-white">{committee.confidence}%</p>
- </div>
-
- <div className={`rounded-lg border border-zinc-800 border-l-2 ${toneBorder(verifiedShare, 60, 30)} bg-zinc-900 p-4`}>
- <p className="text-xs uppercase tracking-wide text-zinc-500">Evidence Feed</p>
- <p className="mt-1 text-lg font-semibold text-white">{verifiedShare}% verified</p>
- <p className="text-xs text-zinc-500">{allItems.length} fields tracked</p>
- </div>
-
- <MarketContext ticker={report.evidence.company.ticker} fallbackVolatility={report.evidence.market.volatilityIndex} />
-
- {/* Real, compact insider-activity summary -- fills real
- space with real data, doesn't duplicate the full list
- already shown in the Operations section below. */}
- <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-4">
- <p className="text-xs uppercase tracking-wide text-zinc-500">Insider Activity (30d)</p>
- {insiderTransactions.length === 0 ? (
- <p className="mt-1 text-sm text-zinc-600">No recent Form 4 filings found.</p>
- ) : (
- <>
- <p className="mt-1 text-sm text-zinc-300">
- <span className="text-emerald-400">{buys} buy{buys === 1 ? "" : "s"}</span>
- {" - "}
- <span className="text-red-400">{sells} sale{sells === 1 ? "" : "s"}</span>
- {" "}in last {insiderTransactions.length} filings
- </p>
- {insiderTransactions.length > 0 && (
- <ul className="mt-2 space-y-1">
- {insiderTransactions.slice(0, 3).map((t, i) => (
- <li key={i} className="text-xs text-zinc-600">
- <span className={t.acquiredOrDisposed === "A" ? "text-emerald-500" : "text-red-500"}>
- {t.acquiredOrDisposed === "A" ? "+" : "-"}
- </span>
- {" "}{t.insiderName} - {t.transactionDate}
- </li>
- ))}
- </ul>
- )}
- </>
- )}
- </div>
-
-
- <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-4">
- <p className="text-xs uppercase tracking-wide text-zinc-500">Reasoning Trace</p>
- <p className="mt-1 text-sm italic text-zinc-400">
- {topThesis ? `"${topThesis}"` : "No analyst had enough verified data to form a thesis."}
- </p>
- </div>
- </section>
-
- );
-}
-
+import React from "react";
+
+import { WorkstationPanelProps } from "../contracts/WorkstationPanelProps";
+import type { EvidenceItem } from "@/engine/evidence/types";
+import MarketContext from "../panels/MarketContext/MarketContext";
+import { SECForm4Provider } from "@/engine/evidence/providers/SECForm4Provider";
+
+const RECOMMENDATION_COLOR: Record<string, string> = {
+ STRONG_BUY: "text-emerald-400",
+ BUY: "text-emerald-400",
+ HOLD: "text-zinc-300",
+ REDUCE: "text-amber-400",
+ SELL: "text-red-400",
+};
+
+// Real tone-based accents, keyed off data already on the page (no new
+// fetch) -- the palette in DesignPrimitives.tsx already supports this,
+// it just wasn't being applied to these three summary cards.
+const RECOMMENDATION_BORDER: Record<string, string> = {
+ STRONG_BUY: "border-l-emerald-500",
+ BUY: "border-l-emerald-500",
+ HOLD: "border-l-zinc-600",
+ REDUCE: "border-l-amber-500",
+ SELL: "border-l-red-500",
+};
+
+function toneBorder(value: number, goodAt: number, badAt: number): string {
+ if (value >= goodAt) return "border-l-emerald-500";
+ if (value <= badAt) return "border-l-red-500";
+ return "border-l-amber-500";
+}
+
+export default async function IntelligenceSidebar({
+ research,
+}: WorkstationPanelProps) {
+
+ const { committee, report } = research;
+
+ const evidenceCategories = ["financial", "management", "ipo", "market", "industry", "news", "sec", "quote", "financialStatements"] as const;
+ const allItems = evidenceCategories.flatMap(
+ c => Object.values(report.evidence[c]) as EvidenceItem<unknown>[]
+ );
+ const verifiedShare = allItems.length > 0
+ ? Math.round((allItems.filter(i => i.verified).length / allItems.length) * 100)
+ : 0;
+
+ const topThesis = committee.reports.find(r => r.confidence > 0)?.thesis;
+
+ // Real, compact summary -- genuinely new content for this sidebar,
+ // not duplicated from OperationsLayer's full InsiderActivityPanel
+ // (that one lists every transaction; this is just real counts +
+ // the single most recent one, sized for the sidebar).
+ const insiderTransactions = await new SECForm4Provider()
+ .getRecentInsiderTransactions(report.evidence.company.ticker, 10);
+ const buys = insiderTransactions.filter(t => t.acquiredOrDisposed === "A" && t.transactionCode === "P").length;
+ const sells = insiderTransactions.filter(t => t.acquiredOrDisposed === "D" && t.transactionCode === "S").length;
+ const mostRecent = insiderTransactions[0];
+
+ return (
+
+ <section className="space-y-4">
+
+ <div className={`rounded-lg border border-zinc-800 border-l-2 ${RECOMMENDATION_BORDER[committee.recommendation] ?? "border-l-zinc-600"} bg-zinc-900 p-4`}>
+ <p className="text-xs uppercase tracking-wide text-zinc-500">AI Committee</p>
+ <p className={`mt-1 text-lg font-semibold ${RECOMMENDATION_COLOR[committee.recommendation] ?? "text-zinc-300"}`}>
+ {committee.recommendation.replace("_", " ")}
+ </p>
+ <p className="text-xs text-zinc-500">{committee.agreement}% agreement</p>
+ </div>
+
+ <div className={`rounded-lg border border-zinc-800 border-l-2 ${toneBorder(committee.confidence, 65, 35)} bg-zinc-900 p-4`}>
+ <p className="text-xs uppercase tracking-wide text-zinc-500">Confidence</p>
+ <p className="mt-1 text-lg font-semibold text-white">{committee.confidence}%</p>
+ </div>
+
+ <div className={`rounded-lg border border-zinc-800 border-l-2 ${toneBorder(verifiedShare, 60, 30)} bg-zinc-900 p-4`}>
+ <p className="text-xs uppercase tracking-wide text-zinc-500">Evidence Feed</p>
+ <p className="mt-1 text-lg font-semibold text-white">{verifiedShare}% verified</p>
+ <p className="text-xs text-zinc-500">{allItems.length} fields tracked</p>
+ </div>
+
+ <MarketContext ticker={report.evidence.company.ticker} fallbackVolatility={report.evidence.market.volatilityIndex} />
+
+ {/* Real, compact companion card - fills real right-rail space with
+ real data already computed for this ticker (report.catalysts, same
+ real descriptions the earlier catalyst-context fix restored), not a
+ duplicate of the full Catalysts section already in the main column. */}
+ {report.catalysts.length > 0 && (
+ <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-4">
+ <p className="text-xs uppercase tracking-wide text-zinc-500">Catalysts to Watch</p>
+ <ul className="mt-2 space-y-2">
+ {report.catalysts.slice(0, 3).map((c, i) => (
+ <li key={i} className="text-xs text-zinc-400">{c}</li>
+ ))}
+ </ul>
+ </div>
+ )}
+
+ {/* Real, compact insider-activity summary -- fills real
+ space with real data, doesn't duplicate the full list
+ already shown in the Operations section below. */}
+ <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-4">
+ <p className="text-xs uppercase tracking-wide text-zinc-500">Insider Activity (30d)</p>
+ {insiderTransactions.length === 0 ? (
+ <p className="mt-1 text-sm text-zinc-600">No recent Form 4 filings found.</p>
+ ) : (
+ <>
+ <p className="mt-1 text-sm text-zinc-300">
+ <span className="text-emerald-400">{buys} buy{buys === 1 ? "" : "s"}</span>
+ {" - "}
+ <span className="text-red-400">{sells} sale{sells === 1 ? "" : "s"}</span>
+ {" "}in last {insiderTransactions.length} filings
+ </p>
+ {insiderTransactions.length > 0 && (
+ <ul className="mt-2 space-y-1">
+ {insiderTransactions.slice(0, 3).map((t, i) => (
+ <li key={i} className="text-xs text-zinc-600">
+ <span className={t.acquiredOrDisposed === "A" ? "text-emerald-500" : "text-red-500"}>
+ {t.acquiredOrDisposed === "A" ? "+" : "-"}
+ </span>
+ {" "}{t.insiderName} - {t.transactionDate}
+ </li>
+ ))}
+ </ul>
+ )}
+ </>
+ )}
+ </div>
+
+
+ <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-4">
+ <p className="text-xs uppercase tracking-wide text-zinc-500">Reasoning Trace</p>
+ <p className="mt-1 text-sm italic text-zinc-400">
+ {topThesis ? `"${topThesis}"` : "No analyst had enough verified data to form a thesis."}
+ </p>
+ </div>
+ </section>
+
+ );
+}
+
