@@ -1,4 +1,4 @@
-﻿import { WorkstationPanelProps } from "../contracts/WorkstationPanelProps";
+import { WorkstationPanelProps } from "../contracts/WorkstationPanelProps";
 
 const TIERS = ["STRONG_BUY", "BUY", "HOLD", "REDUCE", "SELL"] as const;
 const COLORS: Record<string, string> = {
@@ -16,17 +16,28 @@ export default function FiveTierVoteDistribution({ research }: WorkstationPanelP
     return (
         <div className="rounded-xl border border-zinc-800 bg-zinc-950 p-4">
             <h3 className="mb-3 text-xs font-semibold uppercase tracking-wide text-zinc-500">Vote Distribution (5-Tier)</h3>
-            <div className="space-y-1.5">
+            <div className="space-y-2">
                 {TIERS.map(tier => {
-                    const count = voting.filter(r => r.recommendation === tier).length;
+                    const tierAnalysts = voting.filter(r => r.recommendation === tier);
+                    const count = tierAnalysts.length;
                     const pct = (count / total) * 100;
                     return (
-                        <div key={tier} className="flex items-center gap-2 text-[10px]">
-                            <span className="w-20 text-zinc-500">{tier.replace("_", " ")}</span>
-                            <div className="h-2 flex-1 overflow-hidden rounded bg-zinc-800">
-                                <div className={`h-full ${COLORS[tier]}`} style={{ width: `${pct}%` }} />
+                        <div key={tier} className="space-y-1">
+                            <div className="flex items-center gap-2 text-[10px]">
+                                <span className="w-20 text-zinc-500">{tier.replace("_", " ")}</span>
+                                <div className="h-2 flex-1 overflow-hidden rounded bg-zinc-800">
+                                    <div className={`h-full ${COLORS[tier]}`} style={{ width: `${pct}%` }} />
+                                </div>
+                                <span className="w-6 text-right text-zinc-600">{count}</span>
                             </div>
-                            <span className="w-6 text-right text-zinc-600">{count}</span>
+                            {/* Real, already-computed content -- which specific analysts
+                                landed in this tier -- fills the previously bare row instead
+                                of leaving a thin bar with empty space beside it. */}
+                            {count > 0 && (
+                                <p className="pl-[88px] text-[9px] leading-snug text-zinc-600">
+                                    {tierAnalysts.map(r => r.analyst).join(", ")}
+                                </p>
+                            )}
                         </div>
                     );
                 })}
