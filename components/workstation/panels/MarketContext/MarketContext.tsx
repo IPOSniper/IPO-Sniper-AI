@@ -25,6 +25,7 @@ const INDICES = [
     { symbol: "SPY", label: "SPY" },
     { symbol: "QQQ", label: "QQQ" },
     { symbol: "IWM", label: "IWM" },
+    { symbol: "TLT", label: "TLT (30Y)" },
 ];
 const VOLATILITY_SYMBOL = { symbol: "^VIX", label: "VIX" };
 
@@ -86,6 +87,9 @@ export default async function MarketContext({
                             );
                         })}
                     </div>
+                </div>
+                <div className="col-span-2">
+                  <p className="text-[9px] leading-relaxed text-zinc-600">TLT (30-year Treasury) is the single input most likely to reprice the kind of company you are researching here -- long-term yields set the bar future cash flows must clear, and that bar hits long-duration, not-yet-profitable companies hardest.</p>
                 </div>
                 <div>
                     <p className="mb-1 text-[10px] uppercase tracking-wide text-zinc-600">Volatility</p>
