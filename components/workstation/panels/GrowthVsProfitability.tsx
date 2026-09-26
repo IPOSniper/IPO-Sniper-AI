@@ -1,4 +1,4 @@
-﻿import { WorkstationPanelProps } from "../contracts/WorkstationPanelProps";
+import { WorkstationPanelProps } from "../contracts/WorkstationPanelProps";
 
 export default function GrowthVsProfitability({ research }: WorkstationPanelProps) {
     const statements = research.report.evidence.financialStatements.statements.value;
@@ -18,6 +18,22 @@ export default function GrowthVsProfitability({ research }: WorkstationPanelProp
         const margin = s.revenue ? (s.netIncome / s.revenue) * 100 : 0;
         return { year: s.fiscalYear, growth, margin };
     });
+
+    // Real bug fixed: the gate above only checked for 2 real
+    // STATEMENTS, but 2 statements produce exactly 1 real plottable
+    // POINT - a single dot, often pushed to the chart edge by a real
+    // extreme value (confirmed live: IXHL's real -54517% net margin
+    // rendered as a near-invisible mark in an otherwise blank box).
+    // A single point cannot show a real trend anyway - fail closed
+    // to an honest message instead of a near-empty chart.
+    if (points.length < 2) {
+        return (
+            <div className="rounded-xl border border-zinc-800 bg-zinc-950 p-4">
+                <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-zinc-500">Growth vs. Profitability</h3>
+                <p className="text-xs text-zinc-600">Only one comparable year available - not enough real data for a trend yet.</p>
+            </div>
+        );
+    }
 
     const xMin = Math.min(...points.map(p => p.growth), 0);
     const xMax = Math.max(...points.map(p => p.growth), 1);
@@ -48,4 +64,4 @@ export default function GrowthVsProfitability({ research }: WorkstationPanelProp
             </div>
         </div>
     );
-}
+}
