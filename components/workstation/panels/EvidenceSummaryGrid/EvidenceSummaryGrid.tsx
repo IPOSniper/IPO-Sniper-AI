@@ -1,6 +1,5 @@
 import { WorkstationPanelProps } from "../../contracts/WorkstationPanelProps";
 import UnverifiedCard from "../../shared/UnverifiedCard";
-import InstitutionalOwnershipCard from "../InstitutionalOwnershipCard/InstitutionalOwnershipCard";
 
 function StatCard({ label, value, trend }: { label: string; value: string; trend?: "up" | "down" }) {
  return (
@@ -58,7 +57,6 @@ export default function EvidenceSummaryGrid({ research }: WorkstationPanelProps)
  <UnverifiedCard title="Gross Margin" reason="No live Finnhub data for this ticker" />
  )}
 
- <InstitutionalOwnershipCard ticker={research.company.ticker} />
 
  {lockUpDays !== null ? (
  <StatCard label="Lock-Up Period" value={lockUpDays > 0 ? `${Math.round(lockUpDays)}d remaining` : "Expired"} />
