@@ -359,7 +359,11 @@ export default function FinancialOverviewChart({
       </div>
 
       <div className="border-t border-zinc-900 px-5 py-3">
-        <p className="text-[10px] leading-4 text-zinc-600">
+        <p className="text-[10px] leading-4 text-zinc-500">
+          Revenue growth shows whether sales are expanding; gross margin shows how much of each sales dollar is left after direct costs;
+          net margin shows how much is left after everything -- a negative net margin means the company spent more than it earned.
+        </p>
+        <p className="mt-2 text-[10px] leading-4 text-zinc-600">
           Evidence confidence {evidence.confidence}%. Financial values are
           mapped from SEC XBRL tags through Finnhub. Missing or unmappable
           periods are not replaced with estimates or placeholders.
@@ -367,4 +371,4 @@ export default function FinancialOverviewChart({
       </div>
     </section>
   );
-}
+}

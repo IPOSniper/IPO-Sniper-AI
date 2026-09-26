@@ -69,6 +69,7 @@ export default async function MoatAnalysisCard({ research }: WorkstationPanelPro
                     <p className="mt-1 text-sm text-zinc-600">
                         Could not locate a real &quot;Item 1. Business&quot; section in the {filing.formType} filing -- it may use non-standard formatting.
                     </p>
+                    <p className="mt-2 text-[10px] leading-relaxed text-zinc-700">Real, honest gap: our automated reader could not find the company&apos;s own business description in its filing -- not a judgment that the company lacks a competitive advantage, just a gap in this specific extraction.</p>
                 </div>
             );
         }

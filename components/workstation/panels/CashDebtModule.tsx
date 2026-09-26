@@ -1,4 +1,4 @@
-﻿import { WorkstationPanelProps } from "../contracts/WorkstationPanelProps";
+import { WorkstationPanelProps } from "../contracts/WorkstationPanelProps";
 import { DataBar } from "../design/DesignPrimitives";
 
 export default function CashDebtModule({ research }: WorkstationPanelProps) {
@@ -34,6 +34,7 @@ export default function CashDebtModule({ research }: WorkstationPanelProps) {
                     tone="negative"
                 />
             </div>
+            <p className="mt-2 text-[10px] text-zinc-600">Cash funds day-to-day operations without needing to raise more money or borrow; debt is money owed that must eventually be repaid, with interest.</p>
         </div>
     );
-}
+}
