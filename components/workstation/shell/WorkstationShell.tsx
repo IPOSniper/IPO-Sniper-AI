@@ -193,8 +193,10 @@ export default function WorkstationShell({ research, ticker, userId }: Props) {
                         2xl:grid-cols-[230px_minmax(0,1fr)_300px]
                     "
                 >
-                    {/* LEFT ANALYST NAVIGATION */}
-                    <aside className="hidden lg:block">
+                    {/* LEFT ANALYST NAVIGATION - real fix: spans BOTH grid rows below
+                        (row-span-2), so it keeps running the full height of the page
+                        even after the right rail's real content ends partway down. */}
+                    <aside className="hidden lg:row-span-2 lg:block">
                         {/* STICKY_FIX_V2 */}
                         <div className="sticky top-[102px]">
                         <div className="overflow-hidden rounded-lg border border-zinc-800/80 bg-[#070b11]">
@@ -225,38 +227,31 @@ export default function WorkstationShell({ research, ticker, userId }: Props) {
                         </div>
                     </aside>
 
-                    {/* CENTER RESEARCH WORKSPACE */}
+                    {/* ROW 1, CENTER: Price chart only - real content is short,
+                        naturally sized to sit beside the right rail. */}
                     <section className="min-w-0">
-                        <div className="space-y-3">
-                            {/* MARKET VISUALIZATION */}
-                            <section className="overflow-hidden rounded-lg border border-cyan-950/60 bg-[#05090f]">
-                                <div className="flex items-center justify-between border-b border-zinc-900 px-4 py-2.5">
-                                    <div>
-                                        <div className="text-[8px] font-bold uppercase tracking-[0.18em] text-cyan-500/70">
-                                            Market Intelligence
-                                        </div>
-                                        <h2 className="mt-0.5 text-xs font-semibold text-zinc-200">
-                                            Price Action
-                                        </h2>
+                        <section className="overflow-hidden rounded-lg border border-cyan-950/60 bg-[#05090f]">
+                            <div className="flex items-center justify-between border-b border-zinc-900 px-4 py-2.5">
+                                <div>
+                                    <div className="text-[8px] font-bold uppercase tracking-[0.18em] text-cyan-500/70">
+                                        Market Intelligence
                                     </div>
-
-                                    <div className="rounded border border-zinc-800 bg-black/40 px-2 py-1 text-[8px] uppercase tracking-[0.12em] text-zinc-600">
-                                        Live Data
-                                    </div>
+                                    <h2 className="mt-0.5 text-xs font-semibold text-zinc-200">
+                                        Price Action
+                                    </h2>
                                 </div>
 
-                                <PriceChart ticker={research.company.ticker} />
-                            </section>
-
-                            {/* RESEARCH CONTENT */}
-                            <div className="rounded-lg border border-zinc-900/80 bg-[#05080d] p-2 sm:p-3 lg:p-4">
-                                <ResearchViewport research={research} userId={userId} />
+                                <div className="rounded border border-zinc-800 bg-black/40 px-2 py-1 text-[8px] uppercase tracking-[0.12em] text-zinc-600">
+                                    Live Data
+                                </div>
                             </div>
-                        </div>
+
+                            <PriceChart ticker={research.company.ticker} />
+                        </section>
                     </section>
 
-                    {/* RIGHT INTELLIGENCE RAIL - NOT sticky, per explicit correction: only the
-                        left Research Index should be sticky. This column scrolls normally. */}
+                    {/* ROW 1, RIGHT: Intelligence Rail - real content ends here,
+                        NOT stretched to fill the rest of the page. */}
                     <aside className="min-w-0">
                         <div>
                             <div className="mb-2 flex items-center justify-between px-1">
@@ -275,13 +270,24 @@ export default function WorkstationShell({ research, ticker, userId }: Props) {
                             <IntelligenceSidebar research={research} />
                         </div>
                     </aside>
+
+                    {/* ROW 2: the real, long tail content (Committee, Evidence,
+                        Financials, everything else) - real fix per explicit
+                        request: spans BOTH the center and right columns, so it
+                        genuinely widens to fill the space the right rail leaves
+                        empty once its own content has ended above. */}
+                    <div className="min-w-0 lg:col-span-2">
+                        <div className="rounded-lg border border-zinc-900/80 bg-[#05080d] p-2 sm:p-3 lg:p-4">
+                            <ResearchViewport research={research} userId={userId} />
+                        </div>
+                    </div>
                 </div>
             </main>
 
             {/* WORKSTATION FOOTER */}
             <footer className="border-t border-zinc-900 bg-[#03070c] px-4 py-3 lg:px-6">
                 <div className="flex flex-col gap-1 text-[8px] uppercase tracking-[0.14em] text-zinc-700 sm:flex-row sm:items-center sm:justify-between">
-                    <span>IPO Sniper AI · Research Workstation</span>
+                    <span>IPO Sniper AI - Research Workstation</span>
                     <span>Evidence-backed intelligence environment</span>
                 </div>
             </footer>
