@@ -1,3 +1,4 @@
+import { safeNumber } from "../../utils/safeNumber";
 /**
  * ERShares' XOVR ETF (the private-public crossover fund — SpaceX,
  * Kalshi, Anduril alongside its public core) discloses holdings
@@ -63,12 +64,6 @@ function stripTags(html: string): string {
     return html.replace(/<[^>]+>/g, " ").replace(/&nbsp;/g, " ").replace(/\s+/g, " ").trim();
 }
 
-function toNumber(cell: string): number | null {
-    const cleaned = cell.replace(/[$,%]/g, "").trim();
-    if (cleaned === "-" || cleaned === "") return null;
-    const n = Number(cleaned);
-    return Number.isFinite(n) ? n : null;
-}
 
 export class XOVRHoldingsProvider {
 
@@ -124,14 +119,14 @@ export class XOVRHoldingsProvider {
         const asOfMatch = text.match(/As of ([\d.]+)/);
 
         return {
-            nav: toNumber(grab("NAV") ?? "") ?? 0,
-            navChangePercent: toNumber(grab("NAV Changes") ?? "") ?? 0,
-            marketPrice: toNumber(grab("Market Price") ?? "") ?? 0,
-            marketPriceChangePercent: toNumber(grab("Market Price Change") ?? "") ?? 0,
-            premiumDiscount: toNumber(grab("Premium/Discount") ?? "") ?? 0,
-            medianBidAskSpreadPercent: toNumber(grab("Median Bid/Ask Spread") ?? "") ?? 0,
-            dayTradingVolume: toNumber((grab("Day's Trading Volume") ?? "").replace(" shares", "")) ?? 0,
-            totalSharesOutstanding: toNumber((grab("Total Shares Outstanding") ?? "").replace(" shares", "")) ?? 0,
+            nav: safeNumber(grab("NAV") ?? "") ?? 0,
+            navChangePercent: safeNumber(grab("NAV Changes") ?? "") ?? 0,
+            marketPrice: safeNumber(grab("Market Price") ?? "") ?? 0,
+            marketPriceChangePercent: safeNumber(grab("Market Price Change") ?? "") ?? 0,
+            premiumDiscount: safeNumber(grab("Premium/Discount") ?? "") ?? 0,
+            medianBidAskSpreadPercent: safeNumber(grab("Median Bid/Ask Spread") ?? "") ?? 0,
+            dayTradingVolume: safeNumber((grab("Day's Trading Volume") ?? "").replace(" shares", "")) ?? 0,
+            totalSharesOutstanding: safeNumber((grab("Total Shares Outstanding") ?? "").replace(" shares", "")) ?? 0,
             asOf: asOfMatch?.[1] ?? "",
         };
     }
@@ -144,11 +139,11 @@ export class XOVRHoldingsProvider {
     private fromJSON(rows: Record<string, unknown>[]): XOVRHolding[] {
         return rows.map(r => ({
             companyName: String(r.Company ?? r.company ?? ""),
-            weightPercent: toNumber(String(r.Weight ?? r.weight ?? "")) ?? 0,
+            weightPercent: safeNumber(String(r.Weight ?? r.weight ?? "")) ?? 0,
             ticker: (r.Ticker ?? r.ticker) ? String(r.Ticker ?? r.ticker) : null,
-            marketPrice: toNumber(String(r["Market Price"] ?? r.marketPrice ?? "")),
-            sharesHeld: toNumber(String(r["Shares Held"] ?? r.sharesHeld ?? "")),
-            marketValue: toNumber(String(r["Market Value"] ?? r.marketValue ?? "")) ?? 0,
+            marketPrice: safeNumber(String(r["Market Price"] ?? r.marketPrice ?? "")),
+            sharesHeld: safeNumber(String(r["Shares Held"] ?? r.sharesHeld ?? "")),
+            marketValue: safeNumber(String(r["Market Value"] ?? r.marketValue ?? "")) ?? 0,
             cusip: (r.CUSIP ?? r.cusip) ? String(r.CUSIP ?? r.cusip) : null,
         }));
     }
@@ -170,11 +165,11 @@ export class XOVRHoldingsProvider {
         if (rows.length > 0) {
             return rows.map(cells => ({
                 companyName: cells[0],
-                weightPercent: toNumber(cells[1]) ?? 0,
+                weightPercent: safeNumber(cells[1]) ?? 0,
                 ticker: cells[2] === "-" ? null : cells[2],
-                marketPrice: toNumber(cells[3]),
-                sharesHeld: toNumber(cells[4]),
-                marketValue: toNumber(cells[5]) ?? 0,
+                marketPrice: safeNumber(cells[3]),
+                sharesHeld: safeNumber(cells[4]),
+                marketValue: safeNumber(cells[5]) ?? 0,
                 cusip: cells[6] === "-" ? null : cells[6],
             }));
         }
