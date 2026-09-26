@@ -23,6 +23,8 @@
  * access in the sandbox this was built in) — verify once you run it.
  */
 
+import { safeNumber } from "../../utils/safeNumber";
+
 export interface ThirteenFHolding {
     nameOfIssuer: string;
     cusip: string;
@@ -132,8 +134,8 @@ export class SEC13FProvider {
         return entries.map(entry => ({
             nameOfIssuer: this.extract(entry, "nameOfIssuer"),
             cusip: this.extract(entry, "cusip"),
-            valueThousands: Number(this.extract(entry, "value")) || 0,
-            shares: Number(this.extract(entry, "sshPrnamt")) || 0,
+            valueThousands: safeNumber(this.extract(entry, "value")) ?? 0,
+            shares: safeNumber(this.extract(entry, "sshPrnamt")) ?? 0,
         })).filter(h => h.cusip);
     }
 

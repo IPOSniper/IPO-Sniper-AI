@@ -15,6 +15,8 @@
  * separate, unbuilt piece — see docs for the roadmap.
  */
 
+import { safeNumber } from "../../utils/safeNumber";
+
 export interface ARKHolding {
     ticker: string;
     companyName: string;
@@ -100,9 +102,9 @@ export class ARKHoldingsProvider {
             .map(cols => ({
                 ticker: cols[idx.ticker].trim(),
                 companyName: cols[idx.company]?.trim() ?? "",
-                shares: Number(cols[idx.shares]?.replace(/[^0-9.-]/g, "")) || 0,
-                marketValue: Number(cols[idx.marketValue]?.replace(/[^0-9.-]/g, "")) || 0,
-                weightPercent: Number(cols[idx.weight]?.replace(/[^0-9.-]/g, "")) || 0,
+                shares: safeNumber(cols[idx.shares]?.replace(/[^0-9.-]/g, "")) ?? 0,
+                marketValue: safeNumber(cols[idx.marketValue]?.replace(/[^0-9.-]/g, "")) ?? 0,
+                weightPercent: safeNumber(cols[idx.weight]?.replace(/[^0-9.-]/g, "")) ?? 0,
             }));
     }
 }
