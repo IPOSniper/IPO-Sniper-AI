@@ -6,16 +6,17 @@ export class FMPProfileProvider {
         if (!apiKey) return null;
 
         try {
-            const url = `https://financialmodelingprep.com/api/v3/profile/${ticker}?apikey=${apiKey}`;
+            const url = `https://financialmodelingprep.com/stable/profile?apikey=${apiKey}&symbol=${ticker}`;
             const response = await fetch(url, { cache: "no-store" });
-            if (!response.ok) { console.error(`FMP profile request failed for ${ticker}: ${response.status} ${response.statusText}`); return null; }
+            if (!response.ok) return null;
 
             const data = await response.json();
             const entry = Array.isArray(data) ? data[0] : null;
-            if (!entry || !entry.sector) { console.error(`FMP profile for ${ticker} has no usable entry/sector:`, JSON.stringify(data).slice(0, 300)); return null; }
+            if (!entry || !entry.sector) return null;
 
             return entry.sector;
-        } catch (err) { console.error(`FMP profile request threw for ${ticker}:`, err); return null;
+        } catch {
+            return null;
         }
     }
 
