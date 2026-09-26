@@ -103,7 +103,7 @@ const ShareCard = forwardRef<HTMLDivElement, Props>(
  const scoredAnalysts = committee.reports.filter(r => r.confidence > 0 && !excludedFromAggregate.includes(r.analyst));
  const photoAssignments = buildCommitteePhotoAssignments(scoredAnalysts.map(r => r.analyst));
  const scoreChartData = scoredAnalysts
- .map(r => ({ name: r.analyst.replace(" Analyst", ""), score: r.score }))
+ .map(r => ({ name: r.analyst.replace(" Analyst", ""), score: r.confidence }))
  .sort((a, b) => b.score - a.score);
 
  const latest = statements.length > 0 ? [...statements].sort((a, b) => b.fiscalYear - a.fiscalYear)[0] : null;
