@@ -133,8 +133,8 @@ export default async function PublicReportPage({ params }: PageProps) {
             <div className="mx-auto max-w-3xl">
 
                 <header className="mb-8 flex items-start justify-between gap-4 print:hidden">
-                    <a href="/" className="text-sm text-zinc-500 hover:text-zinc-300">
-                        &larr; IPO Sniper AI
+                    <a href="/workstation" className="text-sm text-zinc-500 hover:text-zinc-300">
+                        &larr; Back to Workstation
                     </a>
                     <PrintButton />
                 </header>
