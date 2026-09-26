@@ -111,17 +111,35 @@ export default async function AdaptiveIntelligencePanel({ userId, ticker, commit
  <p className="mb-2 text-xs text-zinc-500">
  <span className="text-zinc-300">Notable</span> = opposite-leaning calls (e.g. Buy vs. Reduce). <span className="text-red-400">Critical</span> = full opposite extremes (Strong Buy vs. Sell) -- as far apart as two opinions can get.
  </p>
- <div className="grid grid-cols-1 gap-x-6 gap-y-1 md:grid-cols-2 xl:grid-cols-3">
- {contradictions.contradictions.map((c, i) => (
- <p key={i} className="text-xs text-zinc-400">
- {c.analystA} ({c.recommendationA}) vs. {c.analystB} ({c.recommendationB})
- {c.severity === "critical" ? (
- <span className="ml-1 text-red-400">critical</span>
- ) : (
- <span className="ml-1 text-zinc-500">notable</span>
- )}
- </p>
+ <div className="overflow-x-auto">
+ <table className="w-full text-left text-xs">
+ <thead>
+ <tr className="border-b border-zinc-800 text-[10px] uppercase tracking-wide text-zinc-600">
+ <th className="py-1 pr-2 font-semibold">Analyst</th>
+ <th className="py-1 pr-2 font-semibold">Call</th>
+ <th className="py-1 pr-2 font-semibold"></th>
+ <th className="py-1 pr-2 font-semibold">Analyst</th>
+ <th className="py-1 pr-2 font-semibold">Call</th>
+ <th className="py-1 text-right font-semibold">Severity</th>
+ </tr>
+ </thead>
+ <tbody>
+ {[...contradictions.contradictions]
+ .sort((a, b) => (a.severity === b.severity ? 0 : a.severity === "critical" ? -1 : 1))
+ .map((c, i) => (
+ <tr key={i} className="border-b border-zinc-900 text-zinc-400">
+ <td className="py-1 pr-2">{c.analystA}</td>
+ <td className="py-1 pr-2 text-zinc-300">{c.recommendationA}</td>
+ <td className="py-1 pr-2 text-zinc-700">vs.</td>
+ <td className="py-1 pr-2">{c.analystB}</td>
+ <td className="py-1 pr-2 text-zinc-300">{c.recommendationB}</td>
+ <td className={"py-1 text-right " + (c.severity === "critical" ? "text-red-400" : "text-zinc-500")}>
+ {c.severity === "critical" ? "Critical" : "Notable"}
+ </td>
+ </tr>
  ))}
+ </tbody>
+ </table>
  </div>
  </div>
  )}
