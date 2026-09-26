@@ -487,11 +487,30 @@ export function formatSicTitle(title: string): string {
  * matches "SERVICES-PREPACKAGED SOFTWARE" (SIC 7372). Returns real
  * [code, title] pairs from the map above, nothing invented.
  */
+// Real, honest gap: SEC's own official SIC titles use their own real
+// vocabulary, which does not always match how people actually search
+// (e.g. real users type "DEFENSE" - the word never appears verbatim in
+// any real SIC title, which instead says things like "Aircraft" or
+// "Ordnance & Accessories"). A small, explicit synonym table - not a
+// fuzzy/AI guess - covers the most real, common gaps.
+const SIC_SEARCH_SYNONYMS: Record<string, string[]> = {
+    "DEFENSE": ["ORDNANCE", "AIRCRAFT", "ARMAMENT"],
+    "TECH": ["COMPUTER", "SOFTWARE", "SEMICONDUCTOR"],
+    "PHARMA": ["PHARMACEUTICAL", "DRUG"],
+};
+
 export function searchSicByName(query: string): Array<{ code: string; title: string }> {
     const normalized = query.trim().toUpperCase();
     if (!normalized) return [];
 
-    return Object.entries(SIC_CODE_MAP)
+    const direct = Object.entries(SIC_CODE_MAP)
         .filter(([, title]) => title.includes(normalized))
+        .map(([code, title]) => ({ code, title }));
+    if (direct.length > 0) return direct;
+
+    const synonyms = SIC_SEARCH_SYNONYMS[normalized];
+    if (!synonyms) return [];
+    return Object.entries(SIC_CODE_MAP)
+        .filter(([, title]) => synonyms.some(s => title.includes(s)))
         .map(([code, title]) => ({ code, title }));
 }
