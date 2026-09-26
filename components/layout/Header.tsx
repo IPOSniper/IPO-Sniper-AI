@@ -22,6 +22,23 @@ export default function Header() {
   const [showDropdown, setShowDropdown] = useState(false);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+// Real fix: static Market Open label had no real check behind it.
+  const [isMarketOpen, setIsMarketOpen] = useState(false);
+  useEffect(() => {
+    function checkMarketHours() {
+      const now = new Date();
+      const parts = new Intl.DateTimeFormat("en-US", { timeZone: "America/New_York", weekday: "short", hour: "numeric", minute: "numeric", hour12: false }).formatToParts(now);
+      const weekday = parts.find(p => p.type === "weekday")?.value ?? "";
+      const hour = Number(parts.find(p => p.type === "hour")?.value ?? "0");
+      const minute = Number(parts.find(p => p.type === "minute")?.value ?? "0");
+      const isWeekday = weekday !== "Sat" && weekday !== "Sun";
+      const mins = hour * 60 + minute;
+      setIsMarketOpen(isWeekday && mins >= 570 && mins < 960);
+    }
+    checkMarketHours();
+    const interval = setInterval(checkMarketHours, 60000);
+    return () => clearInterval(interval);
+  }, []);
 
   useEffect(() => {
     if (debounceRef.current) clearTimeout(debounceRef.current);
@@ -142,9 +159,9 @@ export default function Header() {
           )}
         </div>
         <div className="flex items-center gap-6">
-          <div className="flex items-center gap-2 rounded-lg bg-emerald-900/40 px-3 py-2 text-sm">
+          <div className={"flex items-center gap-2 rounded-lg px-3 py-2 text-sm " + (isMarketOpen ? "bg-emerald-900/40" : "bg-zinc-800")}>
             <Activity size={16} />
-            <span>Market Open</span>
+            <span>{isMarketOpen ? "Market Open" : "Market Closed"}</span>
           </div>
           <span title="Notifications — coming soon" className="cursor-not-allowed">
             <Bell className="text-zinc-600" />
