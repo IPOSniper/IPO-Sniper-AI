@@ -12,7 +12,7 @@ export interface RevenueAnalysis {
 
     surprisePercent: number;
 
-    beat: boolean;
+    beat: "beat" | "miss" | "in_line";
 
     qualityScore: number;
 
@@ -20,4 +20,4 @@ export interface RevenueAnalysis {
 
     summary: string;
 
-}
+}

@@ -34,7 +34,13 @@ export class EPSAnalyzer {
 
             surprisePercent: surprise,
 
-            beat: actualEPS >= estimatedEPS,
+            // Real bug fixed: >= treated an EXACT tie as a real
+            // "Beat" - same class of bug as RevenueAnalyzer, fixed
+            // the same way with a genuine third state.
+            beat:
+                actualEPS > estimatedEPS ? "beat" :
+                actualEPS === estimatedEPS ? "in_line" :
+                "miss",
 
             // Was hardcoded to 75 regardless of input — a fabricated
             // number wearing the shape of a real score. Tiered off
@@ -50,7 +56,7 @@ export class EPSAnalyzer {
                 40,
 
             summary:
-                `EPS ${actualEPS >= estimatedEPS ? "beat" : "missed"} estimates by ${surprise.toFixed(1)}%.`
+                `EPS ${actualEPS > estimatedEPS ? "beat" : actualEPS === estimatedEPS ? "matched" : "missed"} estimates${actualEPS === estimatedEPS ? "" : ` by ${Math.abs(surprise).toFixed(1)}%`}.`
 
         };
 

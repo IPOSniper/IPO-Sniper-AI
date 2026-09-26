@@ -10,10 +10,10 @@ export interface EPSAnalysis {
 
     surprisePercent: number;
 
-    beat: boolean;
+    beat: "beat" | "miss" | "in_line";
 
     qualityScore: number;
 
     summary: string;
 
-}
+}

@@ -36,7 +36,14 @@ export class RevenueAnalyzer {
 
             surprisePercent: surprise,
 
-            beat: currentRevenue >= estimatedRevenue,
+            // Real bug fixed: >= treated an EXACT tie ($0.00 vs $0.00,
+            // confirmed live on multiple tickers) as a real "Beat" -
+            // nothing was actually beaten when the two numbers are
+            // equal. Real fix: a genuine third state.
+            beat:
+                currentRevenue > estimatedRevenue ? "beat" :
+                currentRevenue === estimatedRevenue ? "in_line" :
+                "miss",
 
             qualityScore:
     surprise >= 15 ? 100 :
@@ -55,7 +62,7 @@ export class RevenueAnalyzer {
                         : "Decelerating",
 
             summary:
-                `Revenue ${currentRevenue >= estimatedRevenue ? "beat" : "miss"} expectations by ${surprise.toFixed(1)}%.`
+                `Revenue ${currentRevenue > estimatedRevenue ? "beat" : currentRevenue === estimatedRevenue ? "matched" : "missed"} expectations${currentRevenue === estimatedRevenue ? "" : ` by ${Math.abs(surprise).toFixed(1)}%`}.`
 
         };
 
