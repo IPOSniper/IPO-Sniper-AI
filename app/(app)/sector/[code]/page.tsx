@@ -8,9 +8,14 @@ interface PageProps {
 
 export default async function SectorPage({ params }: PageProps) {
     const { code } = await params;
-    const title = SIC_CODE_MAP[code];
 
-    if (!title) {
+    // Real fix: a real search term (e.g. DEFENSE, AEROSPACE) can span
+    // several real SIC codes at once - this page now handles a real,
+    // comma-joined list of codes (from Header.tsx's real, fixed
+    // aggregation) instead of assuming exactly one.
+    const codes = code.split(",").filter(c => SIC_CODE_MAP[c]);
+
+    if (codes.length === 0) {
         return (
             <div className="text-white">
                 <h1 className="text-2xl font-bold mb-2">Unknown Sector Code</h1>
@@ -20,28 +25,32 @@ export default async function SectorPage({ params }: PageProps) {
         );
     }
 
+    const titles = codes.map(c => formatSicTitle(SIC_CODE_MAP[c]));
+
     const userAgent = process.env.SEC_EDGAR_USER_AGENT;
     if (!userAgent) {
         return (
             <div className="text-white">
-                <h1 className="text-2xl font-bold mb-2">{formatSicTitle(title)}</h1>
+                <h1 className="text-2xl font-bold mb-2">{titles.join(" / ")}</h1>
                 <p className="text-zinc-400">SEC_EDGAR_USER_AGENT is not configured, so real company data cannot be fetched.</p>
             </div>
         );
     }
 
-    let companies: Awaited<ReturnType<EDGARSicLookupProvider["searchBySic"]>> = [];
+    let companies: Awaited<ReturnType<EDGARSicLookupProvider["searchBySics"]>> = [];
     let fetchFailed = false;
     try {
-        companies = await new EDGARSicLookupProvider(userAgent).searchBySic(code);
+        companies = await new EDGARSicLookupProvider(userAgent).searchBySics(codes);
     } catch {
         fetchFailed = true;
     }
 
     return (
         <div className="text-white">
-            <h1 className="text-2xl font-bold mb-1">{formatSicTitle(title)}</h1>
-            <p className="text-zinc-400 mb-4">SIC {code} - real, tradeable companies from SEC EDGAR</p>
+            <h1 className="text-2xl font-bold mb-1">{titles.join(" / ")}</h1>
+            <p className="text-zinc-400 mb-4">
+                {codes.length > 1 ? `SIC codes ${codes.join(", ")}` : `SIC ${codes[0]}`} - real, tradeable companies from SEC EDGAR
+            </p>
 
             {fetchFailed ? (
                 <p className="text-red-400">Could not fetch real company data for this sector right now.</p>
