@@ -1,19 +1,60 @@
 name: CI
 
-"on":
+# Real, standing safety net: runs the same real checks used by hand
+# all session (tsc, npm run build, the duplicate-content script) on
+# every push and pull request automatically, instead of depending on
+# a person remembering to run them.
+on:
   push:
-    branches: [master]
+    branches: [main, feat/workstation-design-system]
   pull_request:
-    branches: [master]
+    branches: [main, feat/workstation-design-system]
 
 jobs:
-  build-check:
+  checks:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
         with:
-          node-version: '20'
-      - run: npm ci
-      - run: npm run type-check
-      - run: npm run build
+          node-version: "22"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Type-check (tsc --noEmit)
+        run: npx tsc --noEmit
+
+      - name: Real production build
+        run: npm run build
+        env:
+          # Real, required at build time -- add the SAME real values
+          # as repository secrets (Settings > Secrets and variables >
+          # Actions) or several routes will fail to build here even
+          # though they build fine locally with .env.local present.
+          ALPACA_API_KEY_ID: ${{ secrets.ALPACA_API_KEY_ID }}
+          ALPACA_SECRET_KEY: ${{ secrets.ALPACA_SECRET_KEY }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+          CURRENTS_API_KEY: ${{ secrets.CURRENTS_API_KEY }}
+          FINNHUB_API_KEY: ${{ secrets.FINNHUB_API_KEY }}
+          FMP_API_KEY: ${{ secrets.FMP_API_KEY }}
+          NEWS_API_KEY: ${{ secrets.NEWS_API_KEY }}
+          NEXT_PUBLIC_SITE_URL: ${{ secrets.NEXT_PUBLIC_SITE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          SEC_EDGAR_USER_AGENT: ${{ secrets.SEC_EDGAR_USER_AGENT }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+
+      - name: Duplicate panel-content report (informational, does not fail CI)
+        # Real, deliberate design: this can flag a real NEW duplicate,
+        # but a human still has to judge whether it's a genuine bug
+        # (like the real Institutional Ownership case) or benign
+        # shared fallback text (like the 4 real matches already
+        # reviewed and accepted this session) -- so it reports, it
+        # doesn't block. Read the Actions log after each run.
+        run: node scripts/check-duplicate-panel-content.js || true
