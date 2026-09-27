@@ -1,9 +1,8 @@
-import React from "react";
+﻿import React from "react";
 
 import CommandBar from "../panels/CommandBar/CommandBar";
 import ProcessStepper from "../panels/ProcessStepper/ProcessStepper";
 import PriceChart from "../panels/PriceChart/PriceChart";
-import IntelligenceSidebar from "../sidebar/IntelligenceSidebar";
 import ResearchViewport from "../viewport/ResearchViewport";
 import ResearchTarget from "../panels/ResearchTarget/ResearchTarget";
 
@@ -12,6 +11,7 @@ import { ResearchObject } from "@/engine/models/ResearchObject";
 interface Props {
     research: ResearchObject;
     ticker?: string;
+    userId?: string | null;
 }
 
 export default function WorkstationShell({ research, ticker }: Props) {
@@ -29,19 +29,19 @@ export default function WorkstationShell({ research, ticker }: Props) {
                 <ResearchTarget defaultTicker={ticker} />
             </div>
 
-            <main className="grid grid-cols-12 gap-4">
+            <main>
 
-                <section className="col-span-9">
+                
 
                     <ResearchViewport research={research} />
 
-                </section>
+                
 
-                <aside className="col-span-3">
+                
 
-                    <IntelligenceSidebar research={research} />
+                    
 
-                </aside>
+                
 
             </main>
 
@@ -50,3 +50,5 @@ export default function WorkstationShell({ research, ticker }: Props) {
     );
 
 }
+
+
