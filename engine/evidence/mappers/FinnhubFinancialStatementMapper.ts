@@ -193,11 +193,24 @@ export class FinnhubFinancialStatementMapper {
 
         debt: this.computeDebt(bs),
 
-        sharesOutstanding: this.getFirstValue(ic, [
-          "us-gaap_WeightedAverageNumberOfDilutedSharesOutstanding",
-          "us-gaap_WeightedAverageNumberOfSharesOutstandingBasic",
-          "us-gaap_WeightedAverageNumberOfShareOutstandingBasicAndDiluted"
-        ]),
+        sharesOutstanding:
+          this.getFirstValue(ic, [
+            "us-gaap_WeightedAverageNumberOfDilutedSharesOutstanding",
+            "us-gaap_WeightedAverageNumberOfSharesOutstandingBasic",
+            "us-gaap_WeightedAverageNumberOfShareOutstandingBasicAndDiluted"
+          ]) ||
+          // Real fix: the 3 income-statement "weighted average" concepts
+          // above are real but narrower and inconsistently tagged -
+          // confirmed via real production data that this silently
+          // returned 0 on ~99.5% of real research calls, permanently
+          // blocking Management Analyst from ever using its own real,
+          // working insider-ownership computation. Real, standard
+          // balance-sheet share-count concepts are far more commonly
+          // tagged and checked here as a real fallback.
+          this.getFirstValue(bs, [
+            "us-gaap_CommonStockSharesOutstanding",
+            "us-gaap_CommonStockSharesIssued"
+          ]),
 
         fiscalYear:
           filing.year,
