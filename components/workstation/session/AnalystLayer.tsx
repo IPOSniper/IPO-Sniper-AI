@@ -1,5 +1,6 @@
 import { WorkstationPanelProps } from "../contracts/WorkstationPanelProps";
 import AnalystConsensusChart from "../panels/AnalystConsensusChart";
+import { getRecommendationLabel } from "@/engine/committee/shared/recommendationLabels";
 
 const RECOMMENDATION_DOT: Record<string, string> = {
     STRONG_BUY: "bg-emerald-400",
@@ -29,14 +30,17 @@ export default function AnalystLayer({ research }: WorkstationPanelProps) {
 
             <div className="grid grid-cols-1 gap-x-8 md:grid-cols-2">
                 {voting.map(r => (
-                    <div key={r.analyst} className="flex items-center justify-between border-b border-zinc-800/70 py-1.5 text-sm">
-                        <div className="flex items-center gap-2">
-                            <span className={`h-2 w-2 rounded-full ${RECOMMENDATION_DOT[r.recommendation] ?? "bg-zinc-500"}`} />
-                            <span className="text-zinc-200">{r.analyst}</span>
+                    <div key={r.analyst} className="border-b border-zinc-800/70 py-1.5 text-sm">
+                        <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                                <span className={`h-2 w-2 rounded-full ${RECOMMENDATION_DOT[r.recommendation] ?? "bg-zinc-500"}`} />
+                                <span className="text-zinc-200">{r.analyst}</span>
+                            </div>
+                            <span className="text-zinc-500">
+                                {getRecommendationLabel(r.recommendation)} - {r.confidence}%
+                            </span>
                         </div>
-                        <span className="text-zinc-500">
-                            {r.recommendation.replace("_", " ")} - {r.confidence}%
-                        </span>
+                        <p className="mt-1 pl-4 text-xs text-zinc-600">{r.thesis}</p>
                     </div>
                 ))}
             </div>

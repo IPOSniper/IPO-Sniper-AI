@@ -2,6 +2,7 @@ import type { TradingPosition } from "@/engine/trading/contracts/TradeOrder";
 import type { PositionRiskResult } from "@/engine/portfolio/PortfolioRiskAggregator";
 import { extractUnderlyingFromOccSymbol } from "@/engine/trading/contracts/occSymbol";
 import PositionPriceChart from "./PositionPriceChart/PositionPriceChart";
+import { getRecommendationLabel } from "@/engine/committee/shared/recommendationLabels";
 
 const RECOMMENDATION_COLOR: Record<string, string> = {
     STRONG_BUY: "text-emerald-400 border-emerald-900/50",
@@ -103,7 +104,7 @@ export default function PositionCards({
                                 <span className="font-semibold text-white">{ticker}</span>
                                 {risk && (
                                     <span className={`text-xs font-medium ${recColor.split(" ")[0]}`}>
-                                        {risk.recommendation.replace("_", " ")}
+                                        {getRecommendationLabel(risk.recommendation)}
                                     </span>
                                 )}
                             </div>

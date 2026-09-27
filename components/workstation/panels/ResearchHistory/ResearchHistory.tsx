@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { getResearchHistory } from "@/app/(app)/research/[ticker]/actions";
 import UnverifiedCard from "../../shared/UnverifiedCard";
+import { getRecommendationLabel } from "@/engine/committee/shared/recommendationLabels";
 
 const RECOMMENDATION_COLOR: Record<string, string> = {
  STRONG_BUY: "text-emerald-400",
@@ -41,7 +42,7 @@ export default async function ResearchHistory() {
  >
  <span className="font-medium text-white">{entry.ticker}</span>
  <span className={RECOMMENDATION_COLOR[entry.recommendation] ?? "text-zinc-400"}>
- {entry.recommendation.replace("_", " ")}
+ {getRecommendationLabel(entry.recommendation)}
  </span>
  <span className="text-xs text-zinc-600">
  {new Date(entry.createdAt).toLocaleDateString()}

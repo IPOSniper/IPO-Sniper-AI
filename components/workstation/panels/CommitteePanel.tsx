@@ -2,6 +2,7 @@ import Image from "next/image";
 import { Bot } from "lucide-react";
 import { WorkstationPanelProps } from "../contracts/WorkstationPanelProps";
 import { buildCommitteePhotoAssignments } from "./committeeAvatars";
+import { getRecommendationLabel } from "@/engine/committee/shared/recommendationLabels";
 
 const VOTE_COLOR: Record<string, string> = {
  STRONG_BUY: "text-emerald-400",
@@ -62,7 +63,7 @@ export default function CommitteePanel({ research }: WorkstationPanelProps) {
  <div className="mb-1 flex items-center gap-2 text-xs">
  <span className="font-medium text-white">AI {r.analyst}</span>
  <span className={`font-semibold ${VOTE_COLOR[r.recommendation] ?? "text-zinc-400"}`}>
- {r.recommendation.replace("_", " ")}
+ {getRecommendationLabel(r.recommendation)}
  </span>
  </div>
  <div className="rounded-lg rounded-tl-none bg-zinc-800/60 px-3 py-2 text-sm text-zinc-300">
@@ -77,9 +78,10 @@ export default function CommitteePanel({ research }: WorkstationPanelProps) {
  <div className="mt-4 flex items-center justify-between rounded-lg bg-zinc-950 p-3">
  <span className="text-sm font-medium text-white">Committee Vote</span>
  <span className="text-sm font-semibold text-white">
- {committee.recommendation.replace("_", " ")} - {committee.agreement}% agreement
+ {getRecommendationLabel(committee.recommendation)} - {committee.agreement}% agreement
  </span>
  </div>
+ <p className="mt-2 text-xs text-zinc-400">{committee.summary}</p>
 
  {excludedCount > 0 && (
  <p className="mt-2 text-xs text-zinc-600">

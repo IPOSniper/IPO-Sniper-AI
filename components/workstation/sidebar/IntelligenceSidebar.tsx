@@ -4,6 +4,7 @@ import { WorkstationPanelProps } from "../contracts/WorkstationPanelProps";
 import type { EvidenceItem } from "@/engine/evidence/types";
 import MarketContext from "../panels/MarketContext/MarketContext";
 import { SECForm4Provider } from "@/engine/evidence/providers/SECForm4Provider";
+import { getRecommendationLabel } from "@/engine/committee/shared/recommendationLabels";
 
 const RECOMMENDATION_COLOR: Record<string, string> = {
  STRONG_BUY: "text-emerald-400",
@@ -63,7 +64,7 @@ export default async function IntelligenceSidebar({
  <div className={`rounded-lg border border-zinc-800 border-l-2 ${RECOMMENDATION_BORDER[committee.recommendation] ?? "border-l-zinc-600"} bg-zinc-900 p-4`}>
  <p className="text-xs uppercase tracking-wide text-zinc-500">AI Committee</p>
  <p className={`mt-1 text-lg font-semibold ${RECOMMENDATION_COLOR[committee.recommendation] ?? "text-zinc-300"}`}>
- {committee.recommendation.replace("_", " ")}
+ {getRecommendationLabel(committee.recommendation)}
  </p>
  <p className="text-xs text-zinc-500">{committee.agreement}% agreement</p>
  </div>

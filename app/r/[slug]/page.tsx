@@ -5,6 +5,7 @@ import { isSupabaseConfigured } from "@/lib/supabase/client";
 import type { ResearchObject } from "@/engine/models/ResearchObject";
 import { excludeAnalysts } from "@/components/workstation/shared/scorePresentation";
 import PrintButton from "./PrintButton";
+import { getRecommendationLabel } from "@/engine/committee/shared/recommendationLabels";
 
 interface PageProps {
     params: Promise<{ slug: string }>;
@@ -42,7 +43,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     // free-text AI synthesis that could incorporate News Analyst
     // reasoning with no way to verify it's clean. This is built
     // entirely from the recomputed, News-excluded recommendation.
-    const description = `AI Committee recommendation: ${recommendation.replace("_", " ")}. Public research snapshot from IPO Sniper AI.`;
+    const description = `AI Committee recommendation: ${getRecommendationLabel(recommendation)}. Public research snapshot from IPO Sniper AI.`;
 
     return {
         title,
@@ -119,7 +120,7 @@ export default async function PublicReportPage({ params }: PageProps) {
         datePublished: new Date(runtime.generatedAt).toISOString(),
         author: { "@type": "Organization", name: "IPO Sniper AI" },
         about: { "@type": "Corporation", name: company.name, tickerSymbol: company.ticker },
-        description: `AI Committee recommendation: ${recommendation.replace("_", " ")}.`,
+        description: `AI Committee recommendation: ${getRecommendationLabel(recommendation)}.`,
     };
 
     return (
@@ -159,7 +160,7 @@ export default async function PublicReportPage({ params }: PageProps) {
                         <div>
                             <p className="text-xs uppercase tracking-wide text-zinc-500">Committee Recommendation</p>
                             <p className={`text-xl font-bold ${RECOMMENDATION_COLOR[recommendation] ?? "text-zinc-300"}`}>
-                                {recommendation.replace("_", " ")}
+                                {getRecommendationLabel(recommendation)}
                             </p>
                         </div>
                         <div>

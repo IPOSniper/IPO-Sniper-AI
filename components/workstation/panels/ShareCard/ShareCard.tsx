@@ -3,6 +3,7 @@ import { WorkstationPanelProps } from "../../contracts/WorkstationPanelProps";
 import { excludeAnalysts, recommendationToRating, recommendationToHeadline, strengthLabel } from "../../shared/scorePresentation";
 import { buildCommitteePhotoAssignments } from "../committeeAvatars";
 import { SHARE_CARD_DISCLOSURE } from "@/config/shareCardDisclosure";
+import { getRecommendationLabel } from "@/engine/committee/shared/recommendationLabels";
 
 interface Props extends WorkstationPanelProps {
  /**
@@ -212,7 +213,7 @@ const ShareCard = forwardRef<HTMLDivElement, Props>(
  )}
  </div>
  <p className="mt-1 text-[9px] leading-tight text-zinc-500">{r.analyst.replace(" Analyst", "")}</p>
- <p className="text-[9px] font-semibold" style={{ color }}>{r.recommendation.replace("_", " ")}</p>
+ <p className="text-[9px] font-semibold" style={{ color }}>{getRecommendationLabel(r.recommendation)}</p>
  </div>
  );
  })}
@@ -371,7 +372,7 @@ const ShareCard = forwardRef<HTMLDivElement, Props>(
  <div key={r.analyst} className="flex items-center justify-between text-xs">
  <span className="text-zinc-300">{r.analyst}</span>
  <span className="font-semibold" style={{ color: VOTE_COLOR[r.recommendation] ?? "#8A8FA3" }}>
- {r.recommendation.replace("_", " ")}
+ {getRecommendationLabel(r.recommendation)}
  </span>
  </div>
  ))}
