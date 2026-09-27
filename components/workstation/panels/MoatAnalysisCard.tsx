@@ -1,6 +1,7 @@
 import { WorkstationPanelProps } from "../contracts/WorkstationPanelProps";
 import { SECEdgarProvider } from "@/engine/evidence/providers/SECEdgarProvider";
 import { AnthropicClient } from "@/engine/synthesis/providers/AnthropicClient";
+import { getCachedAiContent, setCachedAiContent } from "@/engine/synthesis/aiContentCache";
 
 /**
  * Path B "Moat" analysis -- a real, constrained-AI reading of the
@@ -74,9 +75,15 @@ export default async function MoatAnalysisCard({ research }: WorkstationPanelPro
             );
         }
 
-        const systemPrompt = "You summarize a company's own SEC filing business description. Describe ONLY what the text explicitly states -- the business model and any competitive advantages, differentiators, or market position the company claims for itself. Do not add outside knowledge, opinions, or judgments not present in the text. Do not speculate about whether these claims are true. 2-3 sentences.";
-        const client = new AnthropicClient();
-        const summary = await client.complete(systemPrompt, businessSection);
+        const cacheKey = `moat:${ticker}:${filing.formType}:${filing.filedAt}`;
+        let summary = await getCachedAiContent(cacheKey);
+
+        if (!summary) {
+            const systemPrompt = "You summarize a company's own SEC filing business description. Describe ONLY what the text explicitly states -- the business model and any competitive advantages, differentiators, or market position the company claims for itself. Do not add outside knowledge, opinions, or judgments not present in the text. Do not speculate about whether these claims are true. 2-3 sentences.";
+            const client = new AnthropicClient();
+            summary = await client.complete(systemPrompt, businessSection);
+            await setCachedAiContent(cacheKey, summary);
+        }
 
         return (
             <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-4">
