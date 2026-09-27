@@ -86,7 +86,7 @@ export default function Header() {
       const sorted = [...sectorMatches].sort((a, b) => a.code.localeCompare(b.code));
       setError(null);
       setShowDropdown(false);
-      router.push(`/sector/${sorted[0].code}`);
+      router.push(`/sector/${sorted.map(s => s.code).join(",")}`);
       setQuery("");
       return;
     }

@@ -493,10 +493,44 @@ export function formatSicTitle(title: string): string {
 // any real SIC title, which instead says things like "Aircraft" or
 // "Ordnance & Accessories"). A small, explicit synonym table - not a
 // fuzzy/AI guess - covers the most real, common gaps.
-const SIC_SEARCH_SYNONYMS: Record<string, string[]> = {
-    "DEFENSE": ["ORDNANCE", "AIRCRAFT", "ARMAMENT"],
-    "TECH": ["COMPUTER", "SOFTWARE", "SEMICONDUCTOR"],
-    "PHARMA": ["PHARMACEUTICAL", "DRUG"],
+// Real, honest gap: SEC's own official SIC titles use their own
+// decades-old vocabulary, which does not always match how people
+// actually search (e.g. "DEFENSE" and "AEROSPACE" never appear
+// verbatim in any real title - the real titles instead say things
+// like "Aircraft", "Guided Missiles & Space Vehicles", or "Search,
+// Detection, Navigation, Guidance, Aeronautical Sys"). A keyword-
+// substring synonym table was tried first but proved fragile (one
+// entry, "ARMAMENT", matched zero real titles at all) and, more
+// importantly, every real search only ever routed to ONE matched
+// SIC code, discarding every other real match - "DEFENSE" alone
+// spans at least 7 real distinct codes. Real fix: map curated terms
+// directly to their VERIFIED real SIC codes (checked against the
+// real list above, not guessed), and the caller now aggregates
+// across every real code returned, not just the first.
+const SIC_SEARCH_SYNONYM_CODES: Record<string, string[]> = {
+    "DEFENSE": ["3480", "3720", "3721", "3724", "3728", "3760", "3812"],
+    "AEROSPACE": ["3720", "3721", "3724", "3728", "3760", "3812"],
+    "TECH": ["3571", "3572", "3575", "3576", "3577", "3674", "7371", "7372", "7373"],
+    "SOFTWARE": ["7371", "7372", "7373"],
+    "SEMICONDUCTOR": ["3674"],
+    "SEMICONDUCTORS": ["3674"],
+    "PHARMA": ["2833", "2834"],
+    "PHARMACEUTICAL": ["2833", "2834"],
+    "BIOTECH": ["2835", "2836", "8731"],
+    "BIOTECHNOLOGY": ["2835", "2836", "8731"],
+    "BANK": ["6021", "6022", "6029", "6035", "6036"],
+    "BANKING": ["6021", "6022", "6029", "6035", "6036"],
+    "INSURANCE": ["6311", "6321", "6324", "6331", "6351", "6361", "6399", "6411"],
+    "AIRLINE": ["4512", "4513", "4522"],
+    "AIRLINES": ["4512", "4513", "4522"],
+    "OIL": ["1311", "1381", "1382", "1389", "2911"],
+    "ENERGY": ["1311", "1381", "1382", "1389", "2911", "4911", "4922", "4923", "4924"],
+    "MINING": ["1000", "1040", "1090", "1220", "1221", "1400"],
+    "REAL ESTATE": ["6500", "6510", "6512", "6513", "6519", "6531", "6532", "6552", "6798"],
+    "HOTEL": ["7000", "7011"],
+    "HOTELS": ["7000", "7011"],
+    "RESTAURANT": ["5810", "5812"],
+    "RESTAURANTS": ["5810", "5812"],
 };
 
 export function searchSicByName(query: string): Array<{ code: string; title: string }> {
@@ -506,11 +540,20 @@ export function searchSicByName(query: string): Array<{ code: string; title: str
     const direct = Object.entries(SIC_CODE_MAP)
         .filter(([, title]) => title.includes(normalized))
         .map(([code, title]) => ({ code, title }));
-    if (direct.length > 0) return direct;
 
-    const synonyms = SIC_SEARCH_SYNONYMS[normalized];
-    if (!synonyms) return [];
-    return Object.entries(SIC_CODE_MAP)
-        .filter(([, title]) => synonyms.some(s => title.includes(s)))
-        .map(([code, title]) => ({ code, title }));
+    const synonymCodes = SIC_SEARCH_SYNONYM_CODES[normalized] ?? [];
+    const fromSynonyms = synonymCodes
+        .filter(code => SIC_CODE_MAP[code])
+        .map(code => ({ code, title: SIC_CODE_MAP[code] }));
+
+    // Real, deduped union - a code could conceivably appear in both
+    // (e.g. a real title happens to also contain the raw query word).
+    const seen = new Set<string>();
+    const combined: Array<{ code: string; title: string }> = [];
+    for (const entry of [...direct, ...fromSynonyms]) {
+        if (seen.has(entry.code)) continue;
+        seen.add(entry.code);
+        combined.push(entry);
+    }
+    return combined;
 }

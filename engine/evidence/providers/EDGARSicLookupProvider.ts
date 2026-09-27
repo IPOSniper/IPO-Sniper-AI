@@ -111,4 +111,28 @@ export class EDGARSicLookupProvider {
             .filter((r): r is SicSearchResult => r !== null);
     }
 
+
+    /**
+     * Real fix for a real, confirmed bug: a search term like
+     * "DEFENSE" or "AEROSPACE" genuinely spans several real SIC
+     * codes, but every prior search only ever queried ONE of them,
+     * silently discarding real companies filed under the other
+     * matched codes. Real fix: fetch CIKs for EVERY matched code,
+     * merge into one deduped set BEFORE resolving, then resolve once.
+     */
+    async searchBySics(sics: string[], limitPerSic = 20): Promise<SicSearchResult[]> {
+        const cikLists = await Promise.allSettled(sics.map(sic => this.getCiksForSic(sic, limitPerSic)));
+        const allCiks = new Set<string>();
+        for (const result of cikLists) {
+            if (result.status === "fulfilled") {
+                for (const cik of result.value) allCiks.add(cik);
+            }
+        }
+
+        const results = await Promise.allSettled([...allCiks].map(cik => this.resolveCik(cik)));
+        return results
+            .filter((r): r is PromiseFulfilledResult<SicSearchResult | null> => r.status === "fulfilled")
+            .map(r => r.value)
+            .filter((r): r is SicSearchResult => r !== null);
+    }
 }
