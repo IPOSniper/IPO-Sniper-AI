@@ -31,6 +31,11 @@ jobs:
     steps:
       - name: Call the real opportunity discovery endpoint
         run: |
-          curl -sSf -w "\nHTTP status: %{http_code}\n" -X GET \
+          response=$(curl -sS -w "HTTPSTATUS:%{http_code}" -X GET \
             -H "Authorization: Bearer ${{ secrets.QUANT_CRON_SECRET }}" \
-            "https://ipo-sniper-ai.vercel.app/api/cron/quant-opportunities"
+            "https://ipo-sniper-ai.vercel.app/api/cron/quant-opportunities")
+          status=$(echo "$response" | grep -o "HTTPSTATUS:[0-9]*" | cut -d: -f2)
+          body=$(echo "$response" | sed -E "s/HTTPSTATUS:[0-9]*$//")
+          echo "HTTP status: $status"
+          echo "Response body: $body"
+          if [ "$status" -ge 400 ]; then exit 1; fi
