@@ -1,0 +1,6 @@
+
+# Bash scripts embedded in these YAML files break silently if
+# Windows re-introduces CRLF - force LF regardless of local
+# core.autocrlf, for every future edit, not just this one.
+.github/workflows/*.yml text eol=lf
+.github/workflows/*.yaml text eol=lf
