@@ -1,0 +1,39 @@
+# Real, persistent external trigger for the Momentum Radar detector --
+# this route had NO scheduled trigger of any kind before this commit
+# (confirmed via a direct search of every .github/workflows file) --
+# a genuinely different gap than quant-harness/quant-opportunities,
+# which existed but were failing. This route reads its ticker list
+# from the real, persisted opportunities table, so it is scheduled
+# a few minutes after quant-opportunities to give that cron a real
+# head start populating fresh tickers each cycle, though the route
+# itself is safe to run regardless of ordering (it just reads
+# whatever is already in the table at call time).
+#
+# Uses the already-correct lib/supabase/serviceRole.ts helper, NOT
+# the separate engine/observability/heartbeat.ts module that caused
+# tonight's SUPABASE_URL crash on the other two crons -- this route
+# was never affected by that bug, confirmed by direct code read.
+#
+# Real, deliberate interval: every 30 minutes, matching
+# quant-opportunities -- RVOL is a daily-bar signal per this route's
+# own real code comment, so more frequent invocation adds little
+# value while adding real Finnhub rate-limit pressure.
+name: Quant Momentum Radar Cron
+"on":
+  schedule:
+    - cron: "5,35 * * * *"
+  workflow_dispatch: {}
+jobs:
+  trigger-momentum:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Call the real momentum detection endpoint
+        run: |
+          response=$(curl -sS -w "HTTPSTATUS:%{http_code}" -X GET \
+            -H "Authorization: Bearer ${{ secrets.QUANT_CRON_SECRET }}" \
+            "https://www.iposniperai.com/api/cron/quant-momentum")
+          status=$(echo "$response" | grep -o "HTTPSTATUS:[0-9]*" | cut -d: -f2)
+          body=$(echo "$response" | sed -E "s/HTTPSTATUS:[0-9]*$//")
+          echo "HTTP status: $status"
+          echo "Response body: $body"
+          if [ "$status" -ge 400 ]; then exit 1; fi
