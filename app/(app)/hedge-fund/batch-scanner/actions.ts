@@ -16,6 +16,7 @@ import { placeOrder } from "@/app/(app)/hedge-fund/paper-trading/actions";
 import { FinnhubQuoteProvider, type Quote } from "@/engine/evidence/providers/FinnhubQuoteProvider";
 import { classifyMarketRegime, type MarketRegime } from "@/engine/market/marketRegime";
 import { checkAutonomousExecutionAllowed } from "@/app/(app)/hedge-fund/quant-control/actions";
+import { getSessionCapabilities } from "@/engine/quant/orchestration/MarketHours";
 
 /**
  * Real market regime for the Hedge Fund page -- same real instruments
@@ -175,6 +176,31 @@ export async function runBatchScan(
                         ticker,
                         outcome: "reject",
                         reason: control.reason,
+                        plan,
+                        selectedContract,
+                        suggestedQty,
+                        executed: false,
+                        orderStatus: null,
+                    });
+                    continue;
+                }
+
+                // Real market-session gate -- Alpaca's options API does not
+                // support extended hours at all, so an autonomous options
+                // order attempted outside REGULAR session would be rejected
+                // by Alpaca anyway. This stops it before it's even attempted,
+                // consistent with the session model MarketHours.ts already
+                // defines (discovery/analysis always allowed, only execution
+                // is session-gated). Added same night as the SUPABASE_URL fix
+                // that let the autonomous cron actually start running -- real
+                // trade fills were observed at 3-9 AM, outside real market
+                // hours, before this gate existed.
+                const session = getSessionCapabilities();
+                if (!session.optionsExecutionAllowed) {
+                    results.push({
+                        ticker,
+                        outcome: "reject",
+                        reason: `Options execution unavailable during the ${session.session} session (regular market hours only).`,
                         plan,
                         selectedContract,
                         suggestedQty,
