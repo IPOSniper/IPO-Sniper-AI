@@ -46,7 +46,8 @@ export async function getCurrentOpportunities(): Promise<PersistedOpportunity[]>
             .from("opportunities")
             .select("id, ticker, score, events, score_breakdown, status, detected_at, last_seen_at, updated_at")
             .eq("user_id", user.id)
-            .order("score", { ascending: false });
+            .order("score", { ascending: false })
+            .limit(100);
 
         if (error || !data) return [];
 
