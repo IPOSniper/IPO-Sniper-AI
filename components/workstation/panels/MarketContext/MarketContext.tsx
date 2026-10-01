@@ -1,4 +1,5 @@
-import { FinnhubQuoteProvider } from "@/engine/evidence/providers/FinnhubQuoteProvider";
+import { FinnhubQuoteProvider, type Quote } from "@/engine/evidence/providers/FinnhubQuoteProvider";
+import { classifyMarketRegime } from "@/engine/market/marketRegime";
 import type { EvidenceItem } from "@/engine/evidence/types";
 import UnverifiedCard from "../../shared/UnverifiedCard";
 
@@ -28,6 +29,7 @@ const INDICES = [
     { symbol: "TLT", label: "TLT (30Y)" },
 ];
 const VOLATILITY_SYMBOL = { symbol: "^VIX", label: "VIX" };
+const GOLD_SYMBOL = { symbol: "GLD", label: "GLD" };
 
 export default async function MarketContext({
     ticker,
@@ -38,7 +40,7 @@ export default async function MarketContext({
 } = {}) {
     const provider = new FinnhubQuoteProvider();
     const results = await Promise.allSettled(
-        [...INDICES, VOLATILITY_SYMBOL].map(index => provider.getQuote(index.symbol))
+        [...INDICES, VOLATILITY_SYMBOL, GOLD_SYMBOL].map(index => provider.getQuote(index.symbol))
     );
 
     const allFailed = results.every(r => r.status === "rejected");
@@ -52,7 +54,26 @@ export default async function MarketContext({
 
     const indexResults = results.slice(0, INDICES.length);
     const volResult = results[INDICES.length];
+    const goldResult = results[INDICES.length + 1];
     const hasFallbackVol = volResult.status === "rejected" && fallbackVolatility?.verified;
+
+    // Real regime classification -- same function already live on the
+    // Hedge Fund page, so both surfaces compute the identical real
+    // number from the identical real inputs rather than drifting apart.
+    const quotesForRegime: Record<string, Quote> = {};
+    INDICES.forEach((index, i) => {
+        const r = indexResults[i];
+        if (r.status === "fulfilled") quotesForRegime[index.symbol] = r.value;
+    });
+    if (goldResult.status === "fulfilled") quotesForRegime.GLD = goldResult.value;
+    const regime = classifyMarketRegime(quotesForRegime);
+
+    const REGIME_EXPLANATIONS: Record<string, string> = {
+        "Risk-off": "Equities are down while gold/bonds are up -- a classic sign investors are moving toward safety, reducing exposure to risk.",
+        "Risk-on": "Equities are up without a corresponding move into gold -- a sign investors are favoring growth and risk assets over safety.",
+        "Cautious": "Equities are down today, without the clear rotation into gold/bonds that would signal a full risk-off move -- a mixed, watchful tape.",
+        "Mixed": "No clear directional signal across equities, gold, and bonds today -- the real inputs are pulling in different directions.",
+    };
 
     return (
         <div className="rounded-xl border border-zinc-800 bg-zinc-950 p-3">
@@ -60,7 +81,14 @@ export default async function MarketContext({
             <div className="grid grid-cols-2 gap-3 text-sm">
                 <div>
                     <p className="mb-1 text-[10px] uppercase tracking-wide text-zinc-600">Regime</p>
-                    <p className="text-zinc-700">Not yet computed</p>
+                    {regime ? (
+                        <div>
+                            <p style={{ color: regime.color }} className="font-medium">{regime.label}</p>
+                            <p className="mt-0.5 text-[9px] leading-relaxed text-zinc-600">{REGIME_EXPLANATIONS[regime.label]}</p>
+                        </div>
+                    ) : (
+                        <p className="text-zinc-700">Not yet computed</p>
+                    )}
                 </div>
                 <div>
                     <p className="mb-1 text-[10px] uppercase tracking-wide text-zinc-600">Indexes</p>
@@ -112,7 +140,11 @@ export default async function MarketContext({
                 </div>
                 <div>
                     <p className="mb-1 text-[10px] uppercase tracking-wide text-zinc-600">Breadth</p>
-                    <p className="text-zinc-700">Not yet computed</p>
+                    {regime ? (
+                        <p className="text-zinc-300">{regime.breadthUp} of {regime.breadthTotal} up</p>
+                    ) : (
+                        <p className="text-zinc-700">Not yet computed</p>
+                    )}
                 </div>
             </div>
         </div>
