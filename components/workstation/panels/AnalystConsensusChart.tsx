@@ -1,4 +1,5 @@
 "use client";
+import { getRecommendationLabel } from "@/engine/committee/shared/recommendationLabels";
 
 type CommitteeReport = {
     analyst: string;
@@ -28,9 +29,7 @@ const GROUPS = [
     },
 ] as const;
 
-function displayRecommendation(value: string) {
-    return value.replaceAll("_", " ");
-}
+
 
 export default function AnalystConsensusChart({ reports }: Props) {
     const verified = reports.filter(
@@ -174,8 +173,8 @@ export default function AnalystConsensusChart({ reports }: Props) {
                             </span>
 
                             <span className="ml-2 whitespace-nowrap text-[10px] text-zinc-600">
-                                {displayRecommendation(report.recommendation)}
-                                {" · "}
+                                {getRecommendationLabel(report.recommendation)}
+                                {" Â· "}
                                 {report.confidence}%
                             </span>
                         </div>
