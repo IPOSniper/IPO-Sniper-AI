@@ -12,5 +12,7 @@ export const CATEGORY_LABELS: Record<RejectionCategory, string> = {
     low_confidence: "Committee confidence too low",
     low_evidence_quality: "Evidence quality too low",
     no_committee_direction: "Committee reached no direction",
+    no_contract_matched: "No matching option contract found",
     other: "Other",
 };
+

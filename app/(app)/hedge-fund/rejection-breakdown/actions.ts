@@ -20,7 +20,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/client";
 
-export type RejectionCategory = "low_agreement" | "low_confidence" | "low_evidence_quality" | "no_committee_direction" | "other";
+export type RejectionCategory = "low_agreement" | "low_confidence" | "low_evidence_quality" | "no_committee_direction" | "no_contract_matched" | "other";
 
 export interface RejectionBreakdown {
     total: number;
@@ -33,6 +33,7 @@ function classify(reasoning: string[], direction: string): RejectionCategory {
     if (joined.includes("agreement") && joined.includes("below")) return "low_agreement";
     if (joined.includes("confidence") && joined.includes("below")) return "low_confidence";
     if (joined.includes("evidence quality") && joined.includes("below")) return "low_evidence_quality";
+    if (joined.includes("contract") && joined.includes("matched")) return "no_contract_matched";
     return "other";
 }
 
@@ -58,7 +59,7 @@ export async function getRejectionBreakdown(days = 7): Promise<RejectionBreakdow
 
         if (error || !data) return null;
 
-        const counts: Record<RejectionCategory, number> = { low_agreement: 0, low_confidence: 0, low_evidence_quality: 0, no_committee_direction: 0, other: 0 };
+        const counts: Record<RejectionCategory, number> = { low_agreement: 0, low_confidence: 0, low_evidence_quality: 0, no_committee_direction: 0, no_contract_matched: 0, other: 0 };
         for (const row of data) {
             counts[classify(row.reasoning ?? [], row.direction)]++;
         }
@@ -68,3 +69,6 @@ export async function getRejectionBreakdown(days = 7): Promise<RejectionBreakdow
         return null;
     }
 }
+
+
+
