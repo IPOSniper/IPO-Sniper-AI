@@ -100,7 +100,20 @@ export async function runBatchScan(
                 .order("last_seen_at", { ascending: false })
                 .limit(1)
                 .maybeSingle();
-            const dataQuality = checkDataFreshness(oppLookup.data?.last_seen_at ?? null);
+            let dataQuality = checkDataFreshness(oppLookup.data?.last_seen_at ?? null);
+            // If Discovery has no fresh opportunity timestamp, use a real Finnhub quote timestamp as a fallback freshness signal.
+            // This does not create an opportunity, bypass the data-quality gate, or determine trading eligibility.
+            if (dataQuality.status === "SKIP" && (dataQuality.reasonCode === "DATA_STALE" || dataQuality.reasonCode === "DATA_UNAVAILABLE")) {
+                try {
+                    const liveQuote = await new FinnhubQuoteProvider().getQuote(ticker);
+                    if (liveQuote.timestampSeconds) {
+                        const liveIso = new Date(liveQuote.timestampSeconds * 1000).toISOString();
+                        dataQuality = checkDataFreshness(liveIso);
+                    }
+                } catch {
+                    // Preserve the original DATA_STALE/DATA_UNAVAILABLE result when the live quote cannot be obtained.
+                }
+            }
 
             await recordDecisionLayer({
                 runId, decisionId: null, ticker, layer: "data_quality",
