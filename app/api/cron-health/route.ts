@@ -1,4 +1,8 @@
-import { createClient } from "@supabase/supabase-js";
+import { createServiceRoleClient, isServiceRoleConfigured } from "@/lib/supabase/serviceRole";
+
+// Always evaluate at request time -- a health check must never serve a
+// build-time or cached snapshot.
+export const dynamic = "force-dynamic";
 
 // Expected max gap between successful runs, in minutes, per job.
 // Keep this in sync with the schedules in .github/workflows/*.yml.
@@ -8,10 +12,13 @@ const EXPECTED_INTERVAL_MINUTES: Record<string, number> = {
 };
 
 export async function GET() {
-  const supabase = createClient(
-    process.env.SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-  );
+  // Same service-role client as the cron routes and heartbeat writer, so this
+  // reads the same database they write to (previously used a separate
+  // SUPABASE_URL variable).
+  if (!isServiceRoleConfigured()) {
+    return Response.json({ error: "Service role not configured." }, { status: 500 });
+  }
+  const supabase = createServiceRoleClient();
 
   const { data, error } = await supabase.from("cron_heartbeats").select("*");
   if (error) {
@@ -31,6 +38,7 @@ export async function GET() {
 
     return {
       job_name: row.job_name,
+      last_started_at: row.last_started_at,
       last_success_at: row.last_success_at,
       last_error: row.last_error,
       last_error_at: row.last_error_at,
