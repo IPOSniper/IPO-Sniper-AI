@@ -2,6 +2,9 @@ import { EvidenceBuilder } from "../types";
 import { SecEvidence } from "../package";
 import { SECEdgarProvider } from "../providers/SECEdgarProvider";
 import { ProspectusExtractor } from "../extractors/ProspectusExtractor";
+import { extractLockUpInfo } from "../../valuation/extractLockUpInfo";
+import { extractInsiderConcentration } from "../../valuation/extractInsiderConcentration";
+import { extractUseOfProceeds } from "../../valuation/extractUseOfProceeds";
 
 /**
  * Real SEC EDGAR evidence: looks up the company's CIK, finds its
@@ -42,6 +45,18 @@ export class SecBuilder
             const underwriters = this.extractor.extractUnderwriters(text);
             const riskFactorCount = this.extractor.countRiskFactorParagraphs(text);
 
+            // Real, independent extraction calls -- each one re-fetches
+            // the filing text internally (known, accepted inefficiency,
+            // kept additive rather than refactoring these proven,
+            // working, self-contained functions). Each fails
+            // independently and honestly (found: false) -- one missing
+            // section never blocks the other real evidence.
+            const [lockUp, insiderConcentration, useOfProceeds] = await Promise.all([
+                extractLockUpInfo(ticker),
+                extractInsiderConcentration(ticker),
+                extractUseOfProceeds(ticker),
+            ]);
+
             return {
 
                 latestFiling: {
@@ -54,6 +69,30 @@ export class SecBuilder
                     source,
                     confidence: 100,
                     verified: true,
+                    collectedAt: now,
+                },
+
+                lockUp: {
+                    value: lockUp,
+                    source,
+                    confidence: lockUp.found ? 60 : 0,
+                    verified: lockUp.found,
+                    collectedAt: now,
+                },
+
+                insiderConcentration: {
+                    value: insiderConcentration,
+                    source,
+                    confidence: insiderConcentration.found ? 60 : 0,
+                    verified: insiderConcentration.found,
+                    collectedAt: now,
+                },
+
+                useOfProceeds: {
+                    value: useOfProceeds,
+                    source,
+                    confidence: useOfProceeds.found ? 60 : 0,
+                    verified: useOfProceeds.found,
                     collectedAt: now,
                 },
 
@@ -83,6 +122,9 @@ export class SecBuilder
             return {
                 latestFiling: { value: null, source, confidence: 0, verified: false, collectedAt: now },
                 underwriters: { value: [], source, confidence: 0, verified: false, collectedAt: now },
+                lockUp: { value: { found: false, excerpt: null, filingUrl: null, filingDate: null }, source, confidence: 0, verified: false, collectedAt: now },
+                insiderConcentration: { value: { found: false, excerpt: null, filingUrl: null, filingDate: null }, source, confidence: 0, verified: false, collectedAt: now },
+                useOfProceeds: { value: { found: false, excerpt: null, filingUrl: null, filingDate: null }, source, confidence: 0, verified: false, collectedAt: now },
                 riskFactorCount: { value: 0, source, confidence: 0, verified: false, collectedAt: now },
             };
         }

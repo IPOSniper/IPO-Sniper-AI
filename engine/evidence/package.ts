@@ -1,4 +1,7 @@
 import { EvidenceItem } from "./types";
+import type { LockUpExtraction } from "../valuation/extractLockUpInfo";
+import type { InsiderConcentrationExtraction } from "../valuation/extractInsiderConcentration";
+import type { UseOfProceedsExtraction } from "../valuation/extractUseOfProceeds";
 import type { Company } from "../models/Company";
 import type { FinancialStatement } from "../types/FinancialStatement";
 
@@ -106,6 +109,13 @@ export interface SecFilingRef {
 }
 
 export interface SecEvidence {
+  // Real S-1-derived IPO-specific disclosures -- IPOAnalyst.ts's
+  // real evidence source. Each field honestly reports whether the
+  // standard mandated section was found and extractable, not a
+  // severity/quality assessment of its contents.
+  lockUp: EvidenceItem<LockUpExtraction>;
+  insiderConcentration: EvidenceItem<InsiderConcentrationExtraction>;
+  useOfProceeds: EvidenceItem<UseOfProceedsExtraction>;
   latestFiling: EvidenceItem<SecFilingRef | null>;
   underwriters: EvidenceItem<string[]>;
   // Count of risk-factor paragraphs found via heuristic section

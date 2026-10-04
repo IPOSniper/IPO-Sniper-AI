@@ -1,4 +1,4 @@
-﻿import { EvidenceEngine } from "../evidence/evidenceEngine";
+import { EvidenceEngine } from "../evidence/evidenceEngine";
 import type { EvidencePackage } from "../evidence/package";
 
 import { CommitteeEngine } from "../committee/committeeEngine";
@@ -17,6 +17,7 @@ import { RiskAnalyst } from "../committee/analysts/RiskAnalyst";
 import { VerificationAnalyst } from "../committee/analysts/VerificationAnalyst";
 import { NewsAnalyst } from "../committee/analysts/NewsAnalyst";
 import { SECAnalyst } from "../committee/analysts/SECAnalyst";
+import { IPOAnalyst } from "../committee/analysts/IPOAnalyst";
 // KnowledgeAnalyst is intentionally NOT imported â€” unlike News/SEC,
 // it doesn't just need a data source, it needs a product decision on
 // what "Knowledge" evidence even means for a single-company analyst.
@@ -53,6 +54,7 @@ export class ResearchEngine {
             new VerificationAnalyst(),
             new NewsAnalyst(),
             new SECAnalyst(),
+            new IPOAnalyst(),
         ]);
 
     private readonly reportBuilder =
